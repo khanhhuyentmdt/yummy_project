@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "erp_yummy",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "last_updated": "2026-04-13",
-  "session": 1,
+  "session": 2,
 
   "environment": {
     "python": ".venv/python.exe",
@@ -26,9 +26,25 @@
     ],
     "database": {
       "engine": "sqlite3",
-      "file": "backend/db.sqlite3"
+      "file": "backend/db.sqlite3",
+      "migrated": true
+    },
+    "auth": {
+      "package": "djangorestframework-simplejwt 5.5.1",
+      "access_token_lifetime": "8 hours",
+      "refresh_token_lifetime": "7 days",
+      "login_field": "username (stores phone number)",
+      "test_account": {
+        "phone": "0987654321",
+        "password": "yummy123",
+        "create_command": "python manage.py create_test_user"
+      }
     },
     "models": {
+      "User": {
+        "status": "done",
+        "note": "Django built-in User — username field stores phone number"
+      },
       "Product": {
         "status": "TODO",
         "fields": {
@@ -64,10 +80,24 @@
     },
     "api_endpoints": [
       {
+        "method": "POST",
+        "url": "/api/auth/login/",
+        "view": "PhoneLoginView",
+        "auth": "public",
+        "description": "Đăng nhập bằng phone + password → trả về access, refresh, user",
+        "status": "done",
+        "response": {
+          "access": "JWT access token (8h)",
+          "refresh": "JWT refresh token (7d)",
+          "user": { "id": "int", "name": "string", "phone": "string", "is_staff": "bool" }
+        }
+      },
+      {
         "method": "GET",
         "url": "/api/dashboard/",
         "view": "dashboard_stats",
-        "description": "Trả về 4 số liệu tổng quan: total_products, active_products, revenue_today, orders_today",
+        "auth": "Bearer",
+        "description": "4 số liệu tổng quan: total_products, active_products, revenue_today, orders_today",
         "status": "done",
         "data_source": "mock"
       },
@@ -75,6 +105,7 @@
         "method": "GET",
         "url": "/api/products/",
         "view": "product_list",
+        "auth": "Bearer",
         "description": "Danh sách 11 thành phẩm mẫu",
         "status": "done",
         "data_source": "mock"
@@ -83,42 +114,35 @@
         "method": "POST",
         "url": "/api/products/",
         "view": "product_create",
-        "description": "Tạo sản phẩm mới",
+        "auth": "Bearer",
         "status": "TODO"
       },
       {
         "method": "PUT",
         "url": "/api/products/{id}/",
         "view": "product_update",
-        "description": "Cập nhật sản phẩm",
+        "auth": "Bearer",
         "status": "TODO"
       },
       {
         "method": "DELETE",
         "url": "/api/products/{id}/",
         "view": "product_delete",
-        "description": "Xóa sản phẩm",
+        "auth": "Bearer",
         "status": "TODO"
       },
       {
         "method": "GET",
         "url": "/api/orders/",
         "view": "order_list",
-        "description": "Danh sách đơn hàng",
+        "auth": "Bearer",
         "status": "TODO"
       },
       {
         "method": "GET",
         "url": "/api/customers/",
         "view": "customer_list",
-        "description": "Danh sách khách hàng",
-        "status": "TODO"
-      },
-      {
-        "method": "POST",
-        "url": "/api/auth/token/",
-        "view": "JWT TokenObtainPairView",
-        "description": "Đăng nhập — trả về access + refresh token",
+        "auth": "Bearer",
         "status": "TODO"
       }
     ]
@@ -131,12 +155,27 @@
     "icon_library": "lucide-react",
     "api_base": "src/api/axios.js",
     "entry": "src/main.jsx",
-    "router": "TODO (react-router-dom chưa cài)",
+    "router": "state-based (no react-router-dom yet — TODO)",
+    "auth_flow": "localStorage tokens → App.jsx state → LoginPage or HomePage",
     "components": [
+      {
+        "name": "LoginPage",
+        "file": "src/pages/LoginPage.jsx",
+        "description": "Split-screen: food photo CSS-cropped (left 50%), form on cream bg (right 50%)",
+        "status": "done",
+        "features": [
+          "Phone input with Phone icon",
+          "Password input with Lock icon + Eye toggle",
+          "Loading spinner on submit",
+          "Error display from API response",
+          "Saves access_token, refresh_token, user to localStorage",
+          "Demo credentials hint"
+        ]
+      },
       {
         "name": "HomePage",
         "file": "src/components/HomePage.jsx",
-        "description": "Layout chính của ERP: Sidebar + Header + page views",
+        "description": "Layout chính ERP: Sidebar + Header + page views. Nhận user + onLogout props",
         "status": "done",
         "sub_components": ["DashboardView", "ProductsView", "ComingSoonView"]
       },
@@ -151,13 +190,7 @@
         "file": "src/components/HomePage.jsx (inline)",
         "description": "Bảng thành phẩm với search, pagination, action buttons",
         "status": "done",
-        "note": "Dùng mock data — cần thay bằng API call thật khi có model"
-      },
-      {
-        "name": "LoginPage",
-        "file": "src/pages/LoginPage.jsx",
-        "description": "Trang đăng nhập JWT",
-        "status": "TODO"
+        "note": "Mock data — thay bằng API call thật khi có Product model"
       },
       {
         "name": "ProductModal",
@@ -186,17 +219,22 @@
         "session": 1,
         "date": "2026-04-13",
         "summary": "Khởi tạo project, cấu hình Django+CORS, cài Tailwind+Axios, xây dựng HomePage ERP theo thiết kế homepage.png"
+      },
+      {
+        "session": 2,
+        "date": "2026-04-13",
+        "summary": "JWT authentication: simplejwt backend, PhoneLoginView, LoginPage split-screen UI, axios interceptors, App auth routing"
       }
     ],
     "next_steps": [
       "Định nghĩa models: Product, Order, Customer trong api/models.py",
       "Chạy makemigrations + migrate",
-      "Viết serializers.py cho từng model",
+      "Nâng cấp api/serializers.py cho từng model",
       "Nâng cấp API endpoints sang CRUD thật (thay mock data)",
       "Thêm react-router-dom và tạo các pages riêng biệt",
       "Modal thêm/sửa sản phẩm kết nối nút Tạo lô",
-      "Tích hợp JWT authentication (djangorestframework-simplejwt)",
-      "Trang Login + bảo vệ routes bằng PrivateRoute"
+      "Thêm token refresh tự động (interceptor gọi /api/token/refresh/ khi 401)",
+      "Xuất danh sách sản phẩm ra Excel/CSV"
     ]
   }
 }

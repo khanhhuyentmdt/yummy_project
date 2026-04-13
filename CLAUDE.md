@@ -95,10 +95,24 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 ## API Endpoints (hiện tại)
 
-| Method | URL | Mô tả | Status |
-|---|---|---|---|
-| GET | `/api/dashboard/` | Stats tổng quan (4 số liệu) | ✅ Done |
-| GET | `/api/products/` | Danh sách thành phẩm (11 items mock) | ✅ Done |
+| Method | URL | Auth | Mô tả | Status |
+|---|---|---|---|---|
+| POST | `/api/auth/login/` | Public | Đăng nhập bằng phone + password → JWT | ✅ Done |
+| GET | `/api/dashboard/` | Bearer | Stats tổng quan (4 số liệu) | ✅ Done |
+| GET | `/api/products/` | Bearer | Danh sách thành phẩm (11 items mock) | ✅ Done |
+
+---
+
+## Auth
+
+- **JWT** via `djangorestframework-simplejwt 5.5.1`
+- Access token lifetime: **8 giờ**; Refresh: **7 ngày**
+- Token lưu tại `localStorage` keys: `access_token`, `refresh_token`, `user`
+- Axios interceptor tự gắn `Authorization: Bearer <token>` vào mọi request
+- 401 response → tự động clear token + reload về LoginPage
+
+**Test account:** Phone `0987654321` / Password `yummy123`  
+(Tạo bằng `python manage.py create_test_user`)
 
 ---
 
@@ -106,6 +120,7 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 | Component | File | Mô tả | Status |
 |---|---|---|---|
+| LoginPage | `src/pages/LoginPage.jsx` | Split-screen login: food photo trái, form phải | ✅ Done |
 | HomePage | `src/components/HomePage.jsx` | Layout chính: Sidebar + Header + 2 views | ✅ Done |
 | DashboardView | (trong HomePage.jsx) | 4 stat cards + hoạt động gần đây | ✅ Done |
 | ProductsView | (trong HomePage.jsx) | Bảng thành phẩm + search + pagination | ✅ Done |
@@ -128,16 +143,30 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] Hiển thị badge trạng thái API (Connected/Offline) trực tiếp trên UI
 - [x] Django system check: 0 issues
 
-### 🔜 Next Steps (Session 2+)
+### ✅ Completed (Session 2 — 2026-04-13)
+
+- [x] Cài `djangorestframework-simplejwt 5.5.1` + `PyJWT 2.12.1`
+- [x] `settings.py`: `REST_FRAMEWORK` + `SIMPLE_JWT` config (access 8h, refresh 7 ngày)
+- [x] `api/serializers.py`: `PhoneLoginSerializer` xác thực phone + password
+- [x] `api/views.py`: `PhoneLoginView` trả về access + refresh + user info; dashboard & products yêu cầu `IsAuthenticated`
+- [x] `api/urls.py`: `POST /api/auth/login/`
+- [x] Django migrate: tạo bảng auth SQLite lần đầu
+- [x] Management command `create_test_user` — tài khoản `0987654321 / yummy123`
+- [x] `src/pages/LoginPage.jsx`: split-screen (food photo CSS crop trái, form phải)
+- [x] Form: phone icon, password icon + eye toggle, loading spinner, error display
+- [x] `src/api/axios.js`: request interceptor gắn Bearer token; 401 interceptor auto-logout
+- [x] `src/App.jsx`: auth routing — `!user` → `<LoginPage>`, `user` → `<HomePage>`
+- [x] `HomePage.jsx`: nhận `user` + `onLogout` props; avatar initials động; nút logout cả header lẫn sidebar
+
+### 🔜 Next Steps (Session 3+)
 
 - [ ] **Models**: Định nghĩa `Product`, `Order`, `Customer` trong `api/models.py`
 - [ ] **Migrations**: `makemigrations` + `migrate` để tạo bảng SQLite
-- [ ] **Serializers**: Tạo `api/serializers.py` cho từng model
-- [ ] **CRUD API**: Endpoints đầy đủ (POST, PUT, DELETE) cho Product
+- [ ] **Serializers**: Nâng cấp `api/serializers.py` cho từng model
+- [ ] **CRUD API**: Endpoints đầy đủ (POST, PUT, PATCH, DELETE) cho Product
 - [ ] **React Pages**: Các view còn lại — Đơn hàng, Khách hàng, Báo cáo
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page
 - [ ] **Form Modal**: Modal thêm/sửa sản phẩm (kết nối vào nút "Tạo lô")
-- [ ] **Authentication**: Django JWT (`djangorestframework-simplejwt`) + login page
 - [ ] **Data thật**: Thay mock data bằng API calls thực từ SQLite
 - [ ] **Export**: Xuất danh sách sản phẩm ra Excel/CSV
 
@@ -150,3 +179,6 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - `App.css` đã được **xóa nội dung** để tránh conflict với Tailwind
 - Mock data trong `views.py` và `HomePage.jsx` sẽ được thay bằng dữ liệu thật ở bước tiếp theo
 - API badge trên header cho biết trạng thái kết nối realtime (green = OK, red = Django chưa chạy)
+- Login dùng `username` field của Django User để lưu số điện thoại — không cần custom User model
+- `screenshot/login.png` được copy sang `frontend/public/login-bg.png`; crop bằng `background-size: 210% auto` để chỉ hiển thị phần ảnh đồ ăn bên trái
+- Management command output phải dùng ASCII thuần (không dùng emoji/Vietnamese) vì Windows terminal dùng cp1252

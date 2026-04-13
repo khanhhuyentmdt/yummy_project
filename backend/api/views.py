@@ -1,18 +1,56 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from .serializers import PhoneLoginSerializer
+
+
+# ─── Auth ─────────────────────────────────────────────────────────────────────
+
+class PhoneLoginView(APIView):
+    """POST /api/auth/login/ — đăng nhập bằng số điện thoại + mật khẩu."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PhoneLoginSerializer(
+            data=request.data,
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access':  str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id':    user.id,
+                'name':  user.get_full_name() or user.username,
+                'phone': user.username,
+                'is_staff': user.is_staff,
+            },
+        })
+
+
+# ─── Dashboard ────────────────────────────────────────────────────────────────
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def dashboard_stats(request):
     return Response({
-        'total_products': 47,
+        'total_products':  47,
         'active_products': 38,
-        'revenue_today': 12500000,
-        'orders_today': 23,
+        'revenue_today':   12500000,
+        'orders_today':    23,
     })
 
 
+# ─── Products ─────────────────────────────────────────────────────────────────
+
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def product_list(request):
     products = [
         {'id': 1,  'code': 'HSP011', 'name': 'Trà hồ Khoai môn 3 vị',          'group': 'Trà hồ Singapore', 'unit': 'Lý',   'price': 28000, 'status': 'active'},

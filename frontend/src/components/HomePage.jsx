@@ -4,7 +4,7 @@ import {
   BarChart2, Settings, Search, Bell,
   DollarSign, ShoppingBag, CheckCircle,
   Plus, Pencil, Trash2, ChevronRight, ChevronLeft,
-  Menu, Activity,
+  Menu, Activity, LogOut,
 } from 'lucide-react'
 import api from '../api/axios'
 
@@ -53,7 +53,15 @@ const formatCurrency = (amount) =>
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function HomePage() {
+export default function HomePage({ user = {}, onLogout }) {
+  const displayName   = user.name  || 'Admin'
+  const displayPhone  = user.phone || ''
+  const avatarInitials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0].toUpperCase())
+    .join('')
   const [activeView, setActiveView]       = useState('dashboard')
   const [sidebarOpen, setSidebarOpen]     = useState(false)
   const [stats, setStats]                 = useState(STATS_FALLBACK)
@@ -135,12 +143,19 @@ export default function HomePage() {
           <div className="p-3 border-t border-gray-100">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-orange-600 font-semibold text-xs">TV</span>
+                <span className="text-orange-600 font-semibold text-xs">{avatarInitials}</span>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-gray-800 truncate">Thảo Vi</p>
-                <p className="text-xs text-gray-400">Quản trị viên</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-gray-800 truncate">{displayName}</p>
+                <p className="text-xs text-gray-400 truncate">{displayPhone}</p>
               </div>
+              <button
+                onClick={onLogout}
+                title="Đăng xuất"
+                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
+              >
+                <LogOut size={14} />
+              </button>
             </div>
           </div>
         )}
@@ -184,9 +199,16 @@ export default function HomePage() {
 
             <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
               <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                <span className="text-orange-600 font-semibold text-xs">TV</span>
+                <span className="text-orange-600 font-semibold text-xs">{avatarInitials}</span>
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">Thảo Vi</span>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">{displayName}</span>
+              <button
+                onClick={onLogout}
+                title="Đăng xuất"
+                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
           </div>
         </header>
