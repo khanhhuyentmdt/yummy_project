@@ -1,0 +1,19 @@
+# Bỏ qua môi trường ảo Python ở thư mục gốc
+.venv/
+
+# Bỏ qua thư viện Frontend (nằm trong folder frontend)
+frontend/node_modules/
+**/node_modules/
+
+# Bỏ qua các file đệm của Python
+**/__pycache__/
+*.pyc
+
+# Bỏ qua các file log và build
+*.log
+frontend/build/
+frontend/dist/
+
+# Bỏ qua các file hệ thống ẩn
+.DS_Store
+.env
