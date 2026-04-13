@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project": "erp_yummy",
+  "version": "0.2.0",
+  "last_updated": "2026-04-13",
+  "session": 1,
+
+  "environment": {
+    "python": ".venv/python.exe",
+    "venv_type": "conda",
+    "backend_port": 2344,
+    "frontend_port": 2347,
+    "base_api_url": "http://127.0.0.1:2344/api/"
+  },
+
+  "backend": {
+    "framework": "Django 6.0.3",
+    "installed_apps": [
+      "rest_framework",
+      "corsheaders",
+      "api"
+    ],
+    "cors_allowed_origins": [
+      "http://localhost:2347",
+      "http://127.0.0.1:2347"
+    ],
+    "database": {
+      "engine": "sqlite3",
+      "file": "backend/db.sqlite3"
+    },
+    "models": {
+      "Product": {
+        "status": "TODO",
+        "fields": {
+          "code": "CharField(max_length=20, unique=True)",
+          "name": "CharField(max_length=200)",
+          "group": "CharField(max_length=100)",
+          "unit": "CharField(max_length=50)",
+          "price": "DecimalField(max_digits=12, decimal_places=0)",
+          "status": "CharField(choices=['active','inactive'], default='active')",
+          "created_at": "DateTimeField(auto_now_add=True)",
+          "updated_at": "DateTimeField(auto_now=True)"
+        }
+      },
+      "Order": {
+        "status": "TODO",
+        "fields": {
+          "code": "CharField(max_length=20, unique=True)",
+          "customer": "ForeignKey(Customer)",
+          "total": "DecimalField(max_digits=14, decimal_places=0)",
+          "status": "CharField(choices=['pending','confirmed','delivered','cancelled'])",
+          "created_at": "DateTimeField(auto_now_add=True)"
+        }
+      },
+      "Customer": {
+        "status": "TODO",
+        "fields": {
+          "name": "CharField(max_length=200)",
+          "phone": "CharField(max_length=20)",
+          "email": "EmailField(blank=True)",
+          "address": "TextField(blank=True)"
+        }
+      }
+    },
+    "api_endpoints": [
+      {
+        "method": "GET",
+        "url": "/api/dashboard/",
+        "view": "dashboard_stats",
+        "description": "Trả về 4 số liệu tổng quan: total_products, active_products, revenue_today, orders_today",
+        "status": "done",
+        "data_source": "mock"
+      },
+      {
+        "method": "GET",
+        "url": "/api/products/",
+        "view": "product_list",
+        "description": "Danh sách 11 thành phẩm mẫu",
+        "status": "done",
+        "data_source": "mock"
+      },
+      {
+        "method": "POST",
+        "url": "/api/products/",
+        "view": "product_create",
+        "description": "Tạo sản phẩm mới",
+        "status": "TODO"
+      },
+      {
+        "method": "PUT",
+        "url": "/api/products/{id}/",
+        "view": "product_update",
+        "description": "Cập nhật sản phẩm",
+        "status": "TODO"
+      },
+      {
+        "method": "DELETE",
+        "url": "/api/products/{id}/",
+        "view": "product_delete",
+        "description": "Xóa sản phẩm",
+        "status": "TODO"
+      },
+      {
+        "method": "GET",
+        "url": "/api/orders/",
+        "view": "order_list",
+        "description": "Danh sách đơn hàng",
+        "status": "TODO"
+      },
+      {
+        "method": "GET",
+        "url": "/api/customers/",
+        "view": "customer_list",
+        "description": "Danh sách khách hàng",
+        "status": "TODO"
+      },
+      {
+        "method": "POST",
+        "url": "/api/auth/token/",
+        "view": "JWT TokenObtainPairView",
+        "description": "Đăng nhập — trả về access + refresh token",
+        "status": "TODO"
+      }
+    ]
+  },
+
+  "frontend": {
+    "framework": "React 19 + Vite 8",
+    "css": "TailwindCSS 3",
+    "http_client": "axios",
+    "icon_library": "lucide-react",
+    "api_base": "src/api/axios.js",
+    "entry": "src/main.jsx",
+    "router": "TODO (react-router-dom chưa cài)",
+    "components": [
+      {
+        "name": "HomePage",
+        "file": "src/components/HomePage.jsx",
+        "description": "Layout chính của ERP: Sidebar + Header + page views",
+        "status": "done",
+        "sub_components": ["DashboardView", "ProductsView", "ComingSoonView"]
+      },
+      {
+        "name": "DashboardView",
+        "file": "src/components/HomePage.jsx (inline)",
+        "description": "4 stat cards + danh sách hoạt động gần đây",
+        "status": "done"
+      },
+      {
+        "name": "ProductsView",
+        "file": "src/components/HomePage.jsx (inline)",
+        "description": "Bảng thành phẩm với search, pagination, action buttons",
+        "status": "done",
+        "note": "Dùng mock data — cần thay bằng API call thật khi có model"
+      },
+      {
+        "name": "LoginPage",
+        "file": "src/pages/LoginPage.jsx",
+        "description": "Trang đăng nhập JWT",
+        "status": "TODO"
+      },
+      {
+        "name": "ProductModal",
+        "file": "src/components/ProductModal.jsx",
+        "description": "Modal thêm/sửa sản phẩm",
+        "status": "TODO"
+      },
+      {
+        "name": "OrdersPage",
+        "file": "src/pages/OrdersPage.jsx",
+        "description": "Quản lý đơn hàng",
+        "status": "TODO"
+      },
+      {
+        "name": "CustomersPage",
+        "file": "src/pages/CustomersPage.jsx",
+        "description": "Quản lý khách hàng",
+        "status": "TODO"
+      }
+    ]
+  },
+
+  "progress": {
+    "completed_sessions": [
+      {
+        "session": 1,
+        "date": "2026-04-13",
+        "summary": "Khởi tạo project, cấu hình Django+CORS, cài Tailwind+Axios, xây dựng HomePage ERP theo thiết kế homepage.png"
+      }
+    ],
+    "next_steps": [
+      "Định nghĩa models: Product, Order, Customer trong api/models.py",
+      "Chạy makemigrations + migrate",
+      "Viết serializers.py cho từng model",
+      "Nâng cấp API endpoints sang CRUD thật (thay mock data)",
+      "Thêm react-router-dom và tạo các pages riêng biệt",
+      "Modal thêm/sửa sản phẩm kết nối nút Tạo lô",
+      "Tích hợp JWT authentication (djangorestframework-simplejwt)",
+      "Trang Login + bảo vệ routes bằng PrivateRoute"
+    ]
+  }
+}
