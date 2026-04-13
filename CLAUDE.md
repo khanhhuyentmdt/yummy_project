@@ -158,17 +158,31 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] `src/App.jsx`: auth routing — `!user` → `<LoginPage>`, `user` → `<HomePage>`
 - [x] `HomePage.jsx`: nhận `user` + `onLogout` props; avatar initials động; nút logout cả header lẫn sidebar
 
-### 🔜 Next Steps (Session 3+)
+### ✅ Completed (Session 3 — 2026-04-13) — Custom User Model + Login Done
 
+- [x] `api/models.py`: `User(AbstractUser)` — xóa `username`, thêm `phone_number` (USERNAME_FIELD) + `full_name`
+- [x] `UserManager`: override `create_user` / `create_superuser` dùng `phone_number`
+- [x] `settings.py`: `AUTH_USER_MODEL = 'api.User'` + `DEFAULT_AUTO_FIELD`
+- [x] `api/admin.py`: `UserAdmin` custom — đăng ký model mới với Django Admin
+- [x] `api/serializers.py`: field `phone_number` (thay `phone`)
+- [x] `api/views.py`: dùng `get_user_model()`, response trả `user.phone_number`
+- [x] DB reset: clear migration history, `makemigrations api` → `0001_initial.py`, `migrate` sạch
+- [x] Management command cập nhật: seed `0915085900 / 12345`
+- [x] `LoginPage.jsx`: payload API gửi `phone_number`, cập nhật credentials hint
+- [x] **Login feature: DONE**
+
+### 🔜 Next Steps (Session 4+) — Dashboard sau login
+
+- [ ] **Xây dựng Dashboard**: Sau khi login thành công, hiển thị dashboard với dữ liệu thật từ DB
 - [ ] **Models**: Định nghĩa `Product`, `Order`, `Customer` trong `api/models.py`
-- [ ] **Migrations**: `makemigrations` + `migrate` để tạo bảng SQLite
+- [ ] **Migrations**: `makemigrations` + `migrate` để tạo bảng mới
 - [ ] **Serializers**: Nâng cấp `api/serializers.py` cho từng model
 - [ ] **CRUD API**: Endpoints đầy đủ (POST, PUT, PATCH, DELETE) cho Product
 - [ ] **React Pages**: Các view còn lại — Đơn hàng, Khách hàng, Báo cáo
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page
 - [ ] **Form Modal**: Modal thêm/sửa sản phẩm (kết nối vào nút "Tạo lô")
 - [ ] **Data thật**: Thay mock data bằng API calls thực từ SQLite
-- [ ] **Export**: Xuất danh sách sản phẩm ra Excel/CSV
+- [ ] **Token Refresh**: Interceptor tự động gọi `/api/token/refresh/` khi access token hết hạn
 
 ---
 
@@ -179,6 +193,9 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - `App.css` đã được **xóa nội dung** để tránh conflict với Tailwind
 - Mock data trong `views.py` và `HomePage.jsx` sẽ được thay bằng dữ liệu thật ở bước tiếp theo
 - API badge trên header cho biết trạng thái kết nối realtime (green = OK, red = Django chưa chạy)
-- Login dùng `username` field của Django User để lưu số điện thoại — không cần custom User model
+- ~~Login dùng username field~~ → **Session 3**: Custom `User(AbstractUser)` với `phone_number` là `USERNAME_FIELD`
+- Custom `UserManager` bắt buộc khi `username = None` — `create_user(phone_number, password)` và `create_superuser` phải override
+- DB reset khi thay đổi `AUTH_USER_MODEL`: dùng Python `sqlite3.connect()` để xóa migration history thay vì xóa file (tránh lock trên Windows)
 - `screenshot/login.png` được copy sang `frontend/public/login-bg.png`; crop bằng `background-size: 210% auto` để chỉ hiển thị phần ảnh đồ ăn bên trái
 - Management command output phải dùng ASCII thuần (không dùng emoji/Vietnamese) vì Windows terminal dùng cp1252
+- `AUTH_USER_MODEL` phải được set trong `settings.py` TRƯỚC khi chạy `makemigrations` lần đầu

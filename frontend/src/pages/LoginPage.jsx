@@ -18,7 +18,7 @@ export default function LoginPage({ onLoginSuccess }) {
     setError('')
     setLoading(true)
     try {
-      const res = await api.post('auth/login/', { phone, password })
+      const res = await api.post('auth/login/', { phone_number: phone, password })
       const { access, refresh, user } = res.data
 
       localStorage.setItem('access_token', access)
@@ -158,9 +158,9 @@ export default function LoginPage({ onLoginSuccess }) {
 
           {/* Test account hint */}
           <p className="mt-5 text-center text-xs text-gray-400">
-            Demo: <span className="font-mono text-gray-500">0987654321</span>
+            Demo: <span className="font-mono text-gray-500">0915085900</span>
             {' / '}
-            <span className="font-mono text-gray-500">yummy123</span>
+            <span className="font-mono text-gray-500">12345</span>
           </p>
         </div>
       </div>

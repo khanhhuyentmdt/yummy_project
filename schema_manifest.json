@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "erp_yummy",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "last_updated": "2026-04-13",
-  "session": 2,
+  "session": 3,
 
   "environment": {
     "python": ".venv/python.exe",
@@ -33,17 +33,29 @@
       "package": "djangorestframework-simplejwt 5.5.1",
       "access_token_lifetime": "8 hours",
       "refresh_token_lifetime": "7 days",
-      "login_field": "username (stores phone number)",
+      "login_field": "phone_number (USERNAME_FIELD on custom User model)",
       "test_account": {
-        "phone": "0987654321",
-        "password": "yummy123",
+        "phone_number": "0915085900",
+        "password": "12345",
+        "full_name": "Thao Vi",
         "create_command": "python manage.py create_test_user"
       }
     },
     "models": {
       "User": {
         "status": "done",
-        "note": "Django built-in User — username field stores phone number"
+        "class": "api.models.User(AbstractUser)",
+        "manager": "api.models.UserManager",
+        "fields": {
+          "phone_number": "CharField(max_length=20, unique=True) — USERNAME_FIELD",
+          "full_name": "CharField(max_length=200, blank=True)",
+          "email": "inherited from AbstractUser (optional)",
+          "is_staff": "inherited",
+          "is_active": "inherited"
+        },
+        "removed_fields": ["username"],
+        "migration": "api/migrations/0001_initial.py",
+        "note": "Custom User model. username=None, USERNAME_FIELD='phone_number', REQUIRED_FIELDS=[]"
       },
       "Product": {
         "status": "TODO",
@@ -218,23 +230,28 @@
       {
         "session": 1,
         "date": "2026-04-13",
-        "summary": "Khởi tạo project, cấu hình Django+CORS, cài Tailwind+Axios, xây dựng HomePage ERP theo thiết kế homepage.png"
+        "summary": "Project init: Django+CORS, Tailwind+Axios, HomePage ERP UI"
       },
       {
         "session": 2,
         "date": "2026-04-13",
-        "summary": "JWT authentication: simplejwt backend, PhoneLoginView, LoginPage split-screen UI, axios interceptors, App auth routing"
+        "summary": "JWT auth: simplejwt, PhoneLoginView, LoginPage split-screen UI, axios interceptors, App auth routing"
+      },
+      {
+        "session": 3,
+        "date": "2026-04-13",
+        "summary": "Custom User model: phone_number as USERNAME_FIELD, DB reset+migrate, updated seed command, LoginPage payload fix. LOGIN FEATURE COMPLETE."
       }
     ],
     "next_steps": [
-      "Định nghĩa models: Product, Order, Customer trong api/models.py",
-      "Chạy makemigrations + migrate",
-      "Nâng cấp api/serializers.py cho từng model",
-      "Nâng cấp API endpoints sang CRUD thật (thay mock data)",
-      "Thêm react-router-dom và tạo các pages riêng biệt",
-      "Modal thêm/sửa sản phẩm kết nối nút Tạo lô",
-      "Thêm token refresh tự động (interceptor gọi /api/token/refresh/ khi 401)",
-      "Xuất danh sách sản phẩm ra Excel/CSV"
+      "Xay dung Dashboard sau login: hien thi du lieu that tu DB",
+      "Dinh nghia models: Product, Order, Customer trong api/models.py",
+      "Chay makemigrations + migrate cho models moi",
+      "Nang cap api/serializers.py cho tung model",
+      "Nang cap API endpoints sang CRUD that (thay mock data)",
+      "Them react-router-dom va tao cac pages rieng biet",
+      "Modal them/sua san pham ket noi nut Tao lo",
+      "Token refresh tu dong khi access token het han"
     ]
   }
 }

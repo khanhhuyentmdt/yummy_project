@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,11 +7,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import PhoneLoginSerializer
 
+User = get_user_model()
+
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
 
 class PhoneLoginView(APIView):
-    """POST /api/auth/login/ — đăng nhập bằng số điện thoại + mật khẩu."""
+    """POST /api/auth/login/ — đăng nhập bằng phone_number + password."""
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -26,9 +29,9 @@ class PhoneLoginView(APIView):
             'access':  str(refresh.access_token),
             'refresh': str(refresh),
             'user': {
-                'id':    user.id,
-                'name':  user.get_full_name() or user.username,
-                'phone': user.username,
+                'id':       user.id,
+                'name':     user.get_full_name(),
+                'phone':    user.phone_number,
                 'is_staff': user.is_staff,
             },
         })
@@ -53,16 +56,16 @@ def dashboard_stats(request):
 @permission_classes([IsAuthenticated])
 def product_list(request):
     products = [
-        {'id': 1,  'code': 'HSP011', 'name': 'Trà hồ Khoai môn 3 vị',          'group': 'Trà hồ Singapore', 'unit': 'Lý',   'price': 28000, 'status': 'active'},
-        {'id': 2,  'code': 'HSP022', 'name': 'Matcha trà hồ gạo rang đặc 49',   'group': 'Matcha Trà hồ',    'unit': 'Lý',   'price': 30000, 'status': 'inactive'},
-        {'id': 3,  'code': 'HSP030', 'name': 'Trà hồ kem tầm Đường đêm',        'group': 'Trà hồ Singapore', 'unit': 'Phần', 'price': 32000, 'status': 'active'},
-        {'id': 4,  'code': 'HSP045', 'name': 'Trà hồ Đường trắng',              'group': 'Trà hồ Singapore', 'unit': 'Phần', 'price': 22000, 'status': 'active'},
-        {'id': 5,  'code': 'HSP056', 'name': 'Trà hồ sữa xuất',                 'group': 'Trà hồ Singapore', 'unit': 'Phần', 'price': 30000, 'status': 'inactive'},
-        {'id': 6,  'code': 'HSP067', 'name': 'Trà xanh hoa nhài',               'group': 'Trà hồ Singapore', 'unit': 'Lý',   'price': 25000, 'status': 'active'},
-        {'id': 7,  'code': 'HSP078', 'name': 'Trà ô long sữa tươi',             'group': 'Trà hồ Singapore', 'unit': 'Lý',   'price': 35000, 'status': 'active'},
-        {'id': 8,  'code': 'HSP089', 'name': 'Matcha latte nóng',               'group': 'Matcha Trà hồ',    'unit': 'Lý',   'price': 38000, 'status': 'active'},
-        {'id': 9,  'code': 'HSP090', 'name': 'Trà đào cam sả',                  'group': 'Trà hồ Singapore', 'unit': 'Lý',   'price': 29000, 'status': 'inactive'},
-        {'id': 10, 'code': 'HSP101', 'name': 'Trà vải thiều',                   'group': 'Trà hồ Singapore', 'unit': 'Lý',   'price': 27000, 'status': 'active'},
-        {'id': 11, 'code': 'HSP112', 'name': 'Cà phê muối',                     'group': 'Cà phê',           'unit': 'Lý',   'price': 33000, 'status': 'active'},
+        {'id': 1,  'code': 'HSP011', 'name': 'Tra ho Khoai mon 3 vi',          'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 28000, 'status': 'active'},
+        {'id': 2,  'code': 'HSP022', 'name': 'Matcha tra ho gao rang dac 49',   'group': 'Matcha Tra ho',    'unit': 'Ly',   'price': 30000, 'status': 'inactive'},
+        {'id': 3,  'code': 'HSP030', 'name': 'Tra ho kem tam Duong dem',        'group': 'Tra ho Singapore', 'unit': 'Phan', 'price': 32000, 'status': 'active'},
+        {'id': 4,  'code': 'HSP045', 'name': 'Tra ho Duong trang',              'group': 'Tra ho Singapore', 'unit': 'Phan', 'price': 22000, 'status': 'active'},
+        {'id': 5,  'code': 'HSP056', 'name': 'Tra ho sua xuat',                 'group': 'Tra ho Singapore', 'unit': 'Phan', 'price': 30000, 'status': 'inactive'},
+        {'id': 6,  'code': 'HSP067', 'name': 'Tra xanh hoa nhai',               'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 25000, 'status': 'active'},
+        {'id': 7,  'code': 'HSP078', 'name': 'Tra o long sua tuoi',             'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 35000, 'status': 'active'},
+        {'id': 8,  'code': 'HSP089', 'name': 'Matcha latte nong',               'group': 'Matcha Tra ho',    'unit': 'Ly',   'price': 38000, 'status': 'active'},
+        {'id': 9,  'code': 'HSP090', 'name': 'Tra dao cam sa',                  'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 29000, 'status': 'inactive'},
+        {'id': 10, 'code': 'HSP101', 'name': 'Tra vai thieu',                   'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 27000, 'status': 'active'},
+        {'id': 11, 'code': 'HSP112', 'name': 'Ca phe muoi',                     'group': 'Ca phe',           'unit': 'Ly',   'price': 33000, 'status': 'active'},
     ]
     return Response({'products': products, 'total': len(products)})
