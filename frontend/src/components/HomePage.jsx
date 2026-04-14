@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users,
   BarChart2, Settings, Search, Bell,
   DollarSign, ShoppingBag, CheckCircle,
-  Plus, Pencil, Trash2, ChevronRight, ChevronLeft,
+  Plus, ChevronRight, ChevronLeft, ChevronDown,
   Menu, Activity, LogOut, CloudSync, Loader2,
 } from 'lucide-react'
 import api from '../api/axios'
@@ -512,6 +512,15 @@ function ProductsView({
   currentPage, setCurrentPage, totalPages, itemsPerPage,
   onCreateClick, onEditClick, onDeleteClick, onSyncClick,
 }) {
+  const [openDropdownId, setOpenDropdownId] = useState(null)
+
+  useEffect(() => {
+    if (!openDropdownId) return
+    const handleClickOutside = () => setOpenDropdownId(null)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openDropdownId])
+
   const startIdx = allCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const endIdx   = Math.min(currentPage * itemsPerPage, allCount)
 
@@ -604,21 +613,33 @@ function ProductsView({
                       </span>
                     </td>
                     <td className="px-4 py-3.5 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <div
+                        className="relative inline-block"
+                        onMouseDown={e => e.stopPropagation()}
+                      >
                         <button
-                          onClick={() => onEditClick(p)}
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
-                          title="Chỉnh sửa"
+                          onClick={() => setOpenDropdownId(openDropdownId === p.id ? null : p.id)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 hover:bg-gray-50 transition-colors"
                         >
-                          <Pencil size={14} />
+                          Hành động
+                          <ChevronDown size={13} className="text-gray-500" />
                         </button>
-                        <button
-                          onClick={() => onDeleteClick(p)}
-                          className="p-1.5 text-red-400 hover:bg-red-50 rounded-md transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {openDropdownId === p.id && (
+                          <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                            <button
+                              onClick={() => { onEditClick(p); setOpenDropdownId(null) }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                              Chỉnh sửa
+                            </button>
+                            <button
+                              onClick={() => { onDeleteClick(p); setOpenDropdownId(null) }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                              Xóa
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

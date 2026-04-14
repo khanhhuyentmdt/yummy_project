@@ -202,7 +202,15 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 2. Vào tab Thành phẩm → nhấn "Đồng bộ từ file JSON"
 3. Xác nhận → DB được cập nhật tức thì
 
-### 🔜 Next Steps (Session 6+)
+### ✅ Completed (Session 6 — 2026-04-14) — Dropdown Action Menu
+
+- [x] `HomePage.jsx`: Thay 2 icon (Pencil/Trash2) trong cột Hành động bằng dropdown button "Hành động ∨"
+- [x] Dropdown mở/đóng bằng `useState(openDropdownId)` — mỗi dòng độc lập
+- [x] Click ngoài dropdown → tự đóng (document `mousedown` listener + `stopPropagation` trên container)
+- [x] Menu items: "Chỉnh sửa" và "Xóa" — giữ nguyên logic `onEditClick` / `onDeleteClick`
+- [x] Style: nền trắng, `rounded-xl`, `border-gray-200`, shadow-lg, `hover:bg-gray-100`, `z-10`
+
+### 🔜 Next Steps (Session 7+)
 
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status
