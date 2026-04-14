@@ -210,7 +210,29 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] Menu items: "Chỉnh sửa" và "Xóa" — giữ nguyên logic `onEditClick` / `onDeleteClick`
 - [x] Style: nền trắng, `rounded-xl`, `border-gray-200`, shadow-lg, `hover:bg-gray-100`, `z-10`
 
-### 🔜 Next Steps (Session 7+)
+### ✅ Completed (Session 7 — 2026-04-14) — Rename + BG Color + Create Product Page
+
+- [x] **Rename global**: 'Thành phẩm' → 'Sản phẩm' (Sidebar, Breadcrumb, Heading, trong danh sách)
+- [x] **Rename button**: 'Tạo lô' → 'Thêm sản phẩm'
+- [x] **Background**: `<main>` content area đổi thành `bg-[#FFF6F3]`
+- [x] `api/models.py`: Product thêm `description`, `cost_price`, `compare_price`, `production_notes`, `notes`
+- [x] `api/models.py`: Thêm model `RawMaterial` (code, name, unit) và `ProductBOM` (FK Product + RawMaterial, quantity, unit)
+- [x] Migration `0004_product_extended_fields_rawmaterial_bom.py` — apply thành công
+- [x] `api/serializers.py`: `RawMaterialSerializer`, `ProductBOMReadSerializer`, `ProductBOMWriteSerializer`, `ProductCreateSerializer` (auto-gen code, hỗ trợ bom_items)
+- [x] `api/views.py`: `raw_material_list` — GET /api/raw-materials/; `product_list` POST dùng `ProductCreateSerializer`
+- [x] `api/urls.py`: route `raw-materials/`
+- [x] Management command `seed_raw_materials` — seed 12 nguyên liệu mẫu vào DB
+- [x] `src/components/CreateProductPage.jsx`: trang thêm sản phẩm 2 cột — Thông tin chung + BOM + Giá (trái), Ảnh + Ghi chú (phải), Footer Hủy/Lưu
+- [x] `HomePage.jsx`: `onCreateClick` → `setActiveView('create-product')` thay vì mở modal; import & render `CreateProductPage`
+
+**Quy trình thêm sản phẩm:**
+1. Vào tab Sản phẩm → nhấn "Thêm sản phẩm"
+2. Điền Thông tin chung (tên, nhóm, đơn vị, mô tả)
+3. Thêm Định mức BOM (chọn nguyên liệu, định lượng, đơn vị)
+4. Nhập giá bán → hệ thống tự tính biên lợi nhuận
+5. Nhấn "Lưu" → POST /api/products/ → quay về danh sách
+
+### 🔜 Next Steps (Session 8+)
 
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status

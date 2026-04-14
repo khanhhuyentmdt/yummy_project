@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from .models import Customer, Order, Product
+from .models import Customer, Order, Product, RawMaterial, ProductBOM
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -26,16 +26,91 @@ class PhoneLoginSerializer(serializers.Serializer):
         return data
 
 
+# ─── RawMaterial ──────────────────────────────────────────────────────────────
+
+class RawMaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = RawMaterial
+        fields = ['id', 'code', 'name', 'unit']
+
+
+# ─── ProductBOM ───────────────────────────────────────────────────────────────
+
+class ProductBOMReadSerializer(serializers.ModelSerializer):
+    raw_material_id   = serializers.IntegerField(source='raw_material.id')
+    raw_material_name = serializers.CharField(source='raw_material.name')
+
+    class Meta:
+        model  = ProductBOM
+        fields = ['id', 'raw_material_id', 'raw_material_name', 'quantity', 'unit']
+
+
+class ProductBOMWriteSerializer(serializers.Serializer):
+    raw_material_id = serializers.IntegerField()
+    quantity        = serializers.DecimalField(max_digits=10, decimal_places=3)
+    unit            = serializers.CharField(max_length=50, allow_blank=True, default='')
+
+
 # ─── Product ──────────────────────────────────────────────────────────────────
 
 class ProductSerializer(serializers.ModelSerializer):
+    bom_items = ProductBOMReadSerializer(many=True, read_only=True)
+
     class Meta:
         model  = Product
         fields = [
-            'id', 'code', 'name', 'group', 'unit',
-            'quantity', 'price', 'status', 'created_at', 'updated_at',
+            'id', 'code', 'name', 'group', 'unit', 'quantity', 'price',
+            'cost_price', 'compare_price', 'description',
+            'production_notes', 'notes', 'status',
+            'bom_items', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'bom_items', 'created_at', 'updated_at']
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    bom_items = ProductBOMWriteSerializer(many=True, required=False, default=list)
+    code      = serializers.CharField(max_length=20, required=False, allow_blank=True)
+
+    class Meta:
+        model  = Product
+        fields = [
+            'id', 'code', 'name', 'group', 'unit', 'quantity', 'price',
+            'cost_price', 'compare_price', 'description',
+            'production_notes', 'notes', 'status',
+            'bom_items', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        bom_data = validated_data.pop('bom_items', [])
+
+        # Auto-generate unique code when not provided
+        if not validated_data.get('code'):
+            import time
+            suffix = int(time.time() * 1000) % 1000000
+            validated_data['code'] = f'SP{suffix:06d}'
+            # Ensure uniqueness with a simple retry
+            while Product.objects.filter(code=validated_data['code']).exists():
+                suffix = (suffix + 1) % 1000000
+                validated_data['code'] = f'SP{suffix:06d}'
+
+        product = Product.objects.create(**validated_data)
+
+        for item in bom_data:
+            try:
+                rm = RawMaterial.objects.get(id=item['raw_material_id'])
+                ProductBOM.objects.get_or_create(
+                    product=product,
+                    raw_material=rm,
+                    defaults={
+                        'quantity': item['quantity'],
+                        'unit': item.get('unit', '') or rm.unit,
+                    },
+                )
+            except RawMaterial.DoesNotExist:
+                pass
+
+        return product
 
 
 # ─── Customer ─────────────────────────────────────────────────────────────────

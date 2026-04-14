@@ -9,6 +9,7 @@ import {
 import api from '../api/axios'
 import logoImg from '../assets/logo.jpg'
 import ProductModal from './ProductModal'
+import CreateProductPage from './CreateProductPage'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -43,7 +44,7 @@ const ACTIVITIES = [
 
 const MENU_ITEMS = [
   { id: 'dashboard', label: 'Trang chủ',  icon: LayoutDashboard },
-  { id: 'products',  label: 'Thành phẩm', icon: Package },
+  { id: 'products',  label: 'Sản phẩm', icon: Package },
   { id: 'orders',    label: 'Đơn hàng',   icon: ShoppingCart },
   { id: 'customers', label: 'Khách hàng', icon: Users },
   { id: 'reports',   label: 'Báo cáo',    icon: BarChart2 },
@@ -270,7 +271,7 @@ export default function HomePage({ user = {}, onLogout }) {
         </header>
 
         {/* Page body */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 bg-[#FFF6F3]">
           {activeView === 'dashboard' && (
             <DashboardView stats={stats} activities={ACTIVITIES} />
           )}
@@ -284,13 +285,23 @@ export default function HomePage({ user = {}, onLogout }) {
               setCurrentPage={setCurrentPage}
               totalPages={totalPages}
               itemsPerPage={ITEMS_PER_PAGE}
-              onCreateClick={() => setModalProduct(null)}
+              onCreateClick={() => setActiveView('create-product')}
               onEditClick={(p) => setModalProduct(p)}
               onDeleteClick={(p) => setDeleteTarget(p)}
               onSyncClick={() => { setSyncResult(null); setSyncModal(true) }}
             />
           )}
-          {!['dashboard', 'products'].includes(activeView) && (
+          {activeView === 'create-product' && (
+            <CreateProductPage
+              onCancel={() => setActiveView('products')}
+              onSaved={(savedProduct) => {
+                setProducts(prev => [...prev, savedProduct])
+                setActiveView('products')
+                loadDashboard()
+              }}
+            />
+          )}
+          {!['dashboard', 'products', 'create-product'].includes(activeView) && (
             <ComingSoonView />
           )}
         </main>
@@ -527,9 +538,9 @@ function ProductsView({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">THÀNH PHẨM</h1>
+        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">SẢN PHẨM</h1>
         <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-          <span>Thành phẩm</span>
+          <span>Sản phẩm</span>
           <ChevronRight size={14} />
           <span className="text-orange-500 font-medium">Danh sách</span>
         </div>
@@ -561,7 +572,7 @@ function ProductsView({
               className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
               <Plus size={15} />
-              Tạo lô
+              Thêm sản phẩm
             </button>
           </div>
         </div>

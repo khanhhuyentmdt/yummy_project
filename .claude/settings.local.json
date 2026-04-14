@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python.exe backend/manage.py check)",
+      "Bash(.venv/python.exe backend/manage.py check)",
+      "Bash(.venv/python.exe -m pip install djangorestframework-simplejwt)",
+      "Bash(.venv/python.exe backend/manage.py migrate)",
+      "Bash(.venv/python.exe backend/manage.py create_test_user)",
+      "Bash(.venv/python.exe -c \"import os; os.remove\\('backend/db.sqlite3'\\); print\\('DB deleted'\\)\")",
+      "Bash(cmd /c \"del /f D:\\\\TheALAB_VibeCoding\\\\demo_app\\\\backend\\\\db.sqlite3\")",
+      "Bash(.venv/python.exe backend/manage.py makemigrations api)",
+      "Bash(..\\\\\\\\.venv\\\\\\\\python.exe manage.py makemigrations api)",
+      "Bash(../.venv/python.exe manage.py makemigrations api)",
+      "Bash(../.venv/python.exe manage.py migrate)",
+      "Bash(../.venv/python.exe manage.py check)",
+      "Bash(../.venv/python.exe manage.py seed_products)",
+      "Bash(node -e \"const icons = require\\('./node_modules/lucide-react'\\); const names = Object.keys\\(icons\\).filter\\(k => k.toLowerCase\\(\\).includes\\('cloud'\\) || k.toLowerCase\\(\\).includes\\('refresh'\\) || k.toLowerCase\\(\\).includes\\('sync'\\)\\); console.log\\(names.join\\('\\\\n'\\)\\)\")",
+      "Bash(../.venv/python.exe manage.py makemigrations api --name add_product_quantity)",
+      "Bash(../.venv/python.exe manage.py export_products)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(../.venv/python.exe manage.py makemigrations api --name \"product_extended_fields_rawmaterial_bom\")",
+      "Bash(\"../.venv/python.exe\" manage.py makemigrations api --name \"product_extended_fields_rawmaterial_bom\")",
+      "Bash(\"../.venv/python.exe\" manage.py migrate)",
+      "Bash(\"../.venv/python.exe\" manage.py seed_raw_materials)"
+    ]
+  }
+}

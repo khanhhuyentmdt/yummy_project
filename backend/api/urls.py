@@ -13,6 +13,9 @@ urlpatterns = [
     path('products/sync/',        views.product_sync,   name='product-sync'),
     path('products/<int:pk>/',    views.product_detail, name='product-detail'),
 
+    # Raw Materials
+    path('raw-materials/', views.raw_material_list, name='raw-material-list'),
+
     # Customers
     path('customers/', views.customer_list, name='customer-list'),
 

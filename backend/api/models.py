@@ -68,13 +68,18 @@ class Product(models.Model):
         (STATUS_INACTIVE, 'Tạm ngưng'),
     ]
 
-    code       = models.CharField(max_length=20, unique=True, verbose_name='Mã SP')
-    name       = models.CharField(max_length=200, verbose_name='Tên sản phẩm')
-    group      = models.CharField(max_length=100, verbose_name='Nhóm SP')
-    unit       = models.CharField(max_length=50,  verbose_name='ĐVT')
-    quantity   = models.IntegerField(default=0, verbose_name='Số lượng tồn kho')
-    price      = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='Giá bán')
-    status     = models.CharField(
+    code             = models.CharField(max_length=20, unique=True, verbose_name='Mã SP')
+    name             = models.CharField(max_length=200, verbose_name='Tên sản phẩm')
+    group            = models.CharField(max_length=100, verbose_name='Nhóm SP')
+    unit             = models.CharField(max_length=50,  verbose_name='ĐVT')
+    quantity         = models.IntegerField(default=0, verbose_name='Số lượng tồn kho')
+    price            = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='Giá bán')
+    cost_price       = models.DecimalField(max_digits=12, decimal_places=0, default=0, verbose_name='Giá vốn')
+    compare_price    = models.DecimalField(max_digits=12, decimal_places=0, default=0, verbose_name='Giá so sánh')
+    description      = models.TextField(blank=True, verbose_name='Mô tả sản phẩm')
+    production_notes = models.TextField(blank=True, verbose_name='Ghi chú sản xuất')
+    notes            = models.TextField(blank=True, verbose_name='Ghi chú')
+    status           = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default=STATUS_ACTIVE,
@@ -89,6 +94,44 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.code} — {self.name}'
+
+
+# ─── RawMaterial ─────────────────────────────────────────────────────────────
+
+class RawMaterial(models.Model):
+    code       = models.CharField(max_length=20, unique=True, verbose_name='Mã NL')
+    name       = models.CharField(max_length=200, verbose_name='Tên nguyên liệu')
+    unit       = models.CharField(max_length=50,  verbose_name='ĐVT')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering     = ['name']
+        verbose_name = 'RawMaterial'
+
+    def __str__(self):
+        return f'{self.code} - {self.name}'
+
+
+# ─── ProductBOM ───────────────────────────────────────────────────────────────
+
+class ProductBOM(models.Model):
+    product      = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='bom_items',
+        verbose_name='Sản phẩm',
+    )
+    raw_material = models.ForeignKey(
+        RawMaterial, on_delete=models.PROTECT, related_name='bom_items',
+        verbose_name='Nguyên liệu',
+    )
+    quantity = models.DecimalField(max_digits=10, decimal_places=3, verbose_name='Định lượng')
+    unit     = models.CharField(max_length=50, blank=True, verbose_name='ĐVT')
+
+    class Meta:
+        unique_together = [['product', 'raw_material']]
+        verbose_name    = 'ProductBOM'
+
+    def __str__(self):
+        return f'{self.product.code} - {self.raw_material.name} x{self.quantity}'
 
 
 # ─── Customer ─────────────────────────────────────────────────────────────────

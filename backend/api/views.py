@@ -17,10 +17,11 @@ logger = logging.getLogger(__name__)
 
 DATA_SYNC_FILE = Path(settings.BASE_DIR).parent / 'data_sync' / 'products.json'
 
-from .models import Customer, Order, Product
+from .models import Customer, Order, Product, RawMaterial
 from .serializers import (
     CustomerSerializer, OrderSerializer,
-    PhoneLoginSerializer, ProductSerializer,
+    PhoneLoginSerializer, ProductSerializer, ProductCreateSerializer,
+    RawMaterialSerializer,
 )
 
 User = get_user_model()
@@ -87,11 +88,11 @@ def product_list(request):
         serializer = ProductSerializer(qs, many=True)
         return Response({'products': serializer.data, 'total': qs.count()})
 
-    # POST — tạo mới
-    serializer = ProductSerializer(data=request.data)
+    # POST — tạo mới (dùng ProductCreateSerializer để hỗ trợ bom_items)
+    serializer = ProductCreateSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        product = serializer.save()
+        return Response(ProductSerializer(product).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -189,6 +190,16 @@ def product_sync(request):
         response_data['errors'] = errors
 
     return Response(response_data)
+
+
+# ─── Raw Materials ────────────────────────────────────────────────────────────
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def raw_material_list(request):
+    """GET /api/raw-materials/ — danh sách nguyên liệu cho BOM dropdown."""
+    qs = RawMaterial.objects.all()
+    return Response({'raw_materials': RawMaterialSerializer(qs, many=True).data})
 
 
 # ─── Customers ────────────────────────────────────────────────────────────────
