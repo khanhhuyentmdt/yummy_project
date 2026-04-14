@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "erp_yummy",
-  "version": "0.4.0",
-  "last_updated": "2026-04-13",
-  "session": 3,
+  "version": "0.6.0",
+  "last_updated": "2026-04-14",
+  "session": 5,
 
   "environment": {
     "python": ".venv/python.exe",
@@ -58,12 +58,14 @@
         "note": "Custom User model. username=None, USERNAME_FIELD='phone_number', REQUIRED_FIELDS=[]"
       },
       "Product": {
-        "status": "TODO",
+        "status": "done",
+        "migration": "api/migrations/0002_customer_product_order.py",
         "fields": {
           "code": "CharField(max_length=20, unique=True)",
           "name": "CharField(max_length=200)",
           "group": "CharField(max_length=100)",
           "unit": "CharField(max_length=50)",
+          "quantity": "IntegerField(default=0) — so luong ton kho",
           "price": "DecimalField(max_digits=12, decimal_places=0)",
           "status": "CharField(choices=['active','inactive'], default='active')",
           "created_at": "DateTimeField(auto_now_add=True)",
@@ -71,7 +73,7 @@
         }
       },
       "Order": {
-        "status": "TODO",
+        "status": "done",
         "fields": {
           "code": "CharField(max_length=20, unique=True)",
           "customer": "ForeignKey(Customer)",
@@ -81,7 +83,7 @@
         }
       },
       "Customer": {
-        "status": "TODO",
+        "status": "done",
         "fields": {
           "name": "CharField(max_length=200)",
           "phone": "CharField(max_length=20)",
@@ -109,53 +111,81 @@
         "url": "/api/dashboard/",
         "view": "dashboard_stats",
         "auth": "Bearer",
-        "description": "4 số liệu tổng quan: total_products, active_products, revenue_today, orders_today",
+        "description": "4 số liệu tổng quan từ DB thật: total_products, active_products, revenue_today, orders_today",
         "status": "done",
-        "data_source": "mock"
+        "data_source": "real_db"
       },
       {
         "method": "GET",
         "url": "/api/products/",
         "view": "product_list",
         "auth": "Bearer",
-        "description": "Danh sách 11 thành phẩm mẫu",
+        "description": "Danh sách thành phẩm từ DB, hỗ trợ ?search=",
         "status": "done",
-        "data_source": "mock"
+        "data_source": "real_db"
       },
       {
         "method": "POST",
         "url": "/api/products/",
-        "view": "product_create",
+        "view": "product_list",
         "auth": "Bearer",
-        "status": "TODO"
+        "description": "Tạo sản phẩm mới",
+        "status": "done"
       },
       {
         "method": "PUT",
         "url": "/api/products/{id}/",
-        "view": "product_update",
+        "view": "product_detail",
         "auth": "Bearer",
-        "status": "TODO"
+        "description": "Cập nhật toàn bộ sản phẩm",
+        "status": "done"
+      },
+      {
+        "method": "PATCH",
+        "url": "/api/products/{id}/",
+        "view": "product_detail",
+        "auth": "Bearer",
+        "description": "Cập nhật một phần sản phẩm",
+        "status": "done"
       },
       {
         "method": "DELETE",
         "url": "/api/products/{id}/",
-        "view": "product_delete",
+        "view": "product_detail",
         "auth": "Bearer",
-        "status": "TODO"
+        "description": "Xóa sản phẩm",
+        "status": "done"
       },
       {
         "method": "GET",
         "url": "/api/orders/",
         "view": "order_list",
         "auth": "Bearer",
-        "status": "TODO"
+        "status": "done",
+        "data_source": "real_db"
       },
       {
         "method": "GET",
         "url": "/api/customers/",
         "view": "customer_list",
         "auth": "Bearer",
-        "status": "TODO"
+        "status": "done",
+        "data_source": "real_db"
+      },
+      {
+        "method": "POST",
+        "url": "/api/customers/",
+        "view": "customer_list",
+        "auth": "Bearer",
+        "status": "done"
+      },
+      {
+        "method": "POST",
+        "url": "/api/products/sync/",
+        "view": "product_sync",
+        "auth": "Bearer",
+        "description": "Doc data_sync/products.json, upsert theo id. Tra ve {updated, created, message}",
+        "status": "done"
       }
     ]
   },

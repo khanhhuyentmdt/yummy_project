@@ -4,9 +4,11 @@ import {
   BarChart2, Settings, Search, Bell,
   DollarSign, ShoppingBag, CheckCircle,
   Plus, Pencil, Trash2, ChevronRight, ChevronLeft,
-  Menu, Activity, LogOut,
+  Menu, Activity, LogOut, CloudSync, Loader2,
 } from 'lucide-react'
 import api from '../api/axios'
+import logoImg from '../assets/logo.jpg'
+import ProductModal from './ProductModal'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -70,18 +72,70 @@ export default function HomePage({ user = {}, onLogout }) {
   const [tableSearch, setTableSearch]     = useState('')
   const [currentPage, setCurrentPage]     = useState(1)
   const [apiConnected, setApiConnected]   = useState(null)
+  const [modalProduct, setModalProduct]   = useState(undefined) // undefined = closed, null = create, obj = edit
+  const [deleteTarget, setDeleteTarget]   = useState(null)      // product to confirm delete
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [syncModal, setSyncModal]         = useState(false)     // confirm sync dialog
+  const [syncLoading, setSyncLoading]     = useState(false)
+  const [syncResult, setSyncResult]       = useState(null)      // {message, updated, created}
 
   const ITEMS_PER_PAGE = 5
 
-  useEffect(() => {
+  const loadDashboard = () =>
     api.get('dashboard/')
       .then(res  => { setStats(res.data); setApiConnected(true) })
       .catch(()  => { setStats(STATS_FALLBACK); setApiConnected(false) })
 
+  const loadProducts = () =>
     api.get('products/')
       .then(res  => setProducts(res.data.products))
       .catch(()  => setProducts(PRODUCTS_FALLBACK))
+
+  useEffect(() => {
+    loadDashboard()
+    loadProducts()
   }, [])
+
+  const handleProductSaved = (savedProduct, action) => {
+    if (action === 'create') {
+      setProducts(prev => [...prev, savedProduct])
+    } else {
+      setProducts(prev => prev.map(p => p.id === savedProduct.id ? savedProduct : p))
+    }
+    setModalProduct(undefined)
+    loadDashboard() // refresh stats
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return
+    setDeleteLoading(true)
+    try {
+      await api.delete(`products/${deleteTarget.id}/`)
+      setProducts(prev => prev.filter(p => p.id !== deleteTarget.id))
+      setDeleteTarget(null)
+      loadDashboard()
+    } catch {
+      // keep modal open on error
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  const handleSyncConfirm = async () => {
+    setSyncLoading(true)
+    setSyncResult(null)
+    try {
+      const res = await api.post('products/sync/')
+      setSyncResult({ ok: true, ...res.data })
+      await loadProducts()
+      await loadDashboard()
+    } catch (err) {
+      const detail = err.response?.data?.detail || 'Đồng bộ thất bại. Kiểm tra file JSON và server.'
+      setSyncResult({ ok: false, message: detail })
+    } finally {
+      setSyncLoading(false)
+    }
+  }
 
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(tableSearch.toLowerCase()) ||
@@ -101,9 +155,11 @@ export default function HomePage({ user = {}, onLogout }) {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-center border-b border-gray-100 px-2">
-          <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-base">Y</span>
-          </div>
+          <img
+            src={logoImg}
+            alt="Yummy"
+            className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+          />
           {sidebarOpen && (
             <span className="ml-2.5 font-bold text-gray-800 text-sm whitespace-nowrap overflow-hidden">
               ERP Yummy
@@ -228,6 +284,10 @@ export default function HomePage({ user = {}, onLogout }) {
               setCurrentPage={setCurrentPage}
               totalPages={totalPages}
               itemsPerPage={ITEMS_PER_PAGE}
+              onCreateClick={() => setModalProduct(null)}
+              onEditClick={(p) => setModalProduct(p)}
+              onDeleteClick={(p) => setDeleteTarget(p)}
+              onSyncClick={() => { setSyncResult(null); setSyncModal(true) }}
             />
           )}
           {!['dashboard', 'products'].includes(activeView) && (
@@ -235,6 +295,124 @@ export default function HomePage({ user = {}, onLogout }) {
           )}
         </main>
       </div>
+
+      {/* ── ProductModal ────────────────────────────────────────────── */}
+      {modalProduct !== undefined && (
+        <ProductModal
+          product={modalProduct}
+          onClose={() => setModalProduct(undefined)}
+          onSaved={handleProductSaved}
+        />
+      )}
+
+      {/* ── Sync confirm dialog ─────────────────────────────────────── */}
+      {syncModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onMouseDown={(e) => { if (e.target === e.currentTarget && !syncLoading) { setSyncModal(false); setSyncResult(null) } }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                <CloudSync size={20} className="text-green-600" />
+              </div>
+              <h3 className="text-base font-bold text-gray-800">Đồng bộ từ file JSON</h3>
+            </div>
+
+            {!syncResult ? (
+              <>
+                <p className="text-sm text-gray-600 mb-1">
+                  Bạn có chắc chắn muốn ghi đè dữ liệu từ file JSON vào Database không?
+                </p>
+                <p className="text-xs text-gray-400 mb-5">
+                  File: <code className="bg-gray-100 px-1 rounded">data_sync/products.json</code>
+                </p>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setSyncModal(false)}
+                    disabled={syncLoading}
+                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Huỷ
+                  </button>
+                  <button
+                    onClick={handleSyncConfirm}
+                    disabled={syncLoading}
+                    className="flex items-center gap-1.5 px-5 py-2 bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    {syncLoading
+                      ? <Loader2 size={15} className="animate-spin" />
+                      : <CloudSync size={15} />}
+                    {syncLoading ? 'Đang đồng bộ...' : 'Xác nhận đồng bộ'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`text-sm rounded-lg px-4 py-3 mb-4 ${
+                  syncResult.ok
+                    ? 'bg-green-50 border border-green-200 text-green-700'
+                    : 'bg-red-50 border border-red-200 text-red-600'
+                }`}>
+                  {syncResult.message}
+                  {syncResult.ok && (
+                    <p className="text-xs mt-1 text-green-600">
+                      Cập nhật: {syncResult.updated} · Tạo mới: {syncResult.created}
+                    </p>
+                  )}
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => { setSyncModal(false); setSyncResult(null) }}
+                    className="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete confirm dialog ───────────────────────────────────── */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onMouseDown={(e) => { if (e.target === e.currentTarget && !deleteLoading) setDeleteTarget(null) }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <h3 className="text-base font-bold text-gray-800 mb-2">Xác nhận xóa</h3>
+            <p className="text-sm text-gray-600 mb-5">
+              Bạn có chắc muốn xóa sản phẩm{' '}
+              <span className="font-semibold text-gray-800">{deleteTarget.name}</span>?
+              Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              >
+                Huỷ
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleteLoading}
+                className="flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {deleteLoading && (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                )}
+                Xóa sản phẩm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -332,6 +510,7 @@ function DashboardView({ stats, activities }) {
 function ProductsView({
   products, allCount, tableSearch, setTableSearch,
   currentPage, setCurrentPage, totalPages, itemsPerPage,
+  onCreateClick, onEditClick, onDeleteClick, onSyncClick,
 }) {
   const startIdx = allCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const endIdx   = Math.min(currentPage * itemsPerPage, allCount)
@@ -360,10 +539,22 @@ function ProductsView({
               className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
           </div>
-          <button className="ml-auto flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-            <Plus size={15} />
-            Tạo lô
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={onSyncClick}
+              className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              <CloudSync size={15} />
+              Đồng bộ từ file JSON
+            </button>
+            <button
+              onClick={onCreateClick}
+              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              <Plus size={15} />
+              Tạo lô
+            </button>
+          </div>
         </div>
 
         {/* Table */}
@@ -415,12 +606,14 @@ function ProductsView({
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button
+                          onClick={() => onEditClick(p)}
                           className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                           title="Chỉnh sửa"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
+                          onClick={() => onDeleteClick(p)}
                           className="p-1.5 text-red-400 hover:bg-red-50 rounded-md transition-colors"
                           title="Xóa"
                         >

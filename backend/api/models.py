@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -55,3 +56,91 @@ class User(AbstractUser):
 
     def get_full_name(self):
         return self.full_name or self.phone_number
+
+
+# ─── Product ──────────────────────────────────────────────────────────────────
+
+class Product(models.Model):
+    STATUS_ACTIVE   = 'active'
+    STATUS_INACTIVE = 'inactive'
+    STATUS_CHOICES  = [
+        (STATUS_ACTIVE,   'Đang hoạt động'),
+        (STATUS_INACTIVE, 'Tạm ngưng'),
+    ]
+
+    code       = models.CharField(max_length=20, unique=True, verbose_name='Mã SP')
+    name       = models.CharField(max_length=200, verbose_name='Tên sản phẩm')
+    group      = models.CharField(max_length=100, verbose_name='Nhóm SP')
+    unit       = models.CharField(max_length=50,  verbose_name='ĐVT')
+    quantity   = models.IntegerField(default=0, verbose_name='Số lượng tồn kho')
+    price      = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='Giá bán')
+    status     = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
+        verbose_name='Trạng thái',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering     = ['code']
+        verbose_name = 'Product'
+
+    def __str__(self):
+        return f'{self.code} — {self.name}'
+
+
+# ─── Customer ─────────────────────────────────────────────────────────────────
+
+class Customer(models.Model):
+    name       = models.CharField(max_length=200, verbose_name='Tên khách hàng')
+    phone      = models.CharField(max_length=20,  verbose_name='Số điện thoại')
+    email      = models.EmailField(blank=True,     verbose_name='Email')
+    address    = models.TextField(blank=True,      verbose_name='Địa chỉ')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering     = ['name']
+        verbose_name = 'Customer'
+
+    def __str__(self):
+        return self.name
+
+
+# ─── Order ────────────────────────────────────────────────────────────────────
+
+class Order(models.Model):
+    STATUS_PENDING   = 'pending'
+    STATUS_CONFIRMED = 'confirmed'
+    STATUS_DELIVERED = 'delivered'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_CHOICES   = [
+        (STATUS_PENDING,   'Chờ xác nhận'),
+        (STATUS_CONFIRMED, 'Đã xác nhận'),
+        (STATUS_DELIVERED, 'Đã giao'),
+        (STATUS_CANCELLED, 'Đã huỷ'),
+    ]
+
+    code       = models.CharField(max_length=20, unique=True, verbose_name='Mã đơn')
+    customer   = models.ForeignKey(
+        Customer,
+        on_delete=models.PROTECT,
+        related_name='orders',
+        verbose_name='Khách hàng',
+    )
+    total      = models.DecimalField(max_digits=14, decimal_places=0, verbose_name='Tổng tiền')
+    status     = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        verbose_name='Trạng thái',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering     = ['-created_at']
+        verbose_name = 'Order'
+
+    def __str__(self):
+        return self.code

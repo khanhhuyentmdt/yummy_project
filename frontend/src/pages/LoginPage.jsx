@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Phone, Lock, Eye, EyeOff } from 'lucide-react'
 import api from '../api/axios'
+import logoImg from '../assets/logo.jpg'
 
 export default function LoginPage({ onLoginSuccess }) {
   const [phone, setPhone]           = useState('')
@@ -60,12 +61,11 @@ export default function LoginPage({ onLoginSuccess }) {
 
             {/* Logo */}
             <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 rounded-full border-4 border-orange-300 bg-orange-50 flex items-center justify-center shadow-sm">
-                <div className="w-13 h-13 flex flex-col items-center justify-center">
-                  <span className="text-[#E67E22] font-black text-2xl leading-none">Y</span>
-                  <span className="text-[#E67E22] font-bold text-[9px] tracking-widest leading-none mt-0.5">UMMY</span>
-                </div>
-              </div>
+              <img
+                src={logoImg}
+                alt="Yummy Logo"
+                className="w-20 h-20 rounded-full object-cover shadow-md"
+              />
             </div>
 
             {/* Heading */}

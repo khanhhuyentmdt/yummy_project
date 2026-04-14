@@ -1,0 +1,138 @@
+{
+  "exported_at": "2026-04-14T07:21:13.629235+00:00",
+  "total": 11,
+  "products": [
+    {
+      "id": 1,
+      "code": "HSP011",
+      "name": "Tra ho Khoai mon 3 vi",
+      "group": "Tra ho Singapore",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 28000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.506891+00:00",
+      "updated_at": "2026-04-14T07:07:32.506891+00:00"
+    },
+    {
+      "id": 2,
+      "code": "HSP022",
+      "name": "Matcha tra ho gao rang dac 49",
+      "group": "Matcha Tra ho",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 30000,
+      "status": "inactive",
+      "created_at": "2026-04-14T07:07:32.522517+00:00",
+      "updated_at": "2026-04-14T07:07:32.522517+00:00"
+    },
+    {
+      "id": 3,
+      "code": "HSP030",
+      "name": "Tra ho kem tam Duong dem",
+      "group": "Tra ho Singapore",
+      "unit": "Phan",
+      "quantity": 0,
+      "price": 32000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.522517+00:00",
+      "updated_at": "2026-04-14T07:07:32.522517+00:00"
+    },
+    {
+      "id": 4,
+      "code": "HSP045",
+      "name": "Tra ho Duong trang",
+      "group": "Tra ho Singapore",
+      "unit": "Phan",
+      "quantity": 0,
+      "price": 22000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.522517+00:00",
+      "updated_at": "2026-04-14T07:07:32.522517+00:00"
+    },
+    {
+      "id": 5,
+      "code": "HSP056",
+      "name": "Tra ho sua xuat",
+      "group": "Tra ho Singapore",
+      "unit": "Phan",
+      "quantity": 0,
+      "price": 30000,
+      "status": "inactive",
+      "created_at": "2026-04-14T07:07:32.540686+00:00",
+      "updated_at": "2026-04-14T07:07:32.540686+00:00"
+    },
+    {
+      "id": 6,
+      "code": "HSP067",
+      "name": "Tra xanh hoa nhai",
+      "group": "Tra ho Singapore",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 25000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.540686+00:00",
+      "updated_at": "2026-04-14T07:07:32.540686+00:00"
+    },
+    {
+      "id": 7,
+      "code": "HSP078",
+      "name": "Tra o long sua tuoi",
+      "group": "Tra ho Singapore",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 35000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.549712+00:00",
+      "updated_at": "2026-04-14T07:07:32.549712+00:00"
+    },
+    {
+      "id": 8,
+      "code": "HSP089",
+      "name": "Matcha latte nong",
+      "group": "Matcha Tra ho",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 38000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.549712+00:00",
+      "updated_at": "2026-04-14T07:07:32.549712+00:00"
+    },
+    {
+      "id": 9,
+      "code": "HSP090",
+      "name": "Tra dao cam sa",
+      "group": "Tra ho Singapore",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 29000,
+      "status": "inactive",
+      "created_at": "2026-04-14T07:07:32.549712+00:00",
+      "updated_at": "2026-04-14T07:07:32.549712+00:00"
+    },
+    {
+      "id": 10,
+      "code": "HSP101",
+      "name": "Tra vai thieu",
+      "group": "Tra ho Singapore",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 27000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.549712+00:00",
+      "updated_at": "2026-04-14T07:07:32.549712+00:00"
+    },
+    {
+      "id": 11,
+      "code": "HSP112",
+      "name": "Ca phe muoi",
+      "group": "Ca phe",
+      "unit": "Ly",
+      "quantity": 0,
+      "price": 33000,
+      "status": "active",
+      "created_at": "2026-04-14T07:07:32.565525+00:00",
+      "updated_at": "2026-04-14T07:07:32.565525+00:00"
+    }
+  ]
+}

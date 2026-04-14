@@ -1,11 +1,27 @@
+import json
+import logging
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
+from django.utils import timezone
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import PhoneLoginSerializer
+logger = logging.getLogger(__name__)
+
+DATA_SYNC_FILE = Path(settings.BASE_DIR).parent / 'data_sync' / 'products.json'
+
+from .models import Customer, Order, Product
+from .serializers import (
+    CustomerSerializer, OrderSerializer,
+    PhoneLoginSerializer, ProductSerializer,
+)
 
 User = get_user_model()
 
@@ -42,30 +58,161 @@ class PhoneLoginView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_stats(request):
+    today = timezone.now().date()
+    revenue = Order.objects.filter(
+        created_at__date=today,
+        status__in=[Order.STATUS_CONFIRMED, Order.STATUS_DELIVERED],
+    ).aggregate(total=Sum('total'))['total'] or 0
+
     return Response({
-        'total_products':  47,
-        'active_products': 38,
-        'revenue_today':   12500000,
-        'orders_today':    23,
+        'total_products':  Product.objects.count(),
+        'active_products': Product.objects.filter(status=Product.STATUS_ACTIVE).count(),
+        'revenue_today':   int(revenue),
+        'orders_today':    Order.objects.filter(created_at__date=today).count(),
     })
 
 
 # ─── Products ─────────────────────────────────────────────────────────────────
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def product_list(request):
-    products = [
-        {'id': 1,  'code': 'HSP011', 'name': 'Tra ho Khoai mon 3 vi',          'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 28000, 'status': 'active'},
-        {'id': 2,  'code': 'HSP022', 'name': 'Matcha tra ho gao rang dac 49',   'group': 'Matcha Tra ho',    'unit': 'Ly',   'price': 30000, 'status': 'inactive'},
-        {'id': 3,  'code': 'HSP030', 'name': 'Tra ho kem tam Duong dem',        'group': 'Tra ho Singapore', 'unit': 'Phan', 'price': 32000, 'status': 'active'},
-        {'id': 4,  'code': 'HSP045', 'name': 'Tra ho Duong trang',              'group': 'Tra ho Singapore', 'unit': 'Phan', 'price': 22000, 'status': 'active'},
-        {'id': 5,  'code': 'HSP056', 'name': 'Tra ho sua xuat',                 'group': 'Tra ho Singapore', 'unit': 'Phan', 'price': 30000, 'status': 'inactive'},
-        {'id': 6,  'code': 'HSP067', 'name': 'Tra xanh hoa nhai',               'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 25000, 'status': 'active'},
-        {'id': 7,  'code': 'HSP078', 'name': 'Tra o long sua tuoi',             'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 35000, 'status': 'active'},
-        {'id': 8,  'code': 'HSP089', 'name': 'Matcha latte nong',               'group': 'Matcha Tra ho',    'unit': 'Ly',   'price': 38000, 'status': 'active'},
-        {'id': 9,  'code': 'HSP090', 'name': 'Tra dao cam sa',                  'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 29000, 'status': 'inactive'},
-        {'id': 10, 'code': 'HSP101', 'name': 'Tra vai thieu',                   'group': 'Tra ho Singapore', 'unit': 'Ly',   'price': 27000, 'status': 'active'},
-        {'id': 11, 'code': 'HSP112', 'name': 'Ca phe muoi',                     'group': 'Ca phe',           'unit': 'Ly',   'price': 33000, 'status': 'active'},
-    ]
-    return Response({'products': products, 'total': len(products)})
+    """GET /api/products/ — danh sách | POST /api/products/ — tạo mới."""
+
+    if request.method == 'GET':
+        search = request.query_params.get('search', '').strip()
+        qs = Product.objects.all()
+        if search:
+            qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
+        serializer = ProductSerializer(qs, many=True)
+        return Response({'products': serializer.data, 'total': qs.count()})
+
+    # POST — tạo mới
+    serializer = ProductSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def product_detail(request, pk):
+    """GET/PUT/PATCH/DELETE /api/products/{pk}/"""
+    try:
+        product = Product.objects.get(pk=pk)
+    except Product.DoesNotExist:
+        return Response({'detail': 'Khong tim thay san pham.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(ProductSerializer(product).data)
+
+    if request.method in ('PUT', 'PATCH'):
+        partial = (request.method == 'PATCH')
+        serializer = ProductSerializer(product, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # DELETE
+    product.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def product_sync(request):
+    """
+    POST /api/products/sync/
+    Doc data_sync/products.json, upsert theo id vao DB.
+    Tra ve: {updated, created, message}
+    """
+    if not DATA_SYNC_FILE.exists():
+        return Response(
+            {'detail': f'Khong tim thay file {DATA_SYNC_FILE}. Hay chay export_products truoc.'},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        payload = json.loads(DATA_SYNC_FILE.read_text(encoding='utf-8'))
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.error('product_sync: doc file loi — %s', exc)
+        return Response(
+            {'detail': f'File JSON khong hop le: {exc}'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    items = payload.get('products', [])
+    if not isinstance(items, list):
+        return Response(
+            {'detail': 'File JSON phai co key "products" la mot mang.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    updated = 0
+    created = 0
+    errors  = []
+
+    ALLOWED_FIELDS = {'code', 'name', 'group', 'unit', 'quantity', 'price', 'status'}
+
+    for item in items:
+        item_id = item.get('id')
+        if item_id is None:
+            errors.append({'item': item, 'error': 'Thieu truong id'})
+            continue
+
+        defaults = {k: v for k, v in item.items() if k in ALLOWED_FIELDS}
+
+        try:
+            _, is_new = Product.objects.update_or_create(
+                id=item_id,
+                defaults=defaults,
+            )
+            if is_new:
+                created += 1
+            else:
+                updated += 1
+        except Exception as exc:
+            logger.error('product_sync: loi upsert id=%s — %s', item_id, exc)
+            errors.append({'id': item_id, 'error': str(exc)})
+
+    message = f'Da cap nhat {updated} ban ghi, da tao moi {created} ban ghi.'
+    logger.info('product_sync: %s', message)
+
+    response_data = {
+        'updated': updated,
+        'created': created,
+        'message': message,
+    }
+    if errors:
+        response_data['errors'] = errors
+
+    return Response(response_data)
+
+
+# ─── Customers ────────────────────────────────────────────────────────────────
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def customer_list(request):
+    if request.method == 'GET':
+        qs = Customer.objects.all()
+        serializer = CustomerSerializer(qs, many=True)
+        return Response({'customers': serializer.data, 'total': qs.count()})
+
+    serializer = CustomerSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ─── Orders ───────────────────────────────────────────────────────────────────
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def order_list(request):
+    qs = Order.objects.select_related('customer').all()
+    serializer = OrderSerializer(qs, many=True)
+    return Response({'orders': serializer.data, 'total': qs.count()})

@@ -170,19 +170,45 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] Management command cập nhật: seed `0915085900 / 12345`
 - [x] `LoginPage.jsx`: payload API gửi `phone_number`, cập nhật credentials hint
 - [x] **Login feature: DONE**
+- [x] **Logo updated**: `screenshot/logo.jpg` → `frontend/src/assets/logo.jpg`; dùng `<img>` thật trong `LoginPage.jsx` (w-20 h-20) và `HomePage.jsx` sidebar (w-9 h-9)
 
-### 🔜 Next Steps (Session 4+) — Dashboard sau login
+### ✅ Completed (Session 4 — 2026-04-14) — CRUD Product + Real DB
 
-- [ ] **Xây dựng Dashboard**: Sau khi login thành công, hiển thị dashboard với dữ liệu thật từ DB
-- [ ] **Models**: Định nghĩa `Product`, `Order`, `Customer` trong `api/models.py`
-- [ ] **Migrations**: `makemigrations` + `migrate` để tạo bảng mới
-- [ ] **Serializers**: Nâng cấp `api/serializers.py` cho từng model
-- [ ] **CRUD API**: Endpoints đầy đủ (POST, PUT, PATCH, DELETE) cho Product
-- [ ] **React Pages**: Các view còn lại — Đơn hàng, Khách hàng, Báo cáo
-- [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page
-- [ ] **Form Modal**: Modal thêm/sửa sản phẩm (kết nối vào nút "Tạo lô")
-- [ ] **Data thật**: Thay mock data bằng API calls thực từ SQLite
+- [x] `api/models.py`: Thêm `Product`, `Customer`, `Order` models
+- [x] Migration `0002_customer_product_order.py` — tạo 3 bảng mới
+- [x] `api/serializers.py`: `ProductSerializer`, `CustomerSerializer`, `OrderSerializer`
+- [x] `api/views.py`: `product_list` (GET+POST), `product_detail` (GET+PUT+PATCH+DELETE), `customer_list`, `order_list`
+- [x] `api/views.py`: `dashboard_stats` trả dữ liệu thật từ DB (count Product, Order aggregation)
+- [x] `api/urls.py`: thêm route `/api/products/<pk>/`, `/api/customers/`, `/api/orders/`
+- [x] Management command `seed_products` — seed 11 sản phẩm mẫu vào DB
+- [x] `src/components/ProductModal.jsx` — modal thêm/sửa sản phẩm (validation + API calls)
+- [x] `HomePage.jsx` — wire nút "Tạo lô" → modal create, Pencil → modal edit, Trash → confirm delete
+- [x] Delete confirm dialog với loading state
+
+### ✅ Completed (Session 5 — 2026-04-14) — JSON Data Sync cho Thành phẩm
+
+- [x] `api/models.py`: Thêm field `quantity` (IntegerField, default=0) vào Product
+- [x] Migration `0003_add_product_quantity.py` — apply thành công
+- [x] `api/serializers.py`: ProductSerializer bao gồm `quantity`
+- [x] Management command `export_products` — xuất Product ra `data_sync/products.json`
+- [x] `data_sync/products.json` — file JSON mẫu được tạo (11 sản phẩm)
+- [x] `api/views.py`: `product_sync` — POST /api/products/sync/ — đọc JSON, upsert theo id, trả {updated, created, message}
+- [x] `api/urls.py`: route `products/sync/` (trước `products/<int:pk>/`)
+- [x] `HomePage.jsx`: nút "Đồng bộ từ file JSON" (xanh lá, CloudSync icon)
+- [x] Confirm dialog: cảnh báo ghi đè + hiện kết quả updated/created sau sync
+
+**Quy trình sử dụng:**
+1. Sửa `data_sync/products.json` theo ý muốn
+2. Vào tab Thành phẩm → nhấn "Đồng bộ từ file JSON"
+3. Xác nhận → DB được cập nhật tức thì
+
+### 🔜 Next Steps (Session 6+)
+
+- [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
+- [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status
+- [ ] **CustomersPage**: Quản lý khách hàng — list, create, edit
 - [ ] **Token Refresh**: Interceptor tự động gọi `/api/token/refresh/` khi access token hết hạn
+- [ ] **Search server-side**: ProductsView gọi `?search=` lên API thay vì filter ở client
 
 ---
 
