@@ -61,7 +61,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'code', 'name', 'group', 'unit', 'quantity', 'price',
             'cost_price', 'compare_price', 'description',
-            'production_notes', 'notes', 'status',
+            'production_notes', 'notes', 'image', 'status',
             'bom_items', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'bom_items', 'created_at', 'updated_at']
@@ -76,7 +76,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'code', 'name', 'group', 'unit', 'quantity', 'price',
             'cost_price', 'compare_price', 'description',
-            'production_notes', 'notes', 'status',
+            'production_notes', 'notes', 'image', 'status',
             'bom_items', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']

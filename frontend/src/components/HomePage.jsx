@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   LayoutDashboard, Package, ShoppingCart, Users,
   BarChart2, Settings, Search, Bell,
   DollarSign, ShoppingBag, CheckCircle,
   Plus, ChevronRight, ChevronLeft, ChevronDown,
   Menu, Activity, LogOut, CloudSync, Loader2,
+  Filter, Upload, Download, RefreshCw,
 } from 'lucide-react'
 import api from '../api/axios'
 import logoImg from '../assets/logo.jpg'
@@ -14,17 +15,17 @@ import CreateProductPage from './CreateProductPage'
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
 const PRODUCTS_FALLBACK = [
-  { id: 1,  code: 'HSP011', name: 'Trà hồ Khoai môn 3 vị',        group: 'Trà hồ Singapore', unit: 'Lý',   price: 28000, status: 'active' },
-  { id: 2,  code: 'HSP022', name: 'Matcha trà hồ gạo rang đặc 49', group: 'Matcha Trà hồ',    unit: 'Lý',   price: 30000, status: 'inactive' },
-  { id: 3,  code: 'HSP030', name: 'Trà hồ kem tầm Đường đêm',      group: 'Trà hồ Singapore', unit: 'Phần', price: 32000, status: 'active' },
-  { id: 4,  code: 'HSP045', name: 'Trà hồ Đường trắng',            group: 'Trà hồ Singapore', unit: 'Phần', price: 22000, status: 'active' },
-  { id: 5,  code: 'HSP056', name: 'Trà hồ sữa xuất',               group: 'Trà hồ Singapore', unit: 'Phần', price: 30000, status: 'inactive' },
-  { id: 6,  code: 'HSP067', name: 'Trà xanh hoa nhài',             group: 'Trà hồ Singapore', unit: 'Lý',   price: 25000, status: 'active' },
-  { id: 7,  code: 'HSP078', name: 'Trà ô long sữa tươi',           group: 'Trà hồ Singapore', unit: 'Lý',   price: 35000, status: 'active' },
-  { id: 8,  code: 'HSP089', name: 'Matcha latte nóng',             group: 'Matcha Trà hồ',    unit: 'Lý',   price: 38000, status: 'active' },
-  { id: 9,  code: 'HSP090', name: 'Trà đào cam sả',                group: 'Trà hồ Singapore', unit: 'Lý',   price: 29000, status: 'inactive' },
-  { id: 10, code: 'HSP101', name: 'Trà vải thiều',                 group: 'Trà hồ Singapore', unit: 'Lý',   price: 27000, status: 'active' },
-  { id: 11, code: 'HSP112', name: 'Cà phê muối',                   group: 'Cà phê',           unit: 'Lý',   price: 33000, status: 'active' },
+  { id: 1,  code: 'MSP010', name: 'Matcha tàu hủ gạo rang đậu đỏ', group: 'Matcha Tàu hủ',    unit: 'Ly',   price: 35000, status: 'inactive', image: '' },
+  { id: 2,  code: 'MSP009', name: 'Tàu hủ trân châu đường đen',    group: 'Tàu hủ Singapore', unit: 'Phần', price: 18000, status: 'active',   image: '' },
+  { id: 3,  code: 'MSP008', name: 'Tàu hủ kem trứng',              group: 'Tàu hủ Singapore', unit: 'Phần', price: 22000, status: 'active',   image: '' },
+  { id: 4,  code: 'MSP007', name: 'Tàu hủ sốt xoài',               group: 'Tàu hủ Singapore', unit: 'Phần', price: 50000, status: 'inactive', image: '' },
+  { id: 5,  code: 'MSP006', name: 'Lục trà tắc',                   group: 'Trà trái cây',     unit: 'Ly',   price: 18000, status: 'inactive', image: '' },
+  { id: 6,  code: 'MSP005', name: 'Trà xanh hoa nhài',             group: 'Tàu hủ Singapore', unit: 'Ly',   price: 25000, status: 'active',   image: '' },
+  { id: 7,  code: 'MSP004', name: 'Trà ô long sữa tươi',           group: 'Tàu hủ Singapore', unit: 'Ly',   price: 35000, status: 'active',   image: '' },
+  { id: 8,  code: 'MSP003', name: 'Matcha latte nóng',             group: 'Matcha Tàu hủ',    unit: 'Ly',   price: 38000, status: 'active',   image: '' },
+  { id: 9,  code: 'MSP002', name: 'Trà đào cam sả',                group: 'Tàu hủ Singapore', unit: 'Ly',   price: 29000, status: 'inactive', image: '' },
+  { id: 10, code: 'MSP001', name: 'Trà vải thiều',                 group: 'Tàu hủ Singapore', unit: 'Ly',   price: 27000, status: 'active',   image: '' },
+  { id: 11, code: 'MSP011', name: 'Cà phê muối',                   group: 'Cà phê',           unit: 'Ly',   price: 33000, status: 'active',   image: '' },
 ]
 
 const STATS_FALLBACK = {
@@ -35,16 +36,16 @@ const STATS_FALLBACK = {
 }
 
 const ACTIVITIES = [
-  { id: 1, time: '10:30', action: 'Thêm mới',     item: 'Trà hồ Khoai môn 3 vị',       type: 'create',   user: 'Thảo Vi' },
-  { id: 2, time: '09:45', action: 'Cập nhật',     item: 'Matcha trà hồ gạo rang đặc',  type: 'update',   user: 'Minh Tuấn' },
-  { id: 3, time: '09:12', action: 'Tạm ngưng',    item: 'Trà hồ sữa xuất',             type: 'inactive', user: 'Thảo Vi' },
+  { id: 1, time: '10:30', action: 'Thêm mới',     item: 'Trà hủ Khoai môn 3 vị',       type: 'create',   user: 'Thảo Vi' },
+  { id: 2, time: '09:45', action: 'Cập nhật',     item: 'Matcha trà hủ gạo rang đặc',  type: 'update',   user: 'Minh Tuấn' },
+  { id: 3, time: '09:12', action: 'Tạm ngưng',    item: 'Trà hủ sữa xuất',             type: 'inactive', user: 'Thảo Vi' },
   { id: 4, time: '08:55', action: 'Thêm mới',     item: 'Cà phê muối',                 type: 'create',   user: 'Huy Hoàng' },
   { id: 5, time: '08:20', action: 'Cập nhật giá', item: 'Trà ô long sữa tươi',         type: 'update',   user: 'Thảo Vi' },
 ]
 
 const MENU_ITEMS = [
   { id: 'dashboard', label: 'Trang chủ',  icon: LayoutDashboard },
-  { id: 'products',  label: 'Sản phẩm', icon: Package },
+  { id: 'products',  label: 'Sản phẩm',   icon: Package },
   { id: 'orders',    label: 'Đơn hàng',   icon: ShoppingCart },
   { id: 'customers', label: 'Khách hàng', icon: Users },
   { id: 'reports',   label: 'Báo cáo',    icon: BarChart2 },
@@ -65,22 +66,19 @@ export default function HomePage({ user = {}, onLogout }) {
     .slice(0, 2)
     .map(w => w[0].toUpperCase())
     .join('')
+
   const [activeView, setActiveView]       = useState('dashboard')
   const [sidebarOpen, setSidebarOpen]     = useState(false)
   const [stats, setStats]                 = useState(STATS_FALLBACK)
   const [products, setProducts]           = useState(PRODUCTS_FALLBACK)
   const [headerSearch, setHeaderSearch]   = useState('')
-  const [tableSearch, setTableSearch]     = useState('')
-  const [currentPage, setCurrentPage]     = useState(1)
   const [apiConnected, setApiConnected]   = useState(null)
-  const [modalProduct, setModalProduct]   = useState(undefined) // undefined = closed, null = create, obj = edit
-  const [deleteTarget, setDeleteTarget]   = useState(null)      // product to confirm delete
+  const [modalProduct, setModalProduct]   = useState(undefined)
+  const [deleteTarget, setDeleteTarget]   = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
-  const [syncModal, setSyncModal]         = useState(false)     // confirm sync dialog
+  const [syncModal, setSyncModal]         = useState(false)
   const [syncLoading, setSyncLoading]     = useState(false)
-  const [syncResult, setSyncResult]       = useState(null)      // {message, updated, created}
-
-  const ITEMS_PER_PAGE = 5
+  const [syncResult, setSyncResult]       = useState(null)
 
   const loadDashboard = () =>
     api.get('dashboard/')
@@ -104,7 +102,7 @@ export default function HomePage({ user = {}, onLogout }) {
       setProducts(prev => prev.map(p => p.id === savedProduct.id ? savedProduct : p))
     }
     setModalProduct(undefined)
-    loadDashboard() // refresh stats
+    loadDashboard()
   }
 
   const handleDeleteConfirm = async () => {
@@ -137,16 +135,6 @@ export default function HomePage({ user = {}, onLogout }) {
       setSyncLoading(false)
     }
   }
-
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(tableSearch.toLowerCase()) ||
-    p.code.toLowerCase().includes(tableSearch.toLowerCase())
-  )
-  const totalPages      = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
-  const pagedProducts   = filteredProducts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  )
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -235,7 +223,6 @@ export default function HomePage({ user = {}, onLogout }) {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            {/* API connection badge */}
             {apiConnected !== null && (
               <span
                 className={`hidden sm:inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
@@ -258,7 +245,10 @@ export default function HomePage({ user = {}, onLogout }) {
               <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                 <span className="text-orange-600 font-semibold text-xs">{avatarInitials}</span>
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">{displayName}</span>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold text-gray-800 leading-tight">{displayName}</p>
+                <p className="text-xs text-gray-400 leading-tight">Trợ lý sản xuất</p>
+              </div>
               <button
                 onClick={onLogout}
                 title="Đăng xuất"
@@ -277,14 +267,7 @@ export default function HomePage({ user = {}, onLogout }) {
           )}
           {activeView === 'products' && (
             <ProductsView
-              products={pagedProducts}
-              allCount={filteredProducts.length}
-              tableSearch={tableSearch}
-              setTableSearch={(v) => { setTableSearch(v); setCurrentPage(1) }}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-              itemsPerPage={ITEMS_PER_PAGE}
+              products={products}
               onCreateClick={() => setActiveView('create-product')}
               onEditClick={(p) => setModalProduct(p)}
               onDeleteClick={(p) => setDeleteTarget(p)}
@@ -469,7 +452,6 @@ function DashboardView({ stats, activities }) {
         <p className="text-sm text-gray-500 mt-1">Tổng quan hệ thống ERP Yummy</p>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {cards.map(({ label, value, icon: Icon, iconBg, text }) => (
           <div
@@ -487,7 +469,6 @@ function DashboardView({ stats, activities }) {
         ))}
       </div>
 
-      {/* Recent activity */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
           <Activity size={17} className="text-orange-500" />
@@ -518,58 +499,178 @@ function DashboardView({ stats, activities }) {
 
 // ─── Products view ────────────────────────────────────────────────────────────
 
-function ProductsView({
-  products, allCount, tableSearch, setTableSearch,
-  currentPage, setCurrentPage, totalPages, itemsPerPage,
-  onCreateClick, onEditClick, onDeleteClick, onSyncClick,
-}) {
-  const [openDropdownId, setOpenDropdownId] = useState(null)
+function ProductsView({ products, onCreateClick, onEditClick, onDeleteClick, onSyncClick }) {
+  const ITEMS_PER_PAGE = 5
 
+  const [search, setSearch]               = useState('')
+  const [statusFilter, setStatusFilter]   = useState('all')
+  const [currentPage, setCurrentPage]     = useState(1)
+  const [openDropdownId, setOpenDropdownId] = useState(null)
+  const [filterOpen, setFilterOpen]       = useState(false)
+  const [selected, setSelected]           = useState(new Set())
+  const filterRef = useRef(null)
+
+  // Close filter panel on outside click
+  useEffect(() => {
+    if (!filterOpen) return
+    const handler = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setFilterOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [filterOpen])
+
+  // Close action dropdown on outside click
   useEffect(() => {
     if (!openDropdownId) return
-    const handleClickOutside = () => setOpenDropdownId(null)
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    const handler = () => setOpenDropdownId(null)
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
   }, [openDropdownId])
 
-  const startIdx = allCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
-  const endIdx   = Math.min(currentPage * itemsPerPage, allCount)
+  const filtered = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+                        p.code.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = statusFilter === 'all' || p.status === statusFilter
+    return matchSearch && matchStatus
+  })
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const paged      = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+
+  const handleSearchChange = (v) => { setSearch(v); setCurrentPage(1) }
+  const handleStatusFilter = (v) => { setStatusFilter(v); setCurrentPage(1); setFilterOpen(false) }
+
+  const allPageChecked = paged.length > 0 && paged.every(p => selected.has(p.id))
+  const toggleAll = () => {
+    if (allPageChecked) {
+      setSelected(prev => { const s = new Set(prev); paged.forEach(p => s.delete(p.id)); return s })
+    } else {
+      setSelected(prev => { const s = new Set(prev); paged.forEach(p => s.add(p.id)); return s })
+    }
+  }
+  const toggleOne = (id) => setSelected(prev => {
+    const s = new Set(prev)
+    s.has(id) ? s.delete(id) : s.add(id)
+    return s
+  })
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">SẢN PHẨM</h1>
-        <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-          <span>Sản phẩm</span>
-          <ChevronRight size={14} />
-          <span className="text-orange-500 font-medium">Danh sách</span>
+      {/* ── Page header ─── */}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 tracking-wide">SẢN PHẨM</h1>
+          <div className="flex items-center gap-1 text-sm text-gray-400 mt-1 flex-wrap">
+            <span>Bếp trung tâm</span>
+            <ChevronRight size={13} />
+            <span>Quản lý danh mục</span>
+            <ChevronRight size={13} />
+            <span>Thông tin sản phẩm</span>
+            <ChevronRight size={13} />
+            <span className="text-orange-500 font-medium">Danh sách sản phẩm</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-orange-50 border border-orange-200 text-orange-500 text-sm font-semibold rounded-lg hover:bg-orange-100 transition-colors">
+            <Upload size={15} />
+            Nhập
+          </button>
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-orange-50 border border-orange-200 text-orange-500 text-sm font-semibold rounded-lg hover:bg-orange-100 transition-colors">
+            <Download size={15} />
+            Xuất
+          </button>
         </div>
       </div>
 
+      {/* ── Table card ─── */}
       <div className="bg-white rounded-xl border border-gray-200">
+
         {/* Toolbar */}
         <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 flex-wrap">
-          <div className="relative w-64">
+          {/* Search */}
+          <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
             <input
               type="text"
-              placeholder="Tìm tên hoặc mã sản phẩm..."
-              value={tableSearch}
-              onChange={e => setTableSearch(e.target.value)}
+              placeholder="Tìm kiếm thông tin sản phẩm"
+              value={search}
+              onChange={e => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
           </div>
+
+          {/* Filter button + dropdown */}
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setFilterOpen(v => !v)}
+              className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${
+                statusFilter !== 'all'
+                  ? 'bg-orange-50 border-orange-300 text-orange-600'
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Filter size={14} />
+              Bộ lọc
+              {statusFilter !== 'all' && (
+                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+              )}
+            </button>
+
+            {filterOpen && (
+              <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-20 p-4">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Trạng thái</p>
+                <div className="space-y-1">
+                  {[
+                    { value: 'all',      label: 'Tất cả' },
+                    { value: 'active',   label: 'Đang hoạt động' },
+                    { value: 'inactive', label: 'Tạm ngưng' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleStatusFilter(opt.value)}
+                      className={`w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        statusFilter === opt.value
+                          ? 'bg-orange-50 text-orange-600 font-semibold'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className={`w-3 h-3 rounded-full border-2 flex-shrink-0 transition-colors ${
+                        statusFilter === opt.value
+                          ? 'border-orange-500 bg-orange-500'
+                          : 'border-gray-300 bg-white'
+                      }`} />
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {statusFilter !== 'all' && (
+                  <button
+                    onClick={() => handleStatusFilter('all')}
+                    className="mt-3 w-full text-center text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    Đặt lại bộ lọc
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="ml-auto flex items-center gap-2">
+            {/* Sync icon-only button */}
             <button
               onClick={onSyncClick}
-              className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              title="Đồng bộ từ file JSON"
+              className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
             >
-              <CloudSync size={15} />
-              Đồng bộ từ file JSON
+              <RefreshCw size={15} />
             </button>
+            {/* Add product */}
             <button
               onClick={onCreateClick}
-              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
             >
               <Plus size={15} />
               Thêm sản phẩm
@@ -579,45 +680,76 @@ function ProductsView({
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[720px]">
+          <table className="w-full text-sm min-w-[860px]">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">STT</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mã SP</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên Sản Phẩm</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nhóm SP</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ĐVT</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Giá Bán</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành Động</th>
+              <tr className="border-b border-gray-100">
+                <th className="px-5 py-3.5 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allPageChecked}
+                    onChange={toggleAll}
+                    className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                  />
+                </th>
+                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Mã SP</th>
+                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider" colSpan={2}>Tên Sản Phẩm</th>
+                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Nhóm Sản Phẩm</th>
+                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Đơn Vị Tính</th>
+                <th className="text-right px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Bán</th>
+                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Hành Động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {products.length === 0 ? (
+              {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-10 text-center text-gray-400 text-sm">
+                  <td colSpan={9} className="px-5 py-10 text-center text-gray-400 text-sm">
                     Không tìm thấy sản phẩm nào.
                   </td>
                 </tr>
               ) : (
-                products.map((p, idx) => (
-                  <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-5 py-3.5 text-gray-400 text-xs">
-                      {(currentPage - 1) * itemsPerPage + idx + 1}
+                paged.map((p) => (
+                  <tr
+                    key={p.id}
+                    className={`hover:bg-gray-50/60 transition-colors ${selected.has(p.id) ? 'bg-orange-50/40' : ''}`}
+                  >
+                    <td className="px-5 py-3.5">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p.id)}
+                        onChange={() => toggleOne(p.id)}
+                        className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                      />
                     </td>
-                    <td className="px-4 py-3.5 font-mono text-xs text-gray-600">{p.code}</td>
-                    <td className="px-4 py-3.5 text-gray-800 font-medium">{p.name}</td>
-                    <td className="px-4 py-3.5 text-gray-500 text-xs">{p.group}</td>
-                    <td className="px-4 py-3.5 text-gray-500">{p.unit}</td>
-                    <td className="px-4 py-3.5 text-right font-semibold text-gray-700">
+                    <td className="px-4 py-3.5 font-mono text-xs text-gray-600 font-semibold">{p.code}</td>
+                    {/* Image thumbnail */}
+                    <td className="px-2 py-2.5 w-14">
+                      {p.image ? (
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-12 h-12 object-cover rounded-lg border border-gray-100"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-100 flex items-center justify-center">
+                          <Package size={18} className="text-gray-300" />
+                        </div>
+                      )}
+                    </td>
+                    {/* Product name */}
+                    <td className="px-4 py-3.5 text-gray-800 font-semibold">{p.name}</td>
+                    <td className="px-4 py-3.5 text-gray-500 text-sm">{p.group}</td>
+                    <td className="px-4 py-3.5 text-gray-500 text-sm">{p.unit}</td>
+                    <td className="px-4 py-3.5 text-right font-bold text-gray-700">
                       {formatCurrency(p.price)}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        style={{ paddingTop: '9px', paddingBottom: '9px', paddingLeft: '20px', paddingRight: '20px' }}
+                        className={`inline-flex items-center rounded-full text-xs font-bold ${
                           p.status === 'active'
-                            ? 'bg-orange-100 text-orange-600'
-                            : 'bg-gray-100 text-gray-500'
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'bg-red-50 text-red-500'
                         }`}
                       >
                         {p.status === 'active' ? 'Đang hoạt động' : 'Tạm ngưng'}
@@ -630,10 +762,10 @@ function ProductsView({
                       >
                         <button
                           onClick={() => setOpenDropdownId(openDropdownId === p.id ? null : p.id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           Hành động
-                          <ChevronDown size={13} className="text-gray-500" />
+                          <ChevronDown size={13} className="text-gray-400" />
                         </button>
                         {openDropdownId === p.id && (
                           <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
@@ -645,7 +777,7 @@ function ProductsView({
                             </button>
                             <button
                               onClick={() => { onDeleteClick(p); setOpenDropdownId(null) }}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                              className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                             >
                               Xóa
                             </button>
@@ -663,7 +795,10 @@ function ProductsView({
         {/* Pagination */}
         <div className="px-5 py-3.5 flex items-center justify-between border-t border-gray-100 flex-wrap gap-3">
           <p className="text-xs text-gray-500">
-            Hiển thị {startIdx}–{endIdx} trên tổng số {allCount}
+            Hiển thị{' '}
+            <span className="font-bold text-gray-700">{paged.length}</span>{' '}
+            trên tổng số{' '}
+            <span className="font-bold text-orange-500">{filtered.length}</span>
           </p>
           <div className="flex items-center gap-1">
             <button
@@ -677,9 +812,9 @@ function ProductsView({
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-md text-sm transition-colors ${
+                className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-semibold transition-colors ${
                   currentPage === page
-                    ? 'bg-orange-500 text-white font-semibold'
+                    ? 'bg-orange-500 text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
