@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronRight, Plus, X, Upload, Loader2 } from 'lucide-react'
 import api from '../api/axios'
+import SuccessModal from './SuccessModal'
 
 const PRODUCT_GROUPS = [
   'Trà hồ Singapore',
@@ -40,8 +41,10 @@ export default function CreateProductPage({ onCancel, onSaved }) {
   const [saving, setSaving]             = useState(false)
   const [errors, setErrors]             = useState({})
   const [imagePreview, setImagePreview] = useState(null)
+  const [showSuccess, setShowSuccess]   = useState(false)
   const fileInputRef                    = useRef(null)
   const imageFileRef                    = useRef(null)  // stores the actual File object
+  const pendingSavedRef                 = useRef(null)  // product data to pass to onSaved
 
   useEffect(() => {
     api.get('raw-materials/')
@@ -149,7 +152,8 @@ export default function CreateProductPage({ onCancel, onSaved }) {
         saved = detail.data
       }
 
-      onSaved(saved)
+      pendingSavedRef.current = saved
+      setShowSuccess(true)
     } catch (err) {
       const data = err.response?.data
       if (data && typeof data === 'object') {
@@ -511,6 +515,17 @@ export default function CreateProductPage({ onCancel, onSaved }) {
           Lưu
         </button>
       </div>
+
+      {/* Success notification */}
+      {showSuccess && (
+        <SuccessModal
+          message="Thêm sản phẩm thành công!"
+          onClose={() => {
+            setShowSuccess(false)
+            onSaved(pendingSavedRef.current)
+          }}
+        />
+      )}
     </div>
   )
 }

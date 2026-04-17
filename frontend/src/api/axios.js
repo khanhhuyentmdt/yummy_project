@@ -8,10 +8,14 @@ const api = axios.create({
 })
 
 // Attach JWT access token to every request if available
+// Also remove Content-Type for FormData so browser can set multipart boundary
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
   }
   return config
 })
