@@ -19,39 +19,69 @@ const formatCurrency = (val) => {
   return new Intl.NumberFormat('vi-VN').format(n)
 }
 
-export default function CreateProductPage({ onCancel, onSaved }) {
+export default function EditProductPage({ productId, onCancel, onSaved }) {
   const [form, setForm] = useState({
-    name: '',
-    group: '',
-    unit: '',
-    description: '',
-    price: '',
-    cost_price: '',
-    compare_price: '',
-    production_notes: '',
-    notes: '',
-    status: 'active',
+    name: '', group: '', unit: '', description: '',
+    price: '', cost_price: '', compare_price: '',
+    production_notes: '', notes: '', status: 'active',
   })
-  const [bomRows, setBomRows] = useState([
-    { raw_material_id: '', quantity: '', unit: '' },
-    { raw_material_id: '', quantity: '', unit: '' },
-  ])
+  const [bomRows, setBomRows]           = useState([])
   const [rawMaterials, setRawMaterials] = useState([])
+  const [loading, setLoading]           = useState(true)   // fetching product
   const [saving, setSaving]             = useState(false)
   const [errors, setErrors]             = useState({})
-  const [imagePreview, setImagePreview] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)   // base64 or existing URL
+  const [existingImage, setExistingImage] = useState('')   // current image URL from server
   const fileInputRef                    = useRef(null)
-  const imageFileRef                    = useRef(null)  // stores the actual File object
+  const imageFileRef                    = useRef(null)     // actual new File object
 
+  // Load raw materials + product data in parallel
   useEffect(() => {
-    api.get('raw-materials/')
-      .then(res => setRawMaterials(res.data.raw_materials || []))
-      .catch(() => {})
-  }, [])
+    Promise.all([
+      api.get('raw-materials/').catch(() => ({ data: { raw_materials: [] } })),
+      api.get(`products/${productId}/`),
+    ])
+      .then(([rmRes, prodRes]) => {
+        setRawMaterials(rmRes.data.raw_materials || [])
+
+        const p = prodRes.data
+        setForm({
+          name:             p.name             || '',
+          group:            p.group            || '',
+          unit:             p.unit             || '',
+          description:      p.description      || '',
+          price:            p.price            != null ? String(p.price) : '',
+          cost_price:       p.cost_price       != null ? String(p.cost_price) : '',
+          compare_price:    p.compare_price    != null ? String(p.compare_price) : '',
+          production_notes: p.production_notes || '',
+          notes:            p.notes            || '',
+          status:           p.status           || 'active',
+        })
+
+        // Pre-fill BOM rows
+        if (p.bom_items && p.bom_items.length > 0) {
+          setBomRows(p.bom_items.map(b => ({
+            raw_material_id: String(b.raw_material_id),
+            quantity:        String(b.quantity),
+            unit:            b.unit || '',
+          })))
+        } else {
+          setBomRows([{ raw_material_id: '', quantity: '', unit: '' }])
+        }
+
+        // Pre-fill existing image preview
+        if (p.image) {
+          setExistingImage(p.image)
+          setImagePreview(p.image)
+        }
+      })
+      .catch(() => setErrors({ submit: 'Không thể tải dữ liệu sản phẩm.' }))
+      .finally(() => setLoading(false))
+  }, [productId])
 
   /* ── Computed pricing ─────────────────────────────────── */
-  const price      = parseFloat(form.price)       || 0
-  const costPrice  = parseFloat(form.cost_price)  || 0
+  const price      = parseFloat(form.price)      || 0
+  const costPrice  = parseFloat(form.cost_price) || 0
   const profit     = price - costPrice
   const margin     = price > 0 ? ((profit / price) * 100).toFixed(1) + '%' : '--'
   const profitDisp = price > 0 ? formatCurrency(profit) + ' đ' : '0 đ'
@@ -99,6 +129,12 @@ export default function CreateProductPage({ onCancel, onSaved }) {
     reader.readAsDataURL(file)
   }
 
+  const removeImage = () => {
+    setImagePreview(null)
+    setExistingImage('')
+    imageFileRef.current = null
+  }
+
   const validate = () => {
     const errs = {}
     if (!form.name.trim()) errs.name  = 'Vui lòng nhập tên sản phẩm'
@@ -115,7 +151,9 @@ export default function CreateProductPage({ onCancel, onSaved }) {
     setSaving(true)
     try {
       const validBom = bomRows.filter(r => r.raw_material_id && r.quantity)
-      const payload  = {
+
+      // Step 1: PATCH product fields + BOM via JSON
+      const payload = {
         name:             form.name.trim(),
         group:            form.group,
         unit:             form.unit,
@@ -126,30 +164,24 @@ export default function CreateProductPage({ onCancel, onSaved }) {
         production_notes: form.production_notes,
         notes:            form.notes,
         status:           form.status,
-        quantity:         0,
         bom_items: validBom.map(r => ({
           raw_material_id: parseInt(r.raw_material_id),
           quantity:        parseFloat(r.quantity) || 0,
           unit:            r.unit || '',
         })),
       }
+      await api.patch(`products/${productId}/`, payload)
 
-      // Step 1: create product via JSON
-      const res      = await api.post('products/', payload)
-      const newId    = res.data.id
-      let   saved    = res.data
-
-      // Step 2: upload image if a file was selected
+      // Step 2: upload new image if a new file was selected
       if (imageFileRef.current) {
         const fd = new FormData()
         fd.append('image', imageFileRef.current)
-        await api.patch(`products/${newId}/`, fd)
-        // fetch fresh copy with absolute image URL
-        const detail = await api.get(`products/${newId}/`)
-        saved = detail.data
+        await api.patch(`products/${productId}/`, fd)
       }
 
-      onSaved(saved)
+      // Fetch fresh copy with absolute image URL
+      const detail = await api.get(`products/${productId}/`)
+      onSaved(detail.data)
     } catch (err) {
       const data = err.response?.data
       if (data && typeof data === 'object') {
@@ -166,6 +198,16 @@ export default function CreateProductPage({ onCancel, onSaved }) {
     }
   }
 
+  /* ── Loading skeleton ────────────────────────────────── */
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-3">
+        <Loader2 size={32} className="animate-spin text-orange-400" />
+        <p className="text-sm text-gray-500">Đang tải dữ liệu sản phẩm...</p>
+      </div>
+    )
+  }
+
   /* ── Render ───────────────────────────────────────────── */
   return (
     <div>
@@ -179,9 +221,9 @@ export default function CreateProductPage({ onCancel, onSaved }) {
             Sản phẩm
           </span>
           <ChevronRight size={14} />
-          <span className="text-orange-500 font-medium">Thêm mới sản phẩm</span>
+          <span className="text-orange-500 font-medium">Chỉnh sửa sản phẩm</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">THÊM MỚI SẢN PHẨM</h1>
+        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">CHỈNH SỬA SẢN PHẨM</h1>
       </div>
 
       {/* Global error */}
@@ -201,7 +243,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-base font-semibold text-gray-800 mb-5">Thông tin chung</h2>
 
-            {/* Tên sản phẩm */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Tên sản phẩm <span className="text-red-500">*</span>
@@ -218,7 +259,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
             </div>
 
-            {/* Nhóm SP + Đơn vị tính */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -254,7 +294,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               </div>
             </div>
 
-            {/* Mô tả */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Mô tả sản phẩm</label>
               <textarea
@@ -271,12 +310,10 @@ export default function CreateProductPage({ onCancel, onSaved }) {
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-base font-semibold text-gray-800 mb-5">Thông tin sản xuất</h2>
 
-            {/* BOM header */}
             <p className="text-sm font-medium text-gray-700 mb-3">
               Định mức nguyên liệu (BOM) <span className="text-red-500">*</span>
             </p>
 
-            {/* BOM table header */}
             <div className="grid grid-cols-[1fr_120px_140px_36px] gap-2 mb-2 px-1">
               <span className="text-xs font-medium text-gray-500">Nguyên liệu</span>
               <span className="text-xs font-medium text-gray-500">Định lượng</span>
@@ -284,7 +321,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               <span />
             </div>
 
-            {/* BOM rows */}
             <div className="space-y-2 mb-3">
               {bomRows.map((row, idx) => (
                 <div key={idx} className="grid grid-cols-[1fr_120px_140px_36px] gap-2 items-center">
@@ -326,7 +362,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               ))}
             </div>
 
-            {/* Add row */}
             <button
               type="button"
               onClick={addBomRow}
@@ -336,7 +371,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               Thêm nguyên liệu
             </button>
 
-            {/* Ghi chú sản xuất */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Ghi chú sản xuất</label>
               <textarea
@@ -354,7 +388,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
             <h2 className="text-base font-semibold text-gray-800 mb-5">Thông tin giá</h2>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-              {/* Giá bán */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Giá bán <span className="text-red-500">*</span>
@@ -376,7 +409,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
                 {errors.price && <p className="mt-1 text-xs text-red-500">{errors.price}</p>}
               </div>
 
-              {/* Giá so sánh */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Giá so sánh</label>
                 <div className="relative">
@@ -395,7 +427,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               </div>
             </div>
 
-            {/* Giá vốn */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Giá vốn</label>
               <div className="relative w-1/2">
@@ -412,7 +443,6 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               </div>
             </div>
 
-            {/* Computed metrics */}
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
               <div>
                 <p className="text-xs text-gray-500 mb-0.5">Biên lợi nhuận:</p>
@@ -468,7 +498,7 @@ export default function CreateProductPage({ onCancel, onSaved }) {
             {imagePreview && (
               <button
                 type="button"
-                onClick={() => { setImagePreview(null); imageFileRef.current = null }}
+                onClick={removeImage}
                 className="mt-2 text-xs text-gray-400 hover:text-red-500 transition-colors"
               >
                 Xoá ảnh
@@ -486,6 +516,19 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               rows={5}
               className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors resize-none"
             />
+          </div>
+
+          {/* Trạng thái */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-base font-semibold text-gray-800 mb-4">Trạng thái</h2>
+            <select
+              value={form.status}
+              onChange={e => setField('status', e.target.value)}
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors"
+            >
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Tạm ngưng</option>
+            </select>
           </div>
         </div>
       </div>

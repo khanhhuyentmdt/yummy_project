@@ -9,8 +9,8 @@ import {
 } from 'lucide-react'
 import api from '../api/axios'
 import logoImg from '../assets/logo.jpg'
-import ProductModal from './ProductModal'
 import CreateProductPage from './CreateProductPage'
+import EditProductPage from './EditProductPage'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -73,7 +73,7 @@ export default function HomePage({ user = {}, onLogout }) {
   const [products, setProducts]           = useState(PRODUCTS_FALLBACK)
   const [headerSearch, setHeaderSearch]   = useState('')
   const [apiConnected, setApiConnected]   = useState(null)
-  const [modalProduct, setModalProduct]   = useState(undefined)
+  const [editProductId, setEditProductId] = useState(null)
   const [deleteTarget, setDeleteTarget]   = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [syncModal, setSyncModal]         = useState(false)
@@ -94,16 +94,6 @@ export default function HomePage({ user = {}, onLogout }) {
     loadDashboard()
     loadProducts()
   }, [])
-
-  const handleProductSaved = (savedProduct, action) => {
-    if (action === 'create') {
-      setProducts(prev => [...prev, savedProduct])
-    } else {
-      setProducts(prev => prev.map(p => p.id === savedProduct.id ? savedProduct : p))
-    }
-    setModalProduct(undefined)
-    loadDashboard()
-  }
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
@@ -269,7 +259,7 @@ export default function HomePage({ user = {}, onLogout }) {
             <ProductsView
               products={products}
               onCreateClick={() => setActiveView('create-product')}
-              onEditClick={(p) => setModalProduct(p)}
+              onEditClick={(p) => { setEditProductId(p.id); setActiveView('edit-product') }}
               onDeleteClick={(p) => setDeleteTarget(p)}
               onSyncClick={() => { setSyncResult(null); setSyncModal(true) }}
             />
@@ -284,20 +274,22 @@ export default function HomePage({ user = {}, onLogout }) {
               }}
             />
           )}
-          {!['dashboard', 'products', 'create-product'].includes(activeView) && (
+          {activeView === 'edit-product' && editProductId && (
+            <EditProductPage
+              productId={editProductId}
+              onCancel={() => setActiveView('products')}
+              onSaved={(savedProduct) => {
+                setProducts(prev => prev.map(p => p.id === savedProduct.id ? savedProduct : p))
+                setActiveView('products')
+                loadDashboard()
+              }}
+            />
+          )}
+          {!['dashboard', 'products', 'create-product', 'edit-product'].includes(activeView) && (
             <ComingSoonView />
           )}
         </main>
       </div>
-
-      {/* ── ProductModal ────────────────────────────────────────────── */}
-      {modalProduct !== undefined && (
-        <ProductModal
-          product={modalProduct}
-          onClose={() => setModalProduct(undefined)}
-          onSaved={handleProductSaved}
-        />
-      )}
 
       {/* ── Sync confirm dialog ─────────────────────────────────────── */}
       {syncModal && (

@@ -55,6 +55,13 @@ class ProductBOMWriteSerializer(serializers.Serializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     bom_items = ProductBOMReadSerializer(many=True, read_only=True)
+    image     = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return ''
 
     class Meta:
         model  = Product
@@ -64,12 +71,13 @@ class ProductSerializer(serializers.ModelSerializer):
             'production_notes', 'notes', 'image', 'status',
             'bom_items', 'created_at', 'updated_at',
         ]
-        read_only_fields = ['id', 'bom_items', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'image', 'bom_items', 'created_at', 'updated_at']
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
     bom_items = ProductBOMWriteSerializer(many=True, required=False, default=list)
     code      = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    image     = serializers.ImageField(required=False, allow_null=True, allow_empty_file=True)
 
     class Meta:
         model  = Product
@@ -89,7 +97,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             import time
             suffix = int(time.time() * 1000) % 1000000
             validated_data['code'] = f'SP{suffix:06d}'
-            # Ensure uniqueness with a simple retry
             while Product.objects.filter(code=validated_data['code']).exists():
                 suffix = (suffix + 1) % 1000000
                 validated_data['code'] = f'SP{suffix:06d}'
@@ -111,6 +118,30 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                 pass
 
         return product
+
+    def update(self, instance, validated_data):
+        bom_data = validated_data.pop('bom_items', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Replace BOM entirely when bom_items is provided
+        if bom_data is not None:
+            instance.bom_items.all().delete()
+            for item in bom_data:
+                try:
+                    rm = RawMaterial.objects.get(id=item['raw_material_id'])
+                    ProductBOM.objects.create(
+                        product=instance,
+                        raw_material=rm,
+                        quantity=item['quantity'],
+                        unit=item.get('unit', '') or rm.unit,
+                    )
+                except RawMaterial.DoesNotExist:
+                    pass
+
+        return instance
 
 
 # ─── Customer ─────────────────────────────────────────────────────────────────

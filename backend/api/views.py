@@ -80,19 +80,21 @@ def dashboard_stats(request):
 def product_list(request):
     """GET /api/products/ — danh sách | POST /api/products/ — tạo mới."""
 
+    ctx = {'request': request}
+
     if request.method == 'GET':
         search = request.query_params.get('search', '').strip()
         qs = Product.objects.all()
         if search:
             qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
-        serializer = ProductSerializer(qs, many=True)
+        serializer = ProductSerializer(qs, many=True, context=ctx)
         return Response({'products': serializer.data, 'total': qs.count()})
 
     # POST — tạo mới (dùng ProductCreateSerializer để hỗ trợ bom_items)
-    serializer = ProductCreateSerializer(data=request.data)
+    serializer = ProductCreateSerializer(data=request.data, context=ctx)
     if serializer.is_valid():
         product = serializer.save()
-        return Response(ProductSerializer(product).data, status=status.HTTP_201_CREATED)
+        return Response(ProductSerializer(product, context=ctx).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -105,15 +107,17 @@ def product_detail(request, pk):
     except Product.DoesNotExist:
         return Response({'detail': 'Khong tim thay san pham.'}, status=status.HTTP_404_NOT_FOUND)
 
+    ctx = {'request': request}
+
     if request.method == 'GET':
-        return Response(ProductSerializer(product).data)
+        return Response(ProductSerializer(product, context=ctx).data)
 
     if request.method in ('PUT', 'PATCH'):
         partial = (request.method == 'PATCH')
-        serializer = ProductSerializer(product, data=request.data, partial=partial)
+        serializer = ProductCreateSerializer(product, data=request.data, partial=partial, context=ctx)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            updated = serializer.save()
+            return Response(ProductSerializer(updated, context=ctx).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # DELETE

@@ -79,7 +79,7 @@ class Product(models.Model):
     description      = models.TextField(blank=True, verbose_name='Mô tả sản phẩm')
     production_notes = models.TextField(blank=True, verbose_name='Ghi chú sản xuất')
     notes            = models.TextField(blank=True, verbose_name='Ghi chú')
-    image            = models.CharField(max_length=500, blank=True, default='', verbose_name='Ảnh sản phẩm')
+    image            = models.ImageField(upload_to='products/', blank=True, verbose_name='Ảnh sản phẩm')
     status           = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
