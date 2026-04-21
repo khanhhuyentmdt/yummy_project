@@ -232,7 +232,21 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 4. Nhập giá bán → hệ thống tự tính biên lợi nhuận
 5. Nhấn "Lưu" → POST /api/products/ → quay về danh sách
 
-### 🔜 Next Steps (Session 8+)
+### ✅ Completed (Session 8 — 2026-04-21) — Sidebar RBAC Implemented
+
+- [x] Đọc `screenshot/sidebar.docx` → parse cấu trúc menu 6 nhóm + 3 cấp độ phân cấp
+- [x] `src/config/sidebarConfig.js`: SIDEBAR_CONFIG (6 sections, ~40 menu items), `checkPermission()`, `filterMenu()` helpers
+- [x] `src/components/Sidebar.jsx`: component độc lập với RBAC, multi-level accordion, smooth transition
+- [x] Toggle button ChevronLeft/ChevronRight ở chân sidebar
+- [x] Collapsed mode (w-16): chỉ hiển thị section icons; click icon → mở sidebar và expand section đó
+- [x] Expanded mode (w-60): section headers (gray uppercase) + accordion sub-groups + leaf items có dot
+- [x] RBAC: `userRole = user?.role || null`; null = admin mode (thấy tất cả); role cụ thể → ẩn items không được phép
+- [x] Auto-expand path đến active menu item khi mount
+- [x] `activeMenuId` state tách biệt với `activeView` — sidebar highlight đúng item ngay cả khi đang ở sub-view (create/edit product)
+- [x] `HomePage.jsx`: remove old sidebar code, thêm `<Sidebar>` component với props user/onLogout/activeMenuId/onNavigate
+- [x] **Sidebar RBAC Implemented**
+
+### 🔜 Next Steps (Session 9+)
 
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status

@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import {
-  LayoutDashboard, Package, ShoppingCart, Users,
-  BarChart2, Settings, Search, Bell,
+  Package, Search, Bell,
   DollarSign, ShoppingBag, CheckCircle,
   Plus, ChevronRight, ChevronLeft, ChevronDown,
-  Menu, Activity, LogOut, CloudSync, Loader2,
+  Activity, LogOut, CloudSync, Loader2,
   Filter, Upload, Download, RefreshCw,
 } from 'lucide-react'
 import api from '../api/axios'
-import logoImg from '../assets/logo.jpg'
 import CreateProductPage from './CreateProductPage'
 import EditProductPage from './EditProductPage'
+import Sidebar from './Sidebar'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -43,15 +42,6 @@ const ACTIVITIES = [
   { id: 5, time: '08:20', action: 'Cập nhật giá', item: 'Trà ô long sữa tươi',         type: 'update',   user: 'Thảo Vi' },
 ]
 
-const MENU_ITEMS = [
-  { id: 'dashboard', label: 'Trang chủ',  icon: LayoutDashboard },
-  { id: 'products',  label: 'Sản phẩm',   icon: Package },
-  { id: 'orders',    label: 'Đơn hàng',   icon: ShoppingCart },
-  { id: 'customers', label: 'Khách hàng', icon: Users },
-  { id: 'reports',   label: 'Báo cáo',    icon: BarChart2 },
-  { id: 'settings',  label: 'Cài đặt',    icon: Settings },
-]
-
 const formatCurrency = (amount) =>
   new Intl.NumberFormat('vi-VN').format(amount) + 'đ'
 
@@ -68,7 +58,7 @@ export default function HomePage({ user = {}, onLogout }) {
     .join('')
 
   const [activeView, setActiveView]       = useState('dashboard')
-  const [sidebarOpen, setSidebarOpen]     = useState(false)
+  const [activeMenuId, setActiveMenuId]   = useState('dashboard')
   const [stats, setStats]                 = useState(STATS_FALLBACK)
   const [products, setProducts]           = useState(PRODUCTS_FALLBACK)
   const [headerSearch, setHeaderSearch]   = useState('')
@@ -129,72 +119,15 @@ export default function HomePage({ user = {}, onLogout }) {
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      <aside
-        className={`${sidebarOpen ? 'w-56' : 'w-16'} flex-shrink-0 flex flex-col bg-white border-r border-gray-200 transition-all duration-300`}
-      >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-center border-b border-gray-100 px-2">
-          <img
-            src={logoImg}
-            alt="Yummy"
-            className="w-9 h-9 rounded-full object-cover flex-shrink-0"
-          />
-          {sidebarOpen && (
-            <span className="ml-2.5 font-bold text-gray-800 text-sm whitespace-nowrap overflow-hidden">
-              ERP Yummy
-            </span>
-          )}
-        </div>
-
-        {/* Toggle */}
-        <button
-          onClick={() => setSidebarOpen(v => !v)}
-          className="mx-auto mt-3 mb-1 p-1.5 rounded-md hover:bg-gray-100 text-gray-400"
-          title={sidebarOpen ? 'Thu gọn' : 'Mở rộng'}
-        >
-          <Menu size={17} />
-        </button>
-
-        {/* Nav */}
-        <nav className="flex-1 px-2 py-2 space-y-0.5">
-          {MENU_ITEMS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveView(id)}
-              className={`w-full flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm transition-colors ${
-                activeView === id
-                  ? 'bg-orange-50 text-orange-600 font-semibold'
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-              }`}
-            >
-              <Icon size={19} className="flex-shrink-0" />
-              {sidebarOpen && <span className="truncate">{label}</span>}
-            </button>
-          ))}
-        </nav>
-
-        {/* User footer */}
-        {sidebarOpen && (
-          <div className="p-3 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-orange-600 font-semibold text-xs">{avatarInitials}</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-gray-800 truncate">{displayName}</p>
-                <p className="text-xs text-gray-400 truncate">{displayPhone}</p>
-              </div>
-              <button
-                onClick={onLogout}
-                title="Đăng xuất"
-                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
-              >
-                <LogOut size={14} />
-              </button>
-            </div>
-          </div>
-        )}
-      </aside>
+      <Sidebar
+        user={user}
+        onLogout={onLogout}
+        activeMenuId={activeMenuId}
+        onNavigate={(view, menuId) => {
+          setActiveView(view)
+          setActiveMenuId(menuId)
+        }}
+      />
 
       {/* ── Main ────────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
