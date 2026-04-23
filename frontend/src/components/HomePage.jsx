@@ -201,7 +201,7 @@ export default function HomePage({ user = {}, onLogout }) {
             <CreateProductPage
               onCancel={() => setActiveView('products')}
               onSaved={(savedProduct) => {
-                setProducts(prev => [...prev, savedProduct])
+                setProducts(prev => [savedProduct, ...prev])
                 setActiveView('products')
                 loadDashboard()
               }}

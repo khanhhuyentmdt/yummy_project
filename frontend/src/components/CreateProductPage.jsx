@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronRight, Plus, X, Upload, Loader2 } from 'lucide-react'
+import { ChevronRight, ChevronDown, Plus, X, Upload, Loader2 } from 'lucide-react'
 import api from '../api/axios'
 import SuccessModal from './SuccessModal'
 
@@ -228,32 +228,38 @@ export default function CreateProductPage({ onCancel, onSaved }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Nhóm sản phẩm <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={form.group}
-                  onChange={e => setField('group', e.target.value)}
-                  className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
-                    errors.group ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
-                  }`}
-                >
-                  <option value="">Chọn nhóm sản phẩm</option>
-                  {PRODUCT_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+                <div className="relative">
+                  <select
+                    value={form.group}
+                    onChange={e => setField('group', e.target.value)}
+                    className={`w-full px-3 pr-8 py-2.5 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
+                      errors.group ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
+                    }`}
+                  >
+                    <option value="">Chọn nhóm sản phẩm</option>
+                    {PRODUCT_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
                 {errors.group && <p className="mt-1 text-xs text-red-500">{errors.group}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Đơn vị tính <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={form.unit}
-                  onChange={e => setField('unit', e.target.value)}
-                  className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
-                    errors.unit ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
-                  }`}
-                >
-                  <option value="">Chọn đơn vị tính</option>
-                  {PRODUCT_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                </select>
+                <div className="relative">
+                  <select
+                    value={form.unit}
+                    onChange={e => setField('unit', e.target.value)}
+                    className={`w-full px-3 pr-8 py-2.5 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
+                      errors.unit ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
+                    }`}
+                  >
+                    <option value="">Chọn đơn vị tính</option>
+                    {PRODUCT_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
                 {errors.unit && <p className="mt-1 text-xs text-red-500">{errors.unit}</p>}
               </div>
             </div>
@@ -292,16 +298,19 @@ export default function CreateProductPage({ onCancel, onSaved }) {
             <div className="space-y-2 mb-3">
               {bomRows.map((row, idx) => (
                 <div key={idx} className="grid grid-cols-[1fr_120px_140px_36px] gap-2 items-center">
-                  <select
-                    value={row.raw_material_id}
-                    onChange={e => updateBomRow(idx, 'raw_material_id', e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
-                  >
-                    <option value="">Chọn nguyên liệu</option>
-                    {rawMaterials.map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={row.raw_material_id}
+                      onChange={e => updateBomRow(idx, 'raw_material_id', e.target.value)}
+                      className="w-full px-3 pr-8 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+                    >
+                      <option value="">Chọn nguyên liệu</option>
+                      {rawMaterials.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                   <input
                     type="number"
                     min="0"
@@ -311,14 +320,17 @@ export default function CreateProductPage({ onCancel, onSaved }) {
                     placeholder="0"
                     className="w-full px-3 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
                   />
-                  <select
-                    value={row.unit}
-                    onChange={e => updateBomRow(idx, 'unit', e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
-                  >
-                    <option value="">Chọn đơn vị</option>
-                    {BOM_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={row.unit}
+                      onChange={e => updateBomRow(idx, 'unit', e.target.value)}
+                      className="w-full px-3 pr-8 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+                    >
+                      <option value="">Chọn đơn vị</option>
+                      {BOM_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                   <button
                     type="button"
                     onClick={() => removeBomRow(idx)}

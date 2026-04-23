@@ -90,7 +90,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering     = ['code']
+        ordering     = ['-id']
         verbose_name = 'Product'
 
     def __str__(self):

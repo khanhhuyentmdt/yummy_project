@@ -246,7 +246,13 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] `HomePage.jsx`: remove old sidebar code, thêm `<Sidebar>` component với props user/onLogout/activeMenuId/onNavigate
 - [x] **Sidebar RBAC Implemented**
 
-### 🔜 Next Steps (Session 9+)
+### ✅ Completed (Session 9 — 2026-04-23) — Dropdown Arrow Fix + Product Sort
+
+- [x] `CreateProductPage.jsx` + `EditProductPage.jsx`: Thêm `appearance-none` + `pr-8` + custom `ChevronDown` icon (`right-3`, `pointer-events-none`) cho tất cả `<select>` — icon mũi tên cách viền phải đúng bằng `px-3` (12px) giống text cách viền trái
+- [x] `api/models.py`: `Product.Meta.ordering` đổi từ `['code']` → `['-id']` — sản phẩm mới nhất lên đầu danh sách
+- [x] `HomePage.jsx`: `onSaved` callback dùng `[savedProduct, ...prev]` (unshift) thay vì `[...prev, savedProduct]`
+
+### 🔜 Next Steps (Session 10+)
 
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status
