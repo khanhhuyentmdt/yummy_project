@@ -288,7 +288,15 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
   - depth=0 items: giữ nguyên behavior (icon cam khi expanded, text dark semibold)
 - [x] Auto-expand path: khi `activeMenuId='nguyen-lieu-item'`, sidebar tự mở `san-xuat → nguyen-vat-lieu → thong-tin-nvl-group`
 
-### 🔜 Next Steps (Session 11+)
+### ✅ Completed (Session 11 — 2026-04-24) — CreateMaterialPage + Footer UI fix
+
+- [x] `src/components/CreateMaterialPage.jsx`: Trang thêm NVL — 2 cột, FormData upload ảnh, batch_management checkbox, SuccessModal
+- [x] `backend/api/migrations/0008_material_notes_batch.py`: AddField `notes` + `batch_management` vào Material
+- [x] `src/components/MaterialsPage.jsx`: Tách `onEditClick` prop riêng khỏi `onCreateClick`
+- [x] `src/components/HomePage.jsx`: Wire `create-material` view, import `CreateMaterialPage`
+- [x] Footer style fix: bỏ sticky white bar, tất cả nút (RotateCcw + Hủy + Lưu) group bên phải, nền `#FFF6F3`, `rounded-xl`, `font-nunito-sans`
+
+### 🔜 Next Steps (Session 12+)
 
 - [ ] **CreateMaterialPage**: Trang thêm NVL mới (tương tự CreateProductPage)
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)

@@ -145,7 +145,7 @@ export default function CreateMaterialPage({ onCancel, onSaved }) {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="pb-24">
+    <div>
 
       {/* ── Back link + Title ───────────────────────────── */}
       <div className="mb-6">
@@ -353,42 +353,34 @@ export default function CreateMaterialPage({ onCancel, onSaved }) {
         </div>
       </div>
 
-      {/* ── Sticky footer ───────────────────────────────── */}
-      {/*
-        sticky bottom-0 inside overflow-auto main → sticks to bottom of
-        the visible main area; -mx-6 -mb-6 bleeds past the main p-6 padding.
-      */}
-      <div className="sticky bottom-0 -mx-6 -mb-6 mt-8 bg-white border-t border-gray-200 px-6 py-4 flex items-center z-10">
-        {/* Reset */}
+      {/* ── Footer ─────────────────────────────────────── */}
+      <div className="mt-8 flex justify-end items-center gap-3">
         <button
           type="button"
           onClick={handleReset}
           title="Đặt lại form"
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-colors"
         >
           <RotateCcw size={18} />
         </button>
-
-        <div className="ml-auto flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={saving}
-            className="px-6 py-2.5 text-sm font-medium text-gray-600 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
-            Hủy
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-60 hover:opacity-90 active:opacity-80"
-            style={{ backgroundColor: '#E67E22' }}
-          >
-            {saving && <Loader2 size={15} className="animate-spin" />}
-            Lưu
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={saving}
+          className="px-7 py-2.5 text-sm font-semibold text-gray-700 border border-gray-300 bg-white rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 font-nunito-sans"
+        >
+          Hủy
+        </button>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={saving}
+          className="flex items-center gap-2 px-8 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors disabled:opacity-60 hover:opacity-90 active:opacity-80 font-nunito-sans"
+          style={{ backgroundColor: '#E67E22' }}
+        >
+          {saving && <Loader2 size={15} className="animate-spin" />}
+          Lưu
+        </button>
       </div>
 
       {/* Success modal */}
