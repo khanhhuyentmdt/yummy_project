@@ -9,6 +9,7 @@ import {
 import api from '../api/axios'
 import CreateProductPage from './CreateProductPage'
 import EditProductPage from './EditProductPage'
+import MaterialsPage from './MaterialsPage'
 import Sidebar from './Sidebar'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
@@ -218,7 +219,12 @@ export default function HomePage({ user = {}, onLogout }) {
               }}
             />
           )}
-          {!['dashboard', 'products', 'create-product', 'edit-product'].includes(activeView) && (
+          {activeView === 'materials' && (
+            <MaterialsPage
+              onCreateClick={() => setActiveView('coming-soon')}
+            />
+          )}
+          {!['dashboard', 'products', 'create-product', 'edit-product', 'materials'].includes(activeView) && (
             <ComingSoonView />
           )}
         </main>

@@ -252,8 +252,33 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] `api/models.py`: `Product.Meta.ordering` đổi từ `['code']` → `['-id']` — sản phẩm mới nhất lên đầu danh sách
 - [x] `HomePage.jsx`: `onSaved` callback dùng `[savedProduct, ...prev]` (unshift) thay vì `[...prev, savedProduct]`
 
-### 🔜 Next Steps (Session 10+)
+### ✅ Completed (Session 10 — 2026-04-24) — Danh sách Nguyên vật liệu
 
+- [x] `api/models.py`: Thêm `role` field vào `User`, thêm model `Material` (code, name, group, unit, image, status, ordering=[-id])
+- [x] Migration `0007_add_user_role_material.py` — apply thành công
+- [x] Management command `seed_materials` — seed 10 NVL mẫu vào DB
+- [x] `api/serializers.py`: `MaterialSerializer` (read + image URL), `MaterialWriteSerializer` (auto-gen code NVL{6-digit})
+- [x] `api/views.py`: `material_list` (GET+POST), `material_detail` (GET+PUT+PATCH+DELETE) — RBAC: chỉ `is_staff`, `is_superuser`, hoặc `role in {'Nhân viên thu mua', 'Admin'}`
+- [x] `api/views.py`: `PhoneLoginView` response thêm `role` field
+- [x] `api/urls.py`: `GET/POST /api/materials/`, `GET/PUT/PATCH/DELETE /api/materials/<pk>/`
+- [x] `src/config/sidebarConfig.js`: `nguyen-lieu-item` view đổi từ `coming-soon` → `materials`
+- [x] `src/components/MaterialsPage.jsx`: trang danh sách NVL — search, filter status, pagination, delete confirm, action dropdown, status badge (blue/red), thumbnail, breadcrumb, nút Xuất + Thêm NVL
+- [x] `src/components/HomePage.jsx`: import + render `MaterialsPage` tại `activeView === 'materials'`
+- [x] **Nguyên vật liệu list page: DONE**
+
+**API endpoints mới:**
+- `GET /api/materials/?search=` — danh sách NVL (filter theo tên/mã)
+- `POST /api/materials/` — tạo NVL (FormData, hỗ trợ upload ảnh)
+- `GET /api/materials/{pk}/` — chi tiết
+- `PUT/PATCH /api/materials/{pk}/` — cập nhật (hỗ trợ ảnh)
+- `DELETE /api/materials/{pk}/` — xóa
+
+**Seed command:** `python manage.py seed_materials`
+
+### 🔜 Next Steps (Session 11+)
+
+- [ ] **CreateMaterialPage**: Trang thêm NVL mới (tương tự CreateProductPage)
+- [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status
 - [ ] **CustomersPage**: Quản lý khách hàng — list, create, edit

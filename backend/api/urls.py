@@ -13,8 +13,12 @@ urlpatterns = [
     path('products/sync/',        views.product_sync,   name='product-sync'),
     path('products/<int:pk>/',    views.product_detail, name='product-detail'),
 
-    # Raw Materials
+    # Raw Materials (for BOM dropdown)
     path('raw-materials/', views.raw_material_list, name='raw-material-list'),
+
+    # Materials (Nguyen vat lieu - full CRUD)
+    path('materials/',          views.material_list,   name='material-list'),
+    path('materials/<int:pk>/', views.material_detail, name='material-detail'),
 
     # Customers
     path('customers/', views.customer_list, name='customer-list'),

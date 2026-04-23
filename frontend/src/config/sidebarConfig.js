@@ -58,7 +58,7 @@ const SIDEBAR_CONFIG = [
         children: [
           { id: 'thong-tin-nvl',    label: 'Thông tin NVL',   roles: ['Nhân viên thu mua'], view: 'coming-soon' },
           { id: 'nhom-nvl',         label: 'Nhóm NVL',        roles: null,                  view: 'coming-soon' },
-          { id: 'nguyen-lieu-item', label: 'Nguyên vật liệu', roles: null,                  view: 'coming-soon' },
+          { id: 'nguyen-lieu-item', label: 'Nguyên vật liệu', roles: null,                  view: 'materials'   },
           { id: 'nha-cung-cap',     label: 'Nhà cung cấp',    roles: ['Nhân viên thu mua'], view: 'coming-soon' },
         ],
       },
