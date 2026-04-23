@@ -308,6 +308,33 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 ---
 
+## Code Style & Conventions
+
+### Status Badges (Trạng thái)
+
+Tất cả badge trạng thái (`Đang hoạt động`, `Tạm ngưng`, v.v.) trong hệ thống phải tuân thủ quy tắc sau:
+
+```jsx
+<span className={`inline-flex items-center rounded-[7px] py-[9px] px-[20px] text-xs font-semibold ${
+  status === 'active' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-500'
+}`}>
+  {status === 'active' ? 'Đang hoạt động' : 'Tạm ngưng'}
+</span>
+```
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Border-radius | `rounded-[7px]` (7px chính xác — KHÔNG dùng `rounded-full`) |
+| Padding | `py-[9px] px-[20px]` |
+| Font weight | `font-semibold` |
+| Font family | Kế thừa Nunito Sans từ `body` (không cần thêm class) |
+| Active | `bg-blue-50 text-blue-600` |
+| Inactive | `bg-red-50 text-red-500` |
+
+> Quy tắc này áp dụng cho **mọi badge/tag trạng thái** trong toàn bộ frontend, bao gồm các trang sẽ được xây dựng sau này.
+
+---
+
 ## Key Decisions & Notes
 
 - `.venv/` là **Conda environment** — Python tại `.venv/python.exe`, không phải `.venv/Scripts/python.exe`

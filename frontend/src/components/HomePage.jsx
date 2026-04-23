@@ -684,8 +684,7 @@ function ProductsView({ products, onCreateClick, onEditClick, onDeleteClick, onS
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <span
-                        style={{ paddingTop: '9px', paddingBottom: '9px', paddingLeft: '20px', paddingRight: '20px' }}
-                        className={`inline-flex items-center rounded-full text-xs font-bold ${
+                        className={`inline-flex items-center rounded-[7px] py-[9px] px-[20px] text-xs font-semibold ${
                           p.status === 'active'
                             ? 'bg-blue-50 text-blue-600'
                             : 'bg-red-50 text-red-500'
