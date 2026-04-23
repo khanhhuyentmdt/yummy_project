@@ -157,7 +157,10 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Material
-        fields = ['id', 'code', 'name', 'group', 'unit', 'image', 'status', 'created_at', 'updated_at']
+        fields = [
+            'id', 'code', 'name', 'group', 'unit', 'image',
+            'notes', 'batch_management', 'status', 'created_at', 'updated_at',
+        ]
         read_only_fields = ['id', 'image', 'created_at', 'updated_at']
 
 
@@ -167,7 +170,10 @@ class MaterialWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Material
-        fields = ['id', 'code', 'name', 'group', 'unit', 'image', 'status', 'created_at', 'updated_at']
+        fields = [
+            'id', 'code', 'name', 'group', 'unit', 'image',
+            'notes', 'batch_management', 'status', 'created_at', 'updated_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def create(self, validated_data):

@@ -10,6 +10,7 @@ import api from '../api/axios'
 import CreateProductPage from './CreateProductPage'
 import EditProductPage from './EditProductPage'
 import MaterialsPage from './MaterialsPage'
+import CreateMaterialPage from './CreateMaterialPage'
 import Sidebar from './Sidebar'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
@@ -221,10 +222,17 @@ export default function HomePage({ user = {}, onLogout }) {
           )}
           {activeView === 'materials' && (
             <MaterialsPage
-              onCreateClick={() => setActiveView('coming-soon')}
+              onCreateClick={() => { setActiveView('create-material'); setActiveMenuId('nguyen-lieu-item') }}
+              onEditClick={() => {}}
             />
           )}
-          {!['dashboard', 'products', 'create-product', 'edit-product', 'materials'].includes(activeView) && (
+          {activeView === 'create-material' && (
+            <CreateMaterialPage
+              onCancel={() => setActiveView('materials')}
+              onSaved={() => setActiveView('materials')}
+            />
+          )}
+          {!['dashboard', 'products', 'create-product', 'edit-product', 'materials', 'create-material'].includes(activeView) && (
             <ComingSoonView />
           )}
         </main>

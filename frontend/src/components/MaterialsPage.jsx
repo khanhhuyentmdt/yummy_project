@@ -15,7 +15,7 @@ const MATERIALS_FALLBACK = [
   { id: 6,  code: 'NVL006', name: 'Bot Matcha nguyen chat', group: 'Do kho',   unit: 'gram',     status: 'inactive', image: '' },
 ]
 
-export default function MaterialsPage({ onCreateClick }) {
+export default function MaterialsPage({ onCreateClick, onEditClick }) {
   const [materials, setMaterials]         = useState(MATERIALS_FALLBACK)
   const [loading, setLoading]             = useState(true)
   const [search, setSearch]               = useState('')
@@ -293,7 +293,7 @@ export default function MaterialsPage({ onCreateClick }) {
                         {openDropdownId === m.id && (
                           <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
                             <button
-                              onClick={() => { onCreateClick && onCreateClick('edit', m); setOpenDropdownId(null) }}
+                              onClick={() => { onEditClick && onEditClick(m); setOpenDropdownId(null) }}
                               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                             >
                               Chỉnh sửa

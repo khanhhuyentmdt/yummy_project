@@ -209,7 +209,9 @@ class Material(models.Model):
     name   = models.CharField(max_length=200, verbose_name='Tên NVL')
     group  = models.CharField(max_length=100, verbose_name='Nhóm NVL')
     unit   = models.CharField(max_length=50,  verbose_name='Đơn vị tính')
-    image  = models.ImageField(upload_to='materials/', blank=True, verbose_name='Hình ảnh')
+    image            = models.ImageField(upload_to='materials/', blank=True, verbose_name='Hình ảnh')
+    notes            = models.TextField(blank=True, verbose_name='Ghi chu')
+    batch_management = models.BooleanField(default=False, verbose_name='Quan ly theo lo HSD')
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
