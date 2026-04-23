@@ -17,38 +17,64 @@ function findItemPath(items, targetId, path = []) {
   return null
 }
 
+// ─── Helper: check if any descendant matches activeId ────────────────────────
+
+function isDescendantActive(item, activeId) {
+  if (!item.children) return false
+  return item.children.some(c => c.id === activeId || isDescendantActive(c, activeId))
+}
+
 // ─── Recursive nav item ───────────────────────────────────────────────────────
 
 function NavItem({ item, depth, activeMenuId, onNavigate, expandedItems, toggleItem, sidebarOpen }) {
-  const isActive   = item.id === activeMenuId
-  const isExpanded = expandedItems.has(item.id)
-  const hasChildren = !!item.children?.length
+  const isActive     = item.id === activeMenuId
+  const isExpanded   = expandedItems.has(item.id)
+  const hasChildren  = !!item.children?.length
+  const isChildActive = hasChildren && isDescendantActive(item, activeMenuId)
 
   if (hasChildren) {
+    // depth=0: bold dark text (with icon if present); depth≥1: bullet dot, orange when child active
+    const textClass = depth === 0
+      ? `text-gray-700 font-semibold hover:bg-orange-50/60`
+      : isChildActive
+        ? 'text-orange-500 font-semibold hover:bg-orange-50/60'
+        : 'text-gray-500 font-medium hover:bg-gray-100'
+
     return (
       <div>
         <button
           onClick={() => toggleItem(item.id)}
           style={{ paddingLeft: sidebarOpen ? `${10 + depth * 10}px` : undefined }}
-          className={`w-full flex items-center gap-2 py-2 pr-3 rounded-lg text-sm transition-colors ${
-            depth === 0
-              ? 'text-gray-700 font-semibold hover:bg-orange-50/60'
-              : 'text-gray-500 font-medium hover:bg-gray-100'
-          } ${!sidebarOpen ? 'justify-center px-2' : ''}`}
+          className={`w-full flex items-center gap-2 py-2 pr-3 rounded-lg text-sm transition-colors ${textClass} ${
+            !sidebarOpen ? 'justify-center px-2' : ''
+          }`}
           title={!sidebarOpen && depth === 0 ? item.label : undefined}
         >
+          {/* Section-level icon (depth=0 only) */}
           {depth === 0 && item.icon && (
             <item.icon
               size={18}
-              className={`flex-shrink-0 ${isExpanded ? 'text-orange-500' : 'text-gray-400'}`}
+              className={`flex-shrink-0 ${isExpanded || isChildActive ? 'text-orange-500' : 'text-gray-400'}`}
             />
           )}
+
+          {/* Bullet dot for depth≥1 expandable items */}
+          {depth > 0 && sidebarOpen && (
+            <span
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors ${
+                isChildActive ? 'bg-orange-500' : 'bg-gray-300'
+              }`}
+            />
+          )}
+
           {sidebarOpen && (
             <>
               <span className="flex-1 text-left truncate">{item.label}</span>
               <ChevronDown
                 size={12}
-                className={`flex-shrink-0 transition-transform duration-200 text-gray-400 ${isExpanded ? 'rotate-180' : ''}`}
+                className={`flex-shrink-0 transition-transform duration-200 ${
+                  isChildActive ? 'text-orange-400' : 'text-gray-400'
+                } ${isExpanded ? 'rotate-180' : ''}`}
               />
             </>
           )}
@@ -98,11 +124,11 @@ function NavItem({ item, depth, activeMenuId, onNavigate, expandedItems, toggleI
 // ─── Sidebar component ────────────────────────────────────────────────────────
 
 export default function Sidebar({ user, onLogout, activeMenuId, onNavigate }) {
-  const userRole = user?.role || null
+  const userRole    = user?.role || null
   const visibleMenu = filterMenu(SIDEBAR_CONFIG, userRole)
 
-  // Auto-expand the path to the current active item on first render
-  const [sidebarOpen, setSidebarOpen]   = useState(true)
+  // Auto-expand the full path to the current active item on first render
+  const [sidebarOpen, setSidebarOpen]     = useState(true)
   const [expandedItems, setExpandedItems] = useState(() => {
     const path = findItemPath(SIDEBAR_CONFIG, activeMenuId)
     return new Set(path ? path.slice(0, -1) : ['tong-quan'])
@@ -123,7 +149,6 @@ export default function Sidebar({ user, onLogout, activeMenuId, onNavigate }) {
 
   // ── Display info ──
   const displayName    = user?.name  || 'Admin'
-  const displayPhone   = user?.phone || ''
   const displayRole    = user?.role  || 'Quản trị viên'
   const avatarInitials = displayName
     .split(' ').filter(Boolean).slice(0, 2)

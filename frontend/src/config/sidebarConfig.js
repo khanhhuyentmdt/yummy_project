@@ -54,24 +54,30 @@ const SIDEBAR_CONFIG = [
       {
         id: 'nguyen-vat-lieu',
         label: 'Nguyên vật liệu',
-        roles: ['Nhân viên thu mua'],
-        children: [
-          { id: 'thong-tin-nvl',    label: 'Thông tin NVL',   roles: ['Nhân viên thu mua'], view: 'coming-soon' },
-          { id: 'nhom-nvl',         label: 'Nhóm NVL',        roles: null,                  view: 'coming-soon' },
-          { id: 'nguyen-lieu-item', label: 'Nguyên vật liệu', roles: null,                  view: 'materials'   },
-          { id: 'nha-cung-cap',     label: 'Nhà cung cấp',    roles: ['Nhân viên thu mua'], view: 'coming-soon' },
-        ],
-      },
-      {
-        id: 'kho-nvl',
-        label: 'Kho NVL',
         roles: null,
         children: [
-          { id: 'phieu-dat-hang', label: 'Phiếu đặt hàng', roles: ['Nhân viên thu mua'], view: 'coming-soon' },
-          { id: 'nhap-kho-nvl',   label: 'Phiếu nhập kho', roles: ['Nhân viên kho'],     view: 'coming-soon' },
-          { id: 'xuat-kho-nvl',   label: 'Phiếu xuất kho', roles: ['Nhân viên kho'],     view: 'coming-soon' },
-          { id: 'kiem-kho-nvl',   label: 'Phiếu kiểm kho', roles: ['Nhân viên kho'],     view: 'coming-soon' },
-          { id: 'ton-kho-nvl',    label: 'Tồn kho NVL',    roles: ['Nhân viên kho'],     view: 'coming-soon' },
+          {
+            id: 'thong-tin-nvl-group',
+            label: 'Thông tin nguyên vật liệu',
+            roles: ['Nhân viên thu mua'],
+            children: [
+              { id: 'nhom-nvl',         label: 'Nhóm nguyên vật liệu', roles: null, view: 'coming-soon' },
+              { id: 'nguyen-lieu-item', label: 'Nguyên vật liệu',      roles: null, view: 'materials'   },
+            ],
+          },
+          { id: 'nha-cung-cap', label: 'Nhà cung cấp', roles: ['Nhân viên thu mua'], view: 'coming-soon' },
+          {
+            id: 'kho-nvl',
+            label: 'Kho nguyên vật liệu',
+            roles: null,
+            children: [
+              { id: 'phieu-dat-hang', label: 'Phiếu đặt hàng',          roles: ['Nhân viên thu mua'], view: 'coming-soon' },
+              { id: 'nhap-kho-nvl',   label: 'Phiếu nhập kho',          roles: ['Nhân viên kho'],     view: 'coming-soon' },
+              { id: 'xuat-kho-nvl',   label: 'Phiếu xuất kho',          roles: ['Nhân viên kho'],     view: 'coming-soon' },
+              { id: 'kiem-kho-nvl',   label: 'Phiếu kiểm kho',          roles: ['Nhân viên kho'],     view: 'coming-soon' },
+              { id: 'ton-kho-nvl',    label: 'Tồn kho nguyên vật liệu', roles: ['Nhân viên kho'],     view: 'coming-soon' },
+            ],
+          },
         ],
       },
       {

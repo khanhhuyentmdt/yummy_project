@@ -275,6 +275,19 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 **Seed command:** `python manage.py seed_materials`
 
+### ✅ Completed (Session 10b — 2026-04-24) — Sidebar Materials hierarchy updated
+
+- [x] `src/config/sidebarConfig.js`: Tái cấu trúc `nguyen-vat-lieu` thành 3 cấp
+  - `thong-tin-nvl-group` (Thông tin nguyên vật liệu, roles: `['Nhân viên thu mua']`) với 2 con: Nhóm NVL + Nguyên vật liệu
+  - `nha-cung-cap` (leaf, roles: `['Nhân viên thu mua']`)
+  - `kho-nvl` (Kho nguyên vật liệu) di chuyển từ top-level sang con của `nguyen-vat-lieu` với 5 phiếu
+  - `nguyen-vat-lieu.roles` đổi thành `null` (cả Nhân viên thu mua lẫn Nhân viên kho đều thấy)
+- [x] `src/components/Sidebar.jsx`: Thêm `isDescendantActive()` helper; cập nhật `NavItem`:
+  - depth≥1 expandable items: hiển thị bullet dot (cam khi child active)
+  - `isChildActive` flag: text + bullet chuyển cam khi có descendant đang active
+  - depth=0 items: giữ nguyên behavior (icon cam khi expanded, text dark semibold)
+- [x] Auto-expand path: khi `activeMenuId='nguyen-lieu-item'`, sidebar tự mở `san-xuat → nguyen-vat-lieu → thong-tin-nvl-group`
+
 ### 🔜 Next Steps (Session 11+)
 
 - [ ] **CreateMaterialPage**: Trang thêm NVL mới (tương tự CreateProductPage)
