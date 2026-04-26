@@ -288,6 +288,13 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
   - depth=0 items: giữ nguyên behavior (icon cam khi expanded, text dark semibold)
 - [x] Auto-expand path: khi `activeMenuId='nguyen-lieu-item'`, sidebar tự mở `san-xuat → nguyen-vat-lieu → thong-tin-nvl-group`
 
+### ✅ Completed (Session 12 — 2026-04-26) — Created Purchasing Staff account & refined RBAC
+
+- [x] Management command `create_purchasing_staff` — tạo tài khoản `0982334556 / 12345`, role `Nhân viên thu mua`, full_name `Trần Minh Anh`
+- [x] `sidebarConfig.js`: `phieu-dat-hang` đổi roles từ `['Nhân viên thu mua']` → `['Nhân viên kho']` (ẩn khỏi thu mua)
+- [x] `sidebarConfig.js`: `ton-kho-nvl` đổi roles từ `['Nhân viên kho']` → `['Nhân viên kho', 'Nhân viên thu mua']` (cho phép thu mua thấy Tồn kho NVL)
+- [x] Kết quả: `Nhân viên thu mua` chỉ thấy trong Kho NVL đúng 1 mục Tồn kho nguyên vật liệu; tất cả phiếu nhập/xuất/kiểm/đặt hàng bị ẩn
+
 ### ✅ Completed (Session 11 — 2026-04-24) — CreateMaterialPage + Footer UI fix
 
 - [x] `src/components/CreateMaterialPage.jsx`: Trang thêm NVL — 2 cột, FormData upload ảnh, batch_management checkbox, SuccessModal
