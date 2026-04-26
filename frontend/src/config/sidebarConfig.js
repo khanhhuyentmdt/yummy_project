@@ -71,7 +71,7 @@ const SIDEBAR_CONFIG = [
             label: 'Kho nguyên vật liệu',
             roles: null,
             children: [
-              { id: 'phieu-dat-hang', label: 'Phiếu đặt hàng',          roles: ['Nhân viên kho'],                          view: 'coming-soon' },
+              { id: 'phieu-dat-hang', label: 'Phiếu đặt hàng',          roles: ['Nhân viên kho', 'Nhân viên thu mua'],     view: 'coming-soon' },
               { id: 'nhap-kho-nvl',   label: 'Phiếu nhập kho',          roles: ['Nhân viên kho'],                          view: 'coming-soon' },
               { id: 'xuat-kho-nvl',   label: 'Phiếu xuất kho',          roles: ['Nhân viên kho'],                          view: 'coming-soon' },
               { id: 'kiem-kho-nvl',   label: 'Phiếu kiểm kho',          roles: ['Nhân viên kho'],                          view: 'coming-soon' },

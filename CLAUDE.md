@@ -288,6 +288,10 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
   - depth=0 items: giữ nguyên behavior (icon cam khi expanded, text dark semibold)
 - [x] Auto-expand path: khi `activeMenuId='nguyen-lieu-item'`, sidebar tự mở `san-xuat → nguyen-vat-lieu → thong-tin-nvl-group`
 
+### ✅ Completed (Session 12c — 2026-04-26) — Add Phiếu đặt hàng access for purchasing staff
+
+- [x] `sidebarConfig.js`: `phieu-dat-hang` thêm `'Nhân viên thu mua'` vào roles → thu mua thấy 2 mục trong Kho NVL: Phiếu đặt hàng + Tồn kho NVL
+
 ### ✅ Completed (Session 12b — 2026-04-26) — Fixed dynamic user info in Header
 
 - [x] `backend/api/views.py`: `PhoneLoginView` đổi `user.get_full_name()` → `user.full_name or user.phone_number` (get_full_name() trả về rỗng vì model dùng `full_name` không phải `first_name`/`last_name`)
