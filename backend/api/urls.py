@@ -25,4 +25,11 @@ urlpatterns = [
 
     # Orders
     path('orders/', views.order_list, name='order-list'),
+
+    # Suppliers
+    path('suppliers/', views.supplier_list, name='supplier-list'),
+
+    # Purchase Orders
+    path('purchase-orders/',          views.purchase_order_list,   name='purchase-order-list'),
+    path('purchase-orders/<int:pk>/', views.purchase_order_detail, name='purchase-order-detail'),
 ]

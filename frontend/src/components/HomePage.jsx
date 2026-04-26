@@ -11,6 +11,7 @@ import CreateProductPage from './CreateProductPage'
 import EditProductPage from './EditProductPage'
 import MaterialsPage from './MaterialsPage'
 import CreateMaterialPage from './CreateMaterialPage'
+import PurchaseOrdersPage from './PurchaseOrdersPage'
 import Sidebar from './Sidebar'
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
@@ -232,7 +233,12 @@ export default function HomePage({ user = {}, onLogout }) {
               onSaved={() => setActiveView('materials')}
             />
           )}
-          {!['dashboard', 'products', 'create-product', 'edit-product', 'materials', 'create-material'].includes(activeView) && (
+          {activeView === 'purchase-orders' && (
+            <PurchaseOrdersPage
+              onCreateClick={() => {}}
+            />
+          )}
+          {!['dashboard', 'products', 'create-product', 'edit-product', 'materials', 'create-material', 'purchase-orders'].includes(activeView) && (
             <ComingSoonView />
           )}
         </main>

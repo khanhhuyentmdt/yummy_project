@@ -288,6 +288,26 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
   - depth=0 items: giữ nguyên behavior (icon cam khi expanded, text dark semibold)
 - [x] Auto-expand path: khi `activeMenuId='nguyen-lieu-item'`, sidebar tự mở `san-xuat → nguyen-vat-lieu → thong-tin-nvl-group`
 
+### ✅ Completed (Session 13 — 2026-04-26) — Purchase Order list page
+
+- [x] `api/models.py`: Thêm `Supplier` (name, phone, address, status) và `PurchaseOrder` (code, supplier FK, total_value, status: draft/waiting/received/cancelled, notes)
+- [x] Migration `0009_supplier_purchaseorder.py` — apply thành công
+- [x] `api/serializers.py`: `SupplierSerializer`, `PurchaseOrderSerializer` (kèm supplier_name), `PurchaseOrderWriteSerializer` (auto-gen PDH{6-digit})
+- [x] `api/views.py`: `supplier_list` (GET/POST), `purchase_order_list` (GET/POST), `purchase_order_detail` (GET/PUT/PATCH/DELETE) — RBAC: `Nhân viên thu mua` + `Admin`
+- [x] `api/urls.py`: routes `/api/suppliers/`, `/api/purchase-orders/`, `/api/purchase-orders/<pk>/`
+- [x] Management command `seed_purchase_orders` — seed 5 suppliers + 5 phiếu mẫu (PDH001–PDH005)
+- [x] `src/components/PurchaseOrdersPage.jsx`: bảng danh sách — search, filter 4 trạng thái, pagination, action dropdown, delete confirm
+- [x] Status badges 4 màu: Lưu nháp (xám), Chờ nhận (vàng), Đã nhận (xanh lá), Đã hủy (đỏ) — rounded-[7px] py-[9px] px-[20px]
+- [x] `src/components/HomePage.jsx`: import + render `PurchaseOrdersPage` tại `activeView === 'purchase-orders'`
+- [x] `src/config/sidebarConfig.js`: `phieu-dat-hang.view` đổi từ `'coming-soon'` → `'purchase-orders'`
+
+**API endpoints mới:**
+- `GET /api/suppliers/` — danh sách nhà cung cấp
+- `POST /api/suppliers/` — tạo nhà cung cấp
+- `GET /api/purchase-orders/?search=&status=` — danh sách phiếu đặt hàng
+- `POST /api/purchase-orders/` — tạo phiếu (auto-gen code PDH{6-digit})
+- `GET/PUT/PATCH/DELETE /api/purchase-orders/{pk}/`
+
 ### ✅ Completed (Session 12c — 2026-04-26) — Add Phiếu đặt hàng access for purchasing staff
 
 - [x] `sidebarConfig.js`: `phieu-dat-hang` thêm `'Nhân viên thu mua'` vào roles → thu mua thấy 2 mục trong Kho NVL: Phiếu đặt hàng + Tồn kho NVL

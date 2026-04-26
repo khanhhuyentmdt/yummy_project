@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "erp_yummy",
-  "version": "0.9.0",
-  "last_updated": "2026-04-24",
-  "session": 10,
+  "version": "1.0.0",
+  "last_updated": "2026-04-26",
+  "session": 13,
 
   "environment": {
     "python": ".venv/python.exe",
@@ -134,6 +134,33 @@
           "email": "EmailField(blank=True)",
           "address": "TextField(blank=True)"
         }
+      },
+      "Supplier": {
+        "status": "done",
+        "migration": "api/migrations/0009_supplier_purchaseorder.py",
+        "fields": {
+          "name": "CharField(max_length=200)",
+          "phone": "CharField(max_length=20, blank=True)",
+          "address": "TextField(blank=True)",
+          "status": "CharField(choices=['active','inactive'], default='active')"
+        },
+        "rbac": "is_staff OR role in {'Nhân viên thu mua', 'Admin'}",
+        "seed_command": "python manage.py seed_purchase_orders"
+      },
+      "PurchaseOrder": {
+        "status": "done",
+        "migration": "api/migrations/0009_supplier_purchaseorder.py",
+        "fields": {
+          "code": "CharField(max_length=20, unique=True) — auto-gen PDH{6-digit}",
+          "supplier": "ForeignKey(Supplier, PROTECT)",
+          "total_value": "DecimalField(max_digits=14, decimal_places=0)",
+          "status": "CharField(choices=['draft','waiting','received','cancelled'])",
+          "notes": "TextField(blank=True)",
+          "created_at": "DateTimeField(auto_now_add=True)",
+          "updated_at": "DateTimeField(auto_now=True)"
+        },
+        "rbac": "is_staff OR role in {'Nhân viên thu mua', 'Admin'}",
+        "ordering": "-id (newest first)"
       }
     },
     "api_endpoints": [
