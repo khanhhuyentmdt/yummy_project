@@ -288,6 +288,11 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
   - depth=0 items: giữ nguyên behavior (icon cam khi expanded, text dark semibold)
 - [x] Auto-expand path: khi `activeMenuId='nguyen-lieu-item'`, sidebar tự mở `san-xuat → nguyen-vat-lieu → thong-tin-nvl-group`
 
+### ✅ Completed (Session 12b — 2026-04-26) — Fixed dynamic user info in Header
+
+- [x] `backend/api/views.py`: `PhoneLoginView` đổi `user.get_full_name()` → `user.full_name or user.phone_number` (get_full_name() trả về rỗng vì model dùng `full_name` không phải `first_name`/`last_name`)
+- [x] `src/components/HomePage.jsx`: Header role đổi từ hardcode `'Trợ lý sản xuất'` → `{user.role || ''}` — hiển thị role thực tế từ localStorage/login response
+
 ### ✅ Completed (Session 12 — 2026-04-26) — Created Purchasing Staff account & refined RBAC
 
 - [x] Management command `create_purchasing_staff` — tạo tài khoản `0982334556 / 12345`, role `Nhân viên thu mua`, full_name `Trần Minh Anh`

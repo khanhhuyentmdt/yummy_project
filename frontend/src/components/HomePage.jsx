@@ -172,7 +172,7 @@ export default function HomePage({ user = {}, onLogout }) {
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-gray-800 leading-tight">{displayName}</p>
-                <p className="text-xs text-gray-400 leading-tight">Trợ lý sản xuất</p>
+                <p className="text-xs text-gray-400 leading-tight">{user.role || ''}</p>
               </div>
               <button
                 onClick={onLogout}

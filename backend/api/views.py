@@ -47,7 +47,7 @@ class PhoneLoginView(APIView):
             'refresh': str(refresh),
             'user': {
                 'id':       user.id,
-                'name':     user.get_full_name(),
+                'name':     user.full_name or user.phone_number,
                 'phone':    user.phone_number,
                 'role':     user.role,
                 'is_staff': user.is_staff,
