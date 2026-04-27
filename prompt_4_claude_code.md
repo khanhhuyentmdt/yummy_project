@@ -49,3 +49,611 @@ Hãy thực hiện toàn bộ các bước trên mà không cần hỏi lại.
 Claude, hãy cập nhật trạng thái mới nhất vào CLAUDE.md (mục Project Status) và schema_manifest.json. Sau đó, thực hiện Git Commit với thông điệp chi tiết về những gì đã làm và những gì cần làm tiếp theo.
 # 1a3b. Khi bắt đầu lại (Tiếp tục)
 Hãy đọc CLAUDE.md, schema_manifest.json và kiểm tra git log -1 để tóm tắt lại tiến trình hiện tại. Sau đó, hãy bắt đầu thực hiện bước tiếp theo trong danh sách next_steps.
+
+# Màn hình Log in
+Claude, hãy triển khai tính năng Đăng nhập (Login) cho dự án erp_yummy dựa trên hình ảnh tại screenshot/login.png với các yêu cầu sau:
+
+1. Backend (Django DRF - Port 2344):
+
+Sử dụng djangorestframework-simplejwt để xử lý xác thực (nếu chưa có hãy cài đặt vào .venv).
+
+Tạo một Serializer và View cho phép đăng nhập bằng Số điện thoại và Mật khẩu.
+
+Đảm bảo API trả về JWT Token (Access & Refresh).
+
+2. Frontend (React + Tailwind - Port 2347):
+
+Tạo component LoginPage.jsx tại frontend/src/pages/.
+
+Layout: Sử dụng Flexbox để chia màn hình làm 2 phần:
+
+Bên trái: Hiển thị ảnh món ăn lấy từ screenshot/login.png (hoặc dùng placeholder ảnh chất lượng cao tương tự).
+
+Bên phải: Form đăng nhập trên nền màu kem nhạt (bg-[#F9F3F0]).
+
+Form Details:
+
+Thẻ trắng bo góc mạnh (rounded-3xl), đổ bóng nhẹ.
+
+Logo Yummy hình tròn ở trên cùng.
+
+Input "Số điện thoại": Có icon điện thoại bên trái.
+
+Input "Mật khẩu": Có icon khóa bên trái và icon "con mắt" để ẩn/hiện mật khẩu bên phải.
+
+Nút "ĐĂNG NHẬP": Màu cam đặc trưng (bg-[#E67E22]), bo góc, chữ trắng in hoa.
+
+Logic: Sử dụng axios để gọi API tới port 2344 và lưu token vào localStorage.
+
+3. Cập nhật tiến độ:
+
+Sau khi hoàn thành, hãy cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
+
+Thực hiện một Git commit với nội dung: 'feat: add login page with split-screen UI and JWT auth'.
+
+Hãy thực hiện bước này một cách tự chủ.
+
+# Tạo tài khoản
+Context: > - Project: erp_yummy tại D:\TheALAB_VibeCoding\demo_app\
+
+Backend: Django DRF (Port: 2344) | Frontend: React Vite + TailwindCSS (Port: 2347)
+
+File tham chiếu UI: screenshot/login.png
+
+Yêu cầu thực thi:
+
+1. Backend (Django - Port 2344):
+
+Custom User Model: Chỉnh sửa api/models.py, tạo class User(AbstractUser) xóa trường username, thay bằng phone_number làm định danh chính (USERNAME_FIELD).
+
+Settings: Cấu hình AUTH_USER_MODEL = 'api.User'. Cài đặt djangorestframework-simplejwt.
+
+Migrations: Thực hiện makemigrations và migrate. Nếu có xung đột DB cũ, hãy tự quyết định việc reset database.
+
+Auth Logic: Tạo View/Serializer cho JWT Login nhận vào phone_number và password.
+
+Data Seed: Tạo một management command để tự động khởi tạo tài khoản: User: 0915085900 / Pass: 12345.
+
+2. Frontend (React - Port 2347):
+
+UI (TailwindCSS): Tái hiện giao diện split-screen từ screenshot/login.png.
+
+Bên trái: Ảnh trang trí.
+
+Bên phải: Form màu kem #F9F3F0, card trắng rounded-3xl đổ bóng.
+
+Sử dụng lucide-react cho icon điện thoại và ổ khóa trong input.
+
+Nút đăng nhập màu cam đặc trưng #E67E22.
+
+Integration: Thiết lập axios gọi API tới port 2344. Lưu JWT vào localStorage sau khi đăng nhập thành công và điều hướng về trang chủ.
+
+3. Quản lý quy trình (Persistence):
+
+Sau khi hoàn thành, hãy cập nhật trạng thái "Done" cho tính năng Login vào CLAUDE.md.
+
+Cập nhật schema_manifest.json với mục tiêu kế tiếp là "Xây dựng Dashboard sau login".
+
+Thực hiện git add . và git commit -m "feat: implement phone number auth with custom user model and split-screen login UI".
+
+Hãy thực hiện toàn bộ các bước trên một cách tự chủ.
+
+# đổi logo trang log in
+Claude, hãy thực hiện cập nhật logo cho ứng dụng erp_yummy theo các bước sau:
+
+1. Xử lý tệp tin: > - Sao chép (copy) file logo từ đường dẫn screenshot/logo.jpg vào thư mục frontend/src/assets/ để đảm bảo tính nhất quán trong quy trình build của Vite.
+
+2. Cập nhật mã nguồn (Frontend - Port 2347):
+
+Tìm tất cả các vị trí đang hiển thị logo (đặc biệt là trong LoginPage.jsx và HomePage.jsx).
+
+Import file logo mới từ ../assets/logo.jpg và thay thế các placeholder hoặc logo cũ.
+
+Sử dụng TailwindCSS để căn chỉnh lại kích thước logo cho phù hợp (ví dụ: w-20 h-20 rounded-full object-cover) sao cho khớp với giao diện trong bản thiết kế.
+
+3. Lưu tiến độ:
+
+Cập nhật trạng thái "Logo updated" vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "chore: update project logo to logo.jpg".
+
+Hãy tự động thực hiện các bước này.
+
+# Đồng bộ qua Json
+Claude, hãy triển khai tính năng Quản lý dữ liệu Thành phẩm qua file JSON với quy trình như sau:
+
+1. Bước 1: Xuất dữ liệu (Export to JSON):
+
+Viết một script (Management Command) trong Django để xuất toàn bộ dữ liệu từ model Product (Thành phẩm) ra file data_sync/products.json trong thư mục gốc.
+
+File JSON phải có cấu trúc rõ ràng: id, name, quantity, price,...
+
+2. Bước 2: API Đồng bộ (Backend - Port 2344):
+
+Tạo một API endpoint POST /api/products/sync/.
+
+Logic: Khi gọi API này, Django sẽ đọc nội dung file data_sync/products.json, đối chiếu theo id để cập nhật (update) các bản ghi cũ hoặc tạo mới (create) nếu chưa có trong Database.
+
+Thêm log thông báo: 'Đã cập nhật X bản ghi, đã tạo mới Y bản ghi'.
+
+3. Bước 3: Giao diện (Frontend - Port 2347):
+
+Tại view 'Thành phẩm / Danh sách', thêm một nút bấm 'ĐỒNG BỘ TỪ FILE JSON' (màu xanh lá, icon CloudSync từ lucide-react).
+
+Khi bấm nút, hiển thị thông báo xác nhận: 'Bạn có chắc chắn muốn ghi đè dữ liệu từ file JSON vào Database không?'.
+
+Nếu xác nhận, gọi API /api/products/sync/ và reload lại danh sách.
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
+
+Thực hiện git add . và git commit -m "feat: add JSON-based data sync for products".
+
+Hãy thực hiện ngay để tôi có thể bắt đầu sửa file JSON.
+
+# Thay đổi Nút Hành động
+Claude, hãy cập nhật giao diện cột 'Hành động' trong danh sách Thành phẩm tại Frontend theo các yêu cầu sau:
+
+1. Tham chiếu giao diện:
+
+Thay thế 2 icon (sửa/xóa) hiện tại bằng một nút bấm có nhãn 'Hành động' kèm icon mũi tên xuống, dựa trên hình ảnh screenshot/action-button.png.
+
+Khi click vào nút này, một menu dropdown sẽ xổ xuống với 2 lựa chọn: 'Chỉnh sửa' và 'Xóa', dựa trên hình ảnh screenshot/action-button-2.png.
+
+2. Yêu cầu kỹ thuật (Frontend):
+
+Component: Sử dụng Tailwind CSS để tạo style cho nút: nền trắng, bo góc (rounded-lg hoặc rounded-xl), viền nhạt, chữ đen.
+
+Dropdown Logic: Sử dụng React useState để quản lý việc đóng/mở menu cho từng dòng dữ liệu. Đảm bảo khi click ra ngoài menu hoặc click chọn một tác vụ thì menu sẽ tự đóng lại.
+
+Z-index: Đảm bảo menu dropdown hiển thị đè lên trên các dòng dữ liệu phía dưới (sử dụng z-10 hoặc cao hơn).
+
+Action: Giữ nguyên logic cũ của nút 'Chỉnh sửa' và 'Xóa' khi người dùng chọn từ menu.
+
+3. Tinh chỉnh UI:
+
+Menu đổ xuống phải có đổ bóng (shadow-lg), bo góc mềm mại, và hiệu ứng hover cho từng mục chọn (ví dụ: hover:bg-gray-100).
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "ui: refactor action column to dropdown menu".
+
+Hãy thực hiện thay đổi này ngay lập tức.
+
+# Trang them san pham
+Claude, hãy thực hiện một đợt cập nhật lớn cho dự án erp_yummy với các yêu cầu sau:
+
+1. Thay đổi định danh & Màu sắc (Global UI):
+
+Đổi tên: Tìm và thay thế tất cả từ 'Thành phẩm' thành 'Sản phẩm' và nút 'Thêm lô' thành 'Thêm sản phẩm' trên toàn bộ giao diện (Sidebar, Breadcrumbs, Tiêu đề trang, Buttons).
+
+Màu nền: Cập nhật màu nền của khu vực Content chính (trừ Sidebar và Header trắng) thành mã màu #FFF6F3. Hãy áp dụng vào file CSS chính hoặc class Tailwind tại layout tổng.
+
+2. Xây dựng Trang 'Thêm sản phẩm' mới:
+Khi click vào nút 'Thêm sản phẩm', hãy điều hướng đến trang (hoặc mở modal toàn màn hình) được thiết kế dựa trên 3 ảnh: screenshot/them-sanpham-1 of 3.png, 2 of 3.png, và 3 of 3.png.
+
+Cấu trúc trang bao gồm các Section:
+
+Thông tin chung: Tên sản phẩm, Nhóm sản phẩm (dropdown), Đơn vị tính (dropdown), Mô tả.
+
+Hình ảnh sản phẩm: Khu vực kéo thả hoặc tải ảnh lên.
+
+Thông tin sản xuất (Định mức BOM): >   - Cho phép thêm/xóa nhiều dòng Nguyên liệu.
+
+Mỗi dòng gồm: Chọn nguyên liệu (dropdown), Định lượng (input số), Đơn vị (auto-fill theo nguyên liệu).
+
+Ghi chú sản xuất.
+
+Thông tin giá: Giá bán (có dấu sao đỏ), Giá vốn (readonly hoặc tính toán từ BOM), Giá so sánh. Tự động tính Biên lợi nhuận (%) và Lợi nhuận (đ).
+
+Ghi chú: Ô nhập liệu văn bản lớn.
+
+Footer Action: Nút 'Hủy' (viền xám), nút 'Lưu' (màu cam #E67E22).
+
+3. Kỹ thuật & Logic:
+
+Backend: Đảm bảo Model Product có đủ các trường trên. Tạo bảng trung gian cho ProductBOM để lưu định mức nguyên liệu.
+
+Frontend: Sử dụng Tailwind CSS để tạo layout 2 cột (Cột chính bên trái cho thông tin, cột phụ bên phải cho Ảnh và Ghi chú) như trong ảnh.
+
+4. Quản lý quy trình:
+
+Cập nhật CLAUDE.md và schema_manifest.json (Trạng thái: Đã đổi tên sản phẩm & Hoàn thành trang Add Product).
+
+Thực hiện git add . và git commit -m "feat: rename components to 'Sản phẩm', update background color and implement Create Product page with BOM".
+
+Hãy thực hiện ngay một cách tự chủ.
+
+# Prompt Nâng cấp Danh sách Sản phẩm (Giao diện & Tính năng)
+Claude, hãy tiến hành nâng cấp trang Danh sách Sản phẩm dựa trên file thiết kế screenshot/ds-sanpham.png với các yêu cầu chi tiết sau:
+
+1. Thay đổi Font chữ & Style hệ thống:
+
+Cập nhật toàn bộ ứng dụng sang font chữ 'Nunito Sans' (Sử dụng Google Fonts import trong index.css).
+
+Đổi màu nền trang thành #FFF6F3 (như đã yêu cầu ở bước trước).
+
+2. Cấu hình bảng danh sách (Table Update):
+
+Cột Hình ảnh: Thêm cột hiển thị ảnh sản phẩm nằm ngay trước 'Tên sản phẩm'. Ảnh hiển thị trong khung bo góc tròn nhẹ, kích thước nhỏ gọn (w-12 h-12 object-cover rounded-lg).
+
+Cột Trạng thái (Status Badge): Tùy chỉnh padding của tag trạng thái chính xác theo thông số: trên-dưới 9px, trái-phải 20px. Sử dụng màu nền nhạt và chữ đậm theo từng trạng thái (ví dụ: Tạm ngưng - nền đỏ nhạt, Đang hoạt động - nền xanh nhạt).
+
+3. Cập nhật Header & Thanh công cụ (Toolbar):
+
+Góc phải trên cùng: Thêm 2 nút bấm 'Nhập' (màu cam nhạt) và 'Xuất' (màu cam nhạt) có icon tương ứng.
+
+Khu vực tìm kiếm: >   - Thêm nút 'Bộ lọc' (màu cam nhạt, icon Filter) nằm cạnh thanh tìm kiếm.
+
+Nút 'Đồng bộ JSON': Thu nhỏ nút này thành một biểu tượng (IconButton) với icon RefreshCw hoặc Database để tiết kiệm diện tích cho nút Bộ lọc.
+
+Nút 'Thêm sản phẩm': Giữ nguyên màu cam đậm chủ đạo ở góc phải của thanh công cụ.
+
+4. Logic Backend & Frontend:
+
+Cập nhật Model Product để hỗ trợ lưu trữ đường dẫn ảnh.
+
+Xây dựng component FilterDrawer hoặc một khu vực lọc nhanh khi bấm vào nút 'Bộ lọc'.
+
+Đảm bảo phân trang (Pagination) hiển thị đúng như mẫu ở cuối bảng.
+
+5. Quản lý tiến trình:
+
+Cập nhật CLAUDE.md (Task: Refactor Product List UI with images and filters).
+
+Thực hiện git add . và git commit -m "ui: refactor product list, add images, filters, and update font to Nunito Sans".
+
+Hãy thực hiện thay đổi một cách tỉ mỉ để khớp với padding và layout trong ảnh thiết kế.
+# Cấu hình Sidebar ERP Yummy & Phân quyền User
+Claude, hãy thực hiện tái cấu trúc toàn diện Sidebar cho ứng dụng erp_yummy dựa trên file nội dung sidebar.docx (đường dẫn screenshot/sidebar.docx).
+
+1. Cấu trúc Nội dung & Phân quyền (RBAC):
+
+Dữ liệu: Hãy đọc file sidebar.docx và tạo một mảng (Array) hoặc JSON cấu trúc menu. Mỗi mục menu cần bao gồm: title, path, icon, và danh sách roles được phép truy cập (ví dụ: roles: ['Nhân viên kho', 'Bếp trưởng']).
+
+Logic hiển thị: >   - Chỉ hiển thị các mục menu mà Role của người dùng hiện tại có trong danh sách được phép.
+
+Nếu một Nhóm cha (ví dụ: Sản xuất, Nhân sự) không có bất kỳ mục con nào khả dụng cho Role đó, hãy ẩn luôn cả Nhóm cha đó.
+
+Nếu mục menu không để Role trong ngoặc, mặc định là tất cả mọi người đều thấy.
+
+2. Chỉnh sửa giao diện & Tính năng:
+
+Nút Toggle: Thay thế cơ chế mở hiện tại bằng một nút mũi tên (Sử dụng ChevronLeft / ChevronRight từ lucide-react). Nút này nằm ở giữa cạnh phải của Sidebar hoặc ở chân Sidebar.
+
+Hiệu ứng: Sidebar phải có hiệu ứng co giãn mượt mà (smooth transition). Khi co lại, chỉ hiển thị Icon; khi mở ra, hiển thị đầy đủ Icon và Chữ.
+
+Font chữ: Đảm bảo sử dụng nhất quán font Nunito Sans.
+
+3. Kỹ thuật (Frontend):
+
+Sử dụng Context API hoặc Redux (tùy theo cấu trúc hiện tại) để lấy thông tin user.role.
+
+Viết một hàm helper checkPermission(itemRoles, userRole) để lọc mảng menu trước khi render.
+
+Đảm bảo các link điều hướng (react-router-dom) hoạt động chính xác với cấu trúc menu mới.
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái 'Sidebar RBAC Implemented' vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "feat: refactor sidebar with RBAC based on sidebar.docx and add toggle arrow".
+
+Hãy thực hiện một cách tự chủ và chính xác theo danh sách vai trò trong tài liệu.
+
+# Prompt Tinh chỉnh UI Dropdown & Sắp xếp Danh sách
+Claude, hãy thực hiện hai điều chỉnh nhỏ nhưng quan trọng sau cho ứng dụng erp_yummy:
+
+1. Chỉnh sửa giao diện Dropdown (CSS/Tailwind):
+
+Tham khảo hình ảnh image_e04c5b.png. Hiện tại icon mũi tên xổ xuống đang nằm quá sát lề phải.
+
+Hãy điều chỉnh lại CSS/Tailwind cho các component Dropdown/Select (đặc biệt là phần 'Chọn nguyên liệu' và các ô tương tự).
+
+Yêu cầu: Khoảng cách từ icon mũi tên đến viền phải phải bằng chính xác với khoảng cách từ chữ 'Chọn...' đến viền trái (padding-left = padding-right cho icon).
+
+2. Cập nhật logic sắp xếp danh sách Sản phẩm:
+
+Yêu cầu: Đảm bảo các sản phẩm mới được thêm vào sẽ luôn hiển thị ở vị trí đầu tiên trong trang Danh sách sản phẩm (thay vì ở cuối như hiện tại).
+
+Thực hiện: >   - Backend: Cập nhật file api/models.py (thêm ordering = ['-id'] vào class Meta của model Product) hoặc cập nhật View để sắp xếp dữ liệu theo ID hoặc thời gian tạo giảm dần.
+
+Frontend: Đảm bảo state danh sách sau khi thêm mới sẽ được đẩy vào đầu mảng (unshift) hoặc gọi lại API đã được sắp xếp.
+
+3. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "style: fix dropdown arrow padding and sort product list by newest first".
+
+Hãy thực hiện ngay để hoàn thiện trải nghiệm người dùng.
+# Prompt Triển khai Danh sách Nguyên vật liệu (Copy & Paste)
+Claude, hãy xây dựng trang Danh sách Nguyên vật liệu cho ứng dụng erp_yummy dựa trên thiết kế tại screenshot/ds-nguyenvatlieu.png với các yêu cầu sau:
+
+1. Backend (Django - Port 2344):
+
+Model: Tạo model Material (Nguyên vật liệu) với các trường: Mã NVL (unique), Tên, Nhóm NVL, Đơn vị tính, Hình ảnh, Trạng thái (Đang hoạt động/Tạm ngưng).
+
+API: Xây dựng CRUD API đầy đủ. Đảm bảo hỗ trợ sắp xếp theo ID giảm dần (mới nhất lên đầu) và hỗ trợ upload hình ảnh qua FormData.
+
+Phân quyền: Chỉ cho phép role 'Nhân viên thu mua' và 'Admin' truy cập vào các API này (dựa trên cấu trúc RBAC đã thiết lập).
+
+2. Frontend (React - Port 2347):
+
+Giao diện tổng thể: Kế thừa layout từ trang Sản phẩm: Font chữ Nunito Sans, màu nền chính #FFF6F3, Sidebar và Header màu trắng.
+
+Cấu trúc Table: >   - Hiển thị cột: Checkbox chọn, Mã NVL, Tên NVL (kèm thumbnail bo góc), Nhóm NVL, Đơn vị tính, Trạng thái (Badge), và nút Dropdown 'Hành động'.
+
+Thumbnail: Nếu không có ảnh, hiển thị icon placeholder hạt đậu hoặc hộp hàng như trong mẫu.
+
+Trạng thái: Badge bo góc rộng (padding 9px/20px) với màu sắc tương ứng: Xanh dương nhạt cho 'Đang hoạt động', Đỏ nhạt cho 'Tạm ngưng'.
+
+Thanh công cụ (Toolbar): >   - Breadcrumb chính xác: Nguyên vật liệu / Thông tin nguyên vật liệu / Danh sách nguyên vật liệu.
+
+Nút 'Xuất' (màu cam nhạt) ở trên cùng bên phải.
+
+Thanh tìm kiếm, nút 'Bộ lọc', và nút '+ Thêm nguyên vật liệu' (màu cam đậm #E67E22) được sắp xếp đúng vị trí như ảnh mẫu.
+
+3. Tính năng bổ trợ:
+
+Triển khai logic phân trang (Pagination) ở cuối bảng.
+
+Đảm bảo Sidebar làm nổi bật mục 'Nguyên vật liệu' khi đang ở trang này.
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
+
+Thực hiện git add . và git commit -m "feat: implement Raw Materials list page based on ds-nguyenvatlieu.png".
+
+Hãy thực hiện một cách tỉ mỉ để đảm bảo sự đồng bộ hoàn hảo với trang Sản phẩm.
+# Prompt Cấu trúc lại Sidebar Nguyên vật liệu
+Claude, hãy cập nhật cấu trúc Sidebar cho phân đoạn 'Nguyên vật liệu' dựa trên hình ảnh screenshot/sidebar-nvl và các yêu cầu sau:
+
+1. Cấu trúc phân cấp Menu:
+Hãy tổ chức lại menu 'Nguyên vật liệu' thành 3 cấp độ như sau:
+
+Cấp 1: Nguyên vật liệu (Nhóm cha lớn).
+
+Cấp 2 & 3:
+
+Thông tin nguyên vật liệu (Có mũi tên xổ xuống):
+
+Nhóm nguyên vật liệu
+
+Nguyên vật liệu
+
+Nhà cung cấp (Cùng cấp với 'Thông tin nguyên vật liệu').
+
+Kho nguyên vật liệu (Có mũi tên xổ xuống):
+
+Phiếu đặt hàng
+
+Phiếu nhập kho
+
+Phiếu xuất kho
+
+Phiếu kiểm kho
+
+Tồn kho nguyên vật liệu
+
+2. Giao diện & Trải nghiệm (UI/UX):
+
+Style: Tuân thủ thiết kế trong ảnh screenshot/sidebar-nvl. Khi một mục cha được chọn hoặc mở ra, chữ và icon chuyển sang màu cam đặc trưng, các mục con hiển thị thụt lề vào trong với dấu chấm (bullet point) phía trước.
+
+Active State: Vì hiện tại chúng ta đang ở trang 'Danh sách nguyên vật liệu', hãy làm nổi bật mục 'Nguyên vật liệu' (con của 'Thông tin nguyên vật liệu') và tự động mở rộng (expand) nhóm cha của nó.
+
+Mũi tên: Sử dụng icon mũi tên lên/xuống (ChevronUp / ChevronDown) ở bên phải các mục có menu con để người dùng đóng/mở thủ công.
+
+3. Phân quyền (RBAC):
+
+Tiếp tục áp dụng phân quyền từ sidebar.docx: Các mục này chủ yếu dành cho 'Nhân viên thu mua' và 'Nhân viên kho'. Đảm bảo các role không liên quan sẽ không nhìn thấy các phân mục này.
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái 'Sidebar Materials hierarchy updated' vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "ui: refactor materials sidebar with nested navigation and active states".
+
+Hãy thực hiện thay đổi này để đảm bảo Sidebar phản ánh đúng cấu trúc quản lý của hệ thống.
+# Prompt Triển khai trang Thêm mới Nguyên vật liệu
+Claude, hãy triển khai trang 'Thêm mới nguyên vật liệu' cho ứng dụng erp_yummy dựa trên hình ảnh tại screenshot/them-nvl.png với các yêu cầu chi tiết sau:
+
+1. Giao diện (Frontend - Port 2347):
+
+Layout: Sử dụng cấu trúc 2 cột trên nền màu #FFF6F3 với font chữ Nunito Sans.
+
+Cột trái (Thông tin chung):
+
+Tiêu đề section: 'Thông tin chung'.
+
+Input 'Tên nguyên vật liệu' (Bắt buộc, có dấu * đỏ).
+
+2 Dropdown nằm trên cùng một hàng: 'Nhóm nguyên vật liệu' và 'Đơn vị tính' (Cả hai đều bắt buộc).
+
+Textarea 'Ghi chú'.
+
+Checkbox: 'Quản lý sản phẩm theo lô - HSD'.
+
+Cột phải (Hình ảnh):
+
+Khu vực tải ảnh: Có khung bo góc, icon ảnh lớn ở giữa và dòng chữ hướng dẫn 'Kéo thả hoặc tải ảnh lên...'. Chỉ chấp nhận định dạng .png, .jpg, .jpeg.
+
+Header & Footer:
+
+Link 'Quay lại danh sách nguyên vật liệu' có icon mũi tên.
+
+Thanh tác vụ bên dưới: Icon reset (quay lại), nút 'Hủy' (nền trắng viền xám), và nút 'Lưu' (màu cam #E67E22).
+
+2. Logic & Kết nối (Fullstack):
+
+Backend: Đảm bảo API POST /api/materials/ xử lý tốt dữ liệu FormData bao gồm cả file ảnh và trường checkbox quản lý theo lô.
+
+Frontend: >   - Khi bấm 'Lưu', gọi API lưu dữ liệu. Nếu thành công, hiển thị SuccessModal (đã làm ở các bước trước) và điều hướng về trang danh sách.
+
+Khi bấm 'Hủy' hoặc 'Quay lại', điều hướng về trang danh sách nguyên vật liệu.
+
+3. Tinh chỉnh UI:
+
+Khoảng cách padding và bo góc các ô Input/Dropdown phải đồng bộ với các trang trước đó.
+
+Đảm bảo icon mũi tên trong các Dropdown cách lề phải một khoảng cân đối (như đã sửa ở trang Sản phẩm).
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái 'Add Raw Material page implemented' vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "feat: implement Add Raw Material page with image upload and batch management option".
+
+Hãy thực hiện ngay để hoàn thiện phân hệ Quản lý nguyên vật liệu.
+# Tài khoản nhân viên thu mua
+Claude, hãy thực hiện cấu hình tài khoản mới và cập nhật logic phân quyền cho Role 'Nhân viên thu mua' theo các yêu cầu sau:
+
+1. Khởi tạo Tài khoản (Backend):
+
+Tạo một script (Management Command) để khởi tạo User mới với thông tin:
+
+Số điện thoại: 0982334556
+Tên: Trần Minh Anh
+
+Mật khẩu: 12345
+
+Role: Nhân viên thu mua
+
+Đảm bảo hệ thống lưu trữ đúng Role này vào Database để Frontend có thể nhận diện sau khi login.
+
+2. Cấu hình Phân quyền Sidebar (Frontend):
+- Dựa trên file sidebar.docx  và yêu cầu mới, hãy cập nhật lại danh sách quyền truy cập cho Role 'Nhân viên thu mua':
+
+Được phép truy cập: >     - Toàn bộ mục Thông tin nguyên vật liệu (bao gồm Nhóm NVL và NVL).
+
+Mục Nhà cung cấp.
+
+Lưu ý đặc biệt: Trong phần Kho nguyên vật liệu, Role này chỉ được thấy và truy cập mục Tồn kho nguyên vật liệu. Các mục khác như Phiếu nhập/xuất/kiểm kho phải bị ẩn hoàn toàn đối với Role này.
+
+Cập nhật hàm checkPermission để thực thi logic lọc menu con (Sub-menu) một cách nghiêm ngặt.
+
+3. Kiểm tra:
+
+Sau khi tạo xong, hãy kiểm tra lại file sidebar.js (hoặc file cấu hình menu) để chắc chắn Role 'Nhân viên thu mua' đã được gán vào đúng các mục trên.
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái 'Created Purchasing Staff account & refined RBAC' vào CLAUDE.md.
+
+Thực hiện git add . và git commit -m "feat: create purchasing staff user and restrict warehouse access to inventory only".
+
+Hãy thực hiện ngay để tôi có thể dùng tài khoản này kiểm tra hệ thống.
+
+# Prompt Triển khai Danh sách Phiếu đặt hàng (Copy & Paste)
+Claude, hãy xây dựng trang Danh sách Phiếu đặt hàng cho ứng dụng erp_yummy dựa trên thiết kế tại screenshot/ds-phieudathang.png (file image_aa118f.png) với các yêu cầu sau:
+
+1. Backend (Django - Port 2344):
+
+Model: Tạo model PurchaseOrder (Phiếu đặt hàng) với các trường: Mã phiếu (unique), Ngày tạo, Nhà cung cấp (ForeignKey tới Supplier), Tổng giá trị, Trạng thái (Lưu nháp, Chờ nhận, Đã nhận, Đã hủy).
+
+API: Xây dựng đầy đủ API CRUD. Đảm bảo dữ liệu trả về được sắp xếp theo id giảm dần (mới nhất lên đầu).
+
+Phân quyền: Cấu hình để Role 'Nhân viên thu mua' và 'Admin' có toàn quyền truy cập.
+
+2. Frontend (React - Port 2347):
+
+Giao diện tổng thể: Tiếp tục sử dụng font Nunito Sans, màu nền chính #FFF6F3, Sidebar và Header màu trắng.
+
+Breadcrumb: Nguyên vật liệu / Kho nguyên vật liệu / Danh sách phiếu đặt hàng.
+
+Cấu trúc Table:
+
+Hiển thị các cột: Mã phiếu, Ngày tạo phiếu, Nhà cung cấp, Tổng giá trị, Trạng thái, Hành động.
+
+Trạng thái (Status Badges): Sử dụng border-radius 7px, padding 9px/20px. Màu sắc theo mẫu:
+
+Lưu nháp: Nền xám nhạt.
+
+Chờ nhận: Nền vàng nhạt.
+
+Đã nhận: Nền xanh lá nhạt.
+
+Đã hủy: Nền đỏ nhạt.
+
+Hành động: Sử dụng nút Dropdown 'Hành động' đã thiết kế ở các trang trước.
+
+Thanh công cụ (Toolbar):
+
+Nút 'Xuất' (màu cam nhạt) ở góc phải trên.
+
+Ô tìm kiếm, nút 'Bộ lọc' (màu cam nhạt) và nút '+ Thêm phiếu đặt hàng' (màu cam đậm #E67E22) được bố trí chính xác như trong ảnh.
+
+3. Logic bổ trợ:
+
+Triển khai phân trang (Pagination) ở cuối bảng.
+
+Đảm bảo Sidebar làm nổi bật đúng phân mục Phiếu đặt hàng trong nhóm Kho nguyên vật liệu.
+
+4. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
+
+Thực hiện git add . và git commit -m "feat: implement Purchase Order list page based on ds-phieudathang.png".
+
+Hãy thực hiện ngay để đồng bộ hóa quy trình quản lý kho cho hệ thống.
+
+# Triển khai trang Thêm mới Phiếu đặt hàng
+Claude, hãy triển khai trang 'Thêm mới phiếu đặt hàng' cho ứng dụng erp_yummy dựa trên hình ảnh tham chiếu tại screenshot/them-phieudathang-1 of 2.png và screenshot/them-phieudathang-2 of 2.png với các yêu cầu chi tiết sau:
+
+1. Giao diện & Layout (Frontend - Port 2347):
+
+Chủ đề: Sử dụng cấu trúc 2 cột trên nền màu #FFF6F3, font chữ Nunito Sans. Toàn bộ các ô nhập liệu, dropdown và nút bấm sử dụng border-radius: 7px.
+
+Cột trái (Thông tin chính):
+
+Khối Thông tin chung: Các ô 'Nhà cung cấp' (bắt buộc, có dấu * đỏ), 'Người phụ trách' (dropdown), 'Ngày đặt hàng' (datepicker), 'Ngày dự kiến nhập hàng' (datepicker).
+
+Khối Nguyên vật liệu: Ô tìm kiếm nguyên vật liệu, khu vực hiển thị danh sách (hiện tại hiển thị trạng thái trống với icon placeholder và nút 'Nhập file danh sách' màu cam đậm).
+
+Cột phải (Thông tin bổ trợ):
+
+Khối Chi phí đặt hàng: Hiển thị danh sách các chỉ số: Số lượng đặt, Tổng tiền hàng, Chiết khấu đơn, Phí vận chuyển, VAT, Chi phí khác, Tiền cần trả NCC.
+
+Khối Ghi chú: Ô nhập văn bản (textarea) lớn.
+
+2. Cụm nút tác vụ cuối trang (Nằm trong nội dung trang):
+
+Vị trí: Đặt ngay phía dưới các khối nội dung, không tách thành footer riêng biệt. Căn chỉnh lề của icon và các nút phải thẳng hàng với lề của các khối nội dung phía trên.
+
+Phía bên trái: Icon tải lại/làm mới (Sử dụng icon RotateCcw từ lucide-react).
+
+Phía bên phải (Cụm nút bấm):
+
+Nút 'Hủy': Nền trắng, viền xám nhạt, chữ đen.
+
+Nút 'Lưu nháp': Nền xám nhạt (bg-gray-200), chữ đen xám.
+
+Nút 'Thêm': Màu cam đậm #E67E22, chữ trắng.
+
+3. Logic & Kết nối (Fullstack):
+
+Backend (Port 2344): Cập nhật API POST /api/purchase-orders/ để tiếp nhận dữ liệu phiếu đặt hàng cùng danh sách nguyên vật liệu đi kèm.
+
+Frontend:
+
+Thiết lập state để tính toán tự động 'Tiền cần trả NCC' dựa trên các biến số chi phí ở cột phải.
+
+Thực hiện validation: Hiển thị dòng thông báo lỗi màu đỏ dưới các trường bắt buộc nếu để trống (như trong ảnh image_a8bc79.png).
+
+Sau khi bấm 'Thêm' thành công, hiển thị SuccessModal và điều hướng về trang danh sách phiếu đặt hàng.
+
+4. Quy chuẩn thiết kế:
+
+Đảm bảo khoảng cách icon mũi tên trong các dropdown cách lề phải cân đối (giống các trang Sản phẩm/Nguyên vật liệu đã làm).
+
+5. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
+
+Thực hiện git add . và git commit -m "feat: implement Add Purchase Order page with cost calculation and inline action buttons".
+
+Hãy thực hiện ngay để hoàn thiện quy trình thu mua.

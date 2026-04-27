@@ -22,7 +22,18 @@
       "Bash(../.venv/python.exe manage.py makemigrations api --name \"product_extended_fields_rawmaterial_bom\")",
       "Bash(\"../.venv/python.exe\" manage.py makemigrations api --name \"product_extended_fields_rawmaterial_bom\")",
       "Bash(\"../.venv/python.exe\" manage.py migrate)",
-      "Bash(\"../.venv/python.exe\" manage.py seed_raw_materials)"
+      "Bash(\"../.venv/python.exe\" manage.py seed_raw_materials)",
+      "Bash(\"../.venv/python.exe\" manage.py check)",
+      "Bash(ls -la media/)",
+      "Bash(.venv/python.exe *)",
+      "Bash(set PYTHONIOENCODING=utf-8)",
+      "Bash(node -e \"const lr = require\\('./node_modules/lucide-react'\\); const icons = ['Factory','ChefHat','Warehouse','Boxes','Building2','FileText','ClipboardList','Truck','Tag','Calendar','Clock','Wallet','Banknote','FlaskConical','Home','Layers','FolderOpen','Package2','ListChecks','Percent','UserCheck']; icons.forEach\\(i => console.log\\(i, !!lr[i]\\)\\)\")",
+      "Bash(conda run -p .venv python -c ' *)",
+      "Bash(python -c \"import sys; sys.stdout.buffer.write\\(sys.stdin.buffer.read\\(\\)\\)\")",
+      "Bash(conda run *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(npm run *)",
+      "Bash(..\\\\\\\\.venv\\\\\\\\python.exe manage.py migrate)"
     ]
   }
 }
