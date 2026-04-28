@@ -315,16 +315,23 @@ const SIDEBAR_CONFIG = [
         ],
       },
       {
-        id: "nhom-kh",
-        label: "Nhóm khách hàng",
+        id: "khach-hang",
+        label: "Khách hàng",
         roles: null,
-        view: "coming-soon",
-      },
-      {
-        id: "thong-tin-kh",
-        label: "Thông tin khách hàng",
-        roles: null,
-        view: "coming-soon",
+        children: [
+          {
+            id: "nhom-kh",
+            label: "Nhóm khách hàng",
+            roles: null,
+            view: "coming-soon",
+          },
+          {
+            id: "thong-tin-kh",
+            label: "Thông tin khách hàng",
+            roles: null,
+            view: "coming-soon",
+          },
+        ],
       },
       {
         id: "don-hang",

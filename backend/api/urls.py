@@ -24,7 +24,10 @@ from .views import (
     packaging_handover,
     packaging_record,
     # Bán hàng
+    customer_group_list,
+    customer_group_detail,
     customer_list,
+    customer_detail,
     order_list,
     # Nhân sự
     employee_list,
@@ -75,8 +78,13 @@ urlpatterns = [
     path('semi-finished/packaging-handover/', packaging_handover, name='packaging-handover'),
     path('semi-finished/packaging-record/', packaging_record, name='packaging-record'),
 
-    # ─── Bán hàng ─────────────────────────────────────────────────────────────
-    path('customers/', customer_list, name='customer-list'),
+    # ─── Bán hàng > Khách hàng ────────────────────────────────────────────────
+    path('customer-groups/',          customer_group_list,   name='customer-group-list'),
+    path('customer-groups/<int:pk>/', customer_group_detail, name='customer-group-detail'),
+    path('customers/',                customer_list,         name='customer-list'),
+    path('customers/<int:pk>/',       customer_detail,       name='customer-detail'),
+
+    # ─── Bán hàng > Đơn hàng ──────────────────────────────────────────────────
     path('orders/', order_list, name='order-list'),
 
     # ─── Nhân sự > Thiết lập nhân viên ────────────────────────────────────────

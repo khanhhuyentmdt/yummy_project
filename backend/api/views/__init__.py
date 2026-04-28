@@ -43,7 +43,10 @@ from .san_xuat import (
 
 # Bán hàng
 from .ban_hang import (
+    customer_group_list,
+    customer_group_detail,
     customer_list,
+    customer_detail,
     order_list,
 )
 
@@ -102,7 +105,10 @@ __all__ = [
     'packaging_handover',
     'packaging_record',
     # Bán hàng
+    'customer_group_list',
+    'customer_group_detail',
     'customer_list',
+    'customer_detail',
     'order_list',
     # Nhân sự - Thiết lập nhân viên
     'employee_list',
