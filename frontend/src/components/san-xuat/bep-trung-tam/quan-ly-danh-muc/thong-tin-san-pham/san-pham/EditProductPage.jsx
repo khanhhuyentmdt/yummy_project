@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronRight, ChevronDown, Plus, X, Upload, Loader2 } from 'lucide-react'
-import api from '../../../../../api/axios'
-import SuccessModal from '../../../../common/SuccessModal'
+import api from '../../../../../../api/axios'
+import SuccessModal from '../../../../../common/SuccessModal'
 
 const PRODUCT_GROUPS = [
   'Trà hồ Singapore',

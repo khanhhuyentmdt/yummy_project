@@ -145,7 +145,20 @@ const SIDEBAR_CONFIG = [
                 id: "thong-tin-san-pham",
                 label: "Thông tin sản phẩm",
                 roles: ["Trợ lý sản xuất"],
-                view: "products",
+                children: [
+                  {
+                    id: "nhom-san-pham",
+                    label: "Nhóm sản phẩm",
+                    roles: ["Trợ lý sản xuất"],
+                    view: "coming-soon",
+                  },
+                  {
+                    id: "san-pham",
+                    label: "Sản phẩm",
+                    roles: ["Trợ lý sản xuất"],
+                    view: "products",
+                  },
+                ],
               },
             ],
           },

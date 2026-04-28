@@ -1,7 +1,13 @@
 """
 Sản xuất views module
 """
-from .bep_trung_tam import product_list, product_detail, product_sync
+from .bep_trung_tam import (
+    product_list,
+    product_detail,
+    product_sync,
+    product_group_list,
+    product_group_detail,
+)
 from .nguyen_vat_lieu import (
     material_list,
     material_detail,
@@ -23,6 +29,8 @@ __all__ = [
     'product_list',
     'product_detail',
     'product_sync',
+    'product_group_list',
+    'product_group_detail',
     # Nguyên vật liệu
     'material_list',
     'material_detail',

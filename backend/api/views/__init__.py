@@ -23,6 +23,8 @@ from .san_xuat import (
     product_list,
     product_detail,
     product_sync,
+    product_group_list,
+    product_group_detail,
     # Nguyên vật liệu - Materials
     material_list,
     material_detail,
@@ -84,6 +86,8 @@ __all__ = [
     'product_list',
     'product_detail',
     'product_sync',
+    'product_group_list',
+    'product_group_detail',
     # Sản xuất - Nguyên vật liệu
     'material_list',
     'material_detail',

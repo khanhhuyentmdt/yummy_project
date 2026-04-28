@@ -8,6 +8,8 @@ from .views import (
     product_list,
     product_detail,
     product_sync,
+    product_group_list,
+    product_group_detail,
     # Sản xuất - Nguyên vật liệu
     material_list,
     material_detail,
@@ -55,6 +57,8 @@ urlpatterns = [
     path('products/',             product_list,   name='product-list'),
     path('products/sync/',        product_sync,   name='product-sync'),
     path('products/<int:pk>/',    product_detail, name='product-detail'),
+    path('product-groups/',             product_group_list,   name='product-group-list'),
+    path('product-groups/<int:pk>/',    product_group_detail, name='product-group-detail'),
 
     # ─── Sản xuất > Nguyên vật liệu ───────────────────────────────────────────
     path('raw-materials/', raw_material_list, name='raw-material-list'),
