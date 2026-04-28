@@ -1,12 +1,12 @@
 D: && cd D:\TheALAB_VibeCoding\demo_app
 -----
 # Termninal
-[api] D: && cd D:\TheALAB_VibeCoding\demo_app\backend && conda activate ../.venv/ && python manage.py runserver 2344
-[vite] D: && cd D:\TheALAB_VibeCoding\demo_app\frontend && npm run dev -- --port 2347 --host
-[git] D: && cd D:\TheALAB_VibeCoding\demo_app\
-[backend] D: && cd D:\TheALAB_VibeCoding\demo_app\backend && conda activate ../.venv/
-[frontend] D: && cd D:\TheALAB_VibeCoding\demo_app\frontend
-[claude] D: && cd D:\TheALAB_VibeCoding\demo_app && claude 
+[api] D: && cd D:\vibecoding_yummy\backend && conda activate ../.venv/ && python manage.py runserver 2344
+[vite] D: && cd D:\vibecoding_yummy\frontend && npm run dev -- --port 2347 --host
+[git] D: && cd D:\vibecoding_yummy
+[backend] D: && cd D:\vibecoding_yummy\backend && conda activate ../.venv/
+[frontend] D: && cd D:\vibecoding_yummy\frontend
+[claude] D: && cd D:\vibecoding_yummy && claude 
 192.168.1.13
 -----
 [Gemini] https://gemini.google.com/gem/coding-partner/2a2df0c69f9c6374

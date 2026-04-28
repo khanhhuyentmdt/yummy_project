@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import LoginPage from './pages/LoginPage'
-import HomePage from './components/HomePage'
+import HomePage from './components/tong-quan/trang-chu/HomePage'
 
 function App() {
   const [user, setUser] = useState(() => {
