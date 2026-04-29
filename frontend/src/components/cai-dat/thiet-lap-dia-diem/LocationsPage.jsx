@@ -4,6 +4,8 @@ import {
   Plus, Filter, Download, Upload,
 } from 'lucide-react'
 import api from '../../../api/axios'
+import AddLocationModal from './AddLocationModal'
+import SuccessModal from '../../common/SuccessModal'
 
 const ITEMS_PER_PAGE = 5
 
@@ -15,7 +17,7 @@ const LOCATIONS_FALLBACK = [
   { id: 1, code: 'MDD001', name: 'Cua hang Ngu Hanh Son',    address: '120 Nguyen Duy Hieu, Da Nang',       phone: '0236 123 4567', status: 'inactive' },
 ]
 
-export default function LocationsPage({ onCreateClick }) {
+export default function LocationsPage() {
   const [locations, setLocations]           = useState(LOCATIONS_FALLBACK)
   const [loading, setLoading]               = useState(true)
   const [search, setSearch]                 = useState('')
@@ -26,6 +28,8 @@ export default function LocationsPage({ onCreateClick }) {
   const [selected, setSelected]             = useState(new Set())
   const [deleteTarget, setDeleteTarget]     = useState(null)
   const [deleteLoading, setDeleteLoading]   = useState(false)
+  const [addModalOpen, setAddModalOpen]     = useState(false)
+  const [successMsg, setSuccessMsg]         = useState(null)
   const filterRef = useRef(null)
 
   const loadLocations = () => {
@@ -94,6 +98,12 @@ export default function LocationsPage({ onCreateClick }) {
     } finally {
       setDeleteLoading(false)
     }
+  }
+
+  const handleAddSaved = (newLocation) => {
+    setLocations(prev => [newLocation, ...prev])
+    setAddModalOpen(false)
+    setSuccessMsg(`Địa điểm "${newLocation.name}" đã được thêm thành công!`)
   }
 
   return (
@@ -196,7 +206,7 @@ export default function LocationsPage({ onCreateClick }) {
           {/* Add button */}
           <div className="ml-auto">
             <button
-              onClick={onCreateClick}
+              onClick={() => setAddModalOpen(true)}
               className="flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors hover:opacity-90 active:opacity-80"
               style={{ backgroundColor: '#E67E22' }}
             >
@@ -348,6 +358,22 @@ export default function LocationsPage({ onCreateClick }) {
           </div>
         </div>
       </div>
+
+      {/* ── Add Location Modal ─────────────────────────────────────────────── */}
+      {addModalOpen && (
+        <AddLocationModal
+          onClose={() => setAddModalOpen(false)}
+          onSaved={handleAddSaved}
+        />
+      )}
+
+      {/* ── Success Modal ──────────────────────────────────────────────────── */}
+      {successMsg && (
+        <SuccessModal
+          message={successMsg}
+          onClose={() => setSuccessMsg(null)}
+        />
+      )}
 
       {/* ── Delete confirm dialog ──────────────────────────────────────────── */}
       {deleteTarget && (

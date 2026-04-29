@@ -353,9 +353,21 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 **Seed command:** `python manage.py seed_locations`
 
+### ✅ Completed (Session 15 — 2026-04-29) — Pop-up Thêm mới địa điểm
+
+- [x] `src/components/cai-dat/thiet-lap-dia-diem/AddLocationModal.jsx`: Modal thêm địa điểm — 4 fields (Tên*, SĐT, Mã, Địa chỉ, Trạng thái), validation client-side, border-radius 7px, nút Reset/Hủy/Thêm, Escape để đóng
+- [x] `src/components/cai-dat/thiet-lap-dia-diem/LocationsPage.jsx`: Tích hợp AddLocationModal (quản lý state nội bộ), hiển thị SuccessModal sau khi thêm thành công, tự cập nhật danh sách (prepend) mà không reload trang
+- [x] `src/components/tong-quan/trang-chu/HomePage.jsx`: Bỏ prop `onCreateClick` khỏi `<LocationsPage>` (modal tự quản lý)
+- [x] Backend POST /api/locations/: Đã đủ — nhận code, name, address, phone, status, chỉ Admin
+
+**Quy trình thêm địa điểm:**
+1. Vào Cài đặt → Thiết lập địa điểm → nhấn "+ Thêm địa điểm"
+2. Điền Tên địa điểm (bắt buộc), SĐT, Địa chỉ, Mã (để trống = auto-gen MDD{6-digit}), Trạng thái
+3. Nhấn "Thêm" → POST /api/locations/ → đóng modal → hiển thị SuccessModal → danh sách tự cập nhật
+
 ### 🔜 Next Steps
 
-- [ ] **CreateLocationPage / EditLocationPage**: Trang thêm/sửa địa điểm
+- [ ] **EditLocationModal**: Pop-up sửa thông tin địa điểm
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status

@@ -903,7 +903,7 @@ export default function HomePage({ user = {}, onLogout }) {
             <PurchaseOrdersPage onCreateClick={() => {}} />
           )}
           {activeView === "locations" && (
-            <LocationsPage onCreateClick={() => {}} />
+            <LocationsPage />
           )}
           {![
             "dashboard",
