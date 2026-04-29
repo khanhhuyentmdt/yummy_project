@@ -229,10 +229,8 @@ export default function LocationsPage() {
                 </span>
                 <button
                   onClick={() => setBulkDeleteOpen(true)}
-                  className="flex items-center gap-1.5 text-white text-sm font-bold px-4 py-2 rounded-[7px] hover:opacity-90 active:opacity-80 transition-opacity"
-                  style={{ backgroundColor: '#C00000' }}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors"
                 >
-                  <Trash2 size={14} />
                   Xóa đã chọn
                 </button>
               </>
@@ -259,15 +257,15 @@ export default function LocationsPage() {
                     type="checkbox"
                     checked={allPageChecked}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                    className="w-4 h-4 rounded border-gray-300 cursor-pointer checked:bg-[#E67E22] checked:border-[#E67E22] focus:ring-2 focus:ring-orange-300 focus:ring-offset-0"
                   />
                 </th>
-                <SortableTh columnKey="code"    label="Mã Địa Điểm" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="name"    label="Tên Địa Điểm" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="address" label="Địa Chỉ"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="code"    label="MÃ ĐỊA ĐIỂM" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="name"    label="TÊN ĐỊA ĐIỂM" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="address" label="ĐỊA CHỈ"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
                 <SortableTh columnKey="phone"   label="SĐT"          sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="status"  label="Trạng Thái"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Hành Động</th>
+                <SortableTh columnKey="status"  label="TRẠNG THÁI"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
+                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">HÀNH ĐỘNG</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -288,7 +286,7 @@ export default function LocationsPage() {
                         type="checkbox"
                         checked={selected.has(l.id)}
                         onChange={() => toggleOne(l.id)}
-                        className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                        className="w-4 h-4 rounded border-gray-300 cursor-pointer checked:bg-[#E67E22] checked:border-[#E67E22] focus:ring-2 focus:ring-orange-300 focus:ring-offset-0"
                       />
                     </td>
                     <td className="px-4 py-3.5 font-mono text-xs text-gray-600 font-semibold">{l.code}</td>

@@ -421,6 +421,14 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 **API mới:** `POST /api/locations/bulk-delete/` body `{ids: [1,2,3]}` → `{deleted: 3}`
 
+### ✅ Completed (Session 21 — 2026-04-29) — UI Refinement: Checkbox, Bulk Delete Button, Table Headers
+
+- [x] `LocationsPage.jsx`: Checkbox style — thay `accent-orange-500` bằng `checked:bg-[#E67E22] checked:border-[#E67E22] focus:ring-2 focus:ring-orange-300 focus:ring-offset-0` cho cả checkbox header và row
+- [x] `LocationsPage.jsx`: Nút "Xóa đã chọn" — thay style inline `#C00000` + `rounded-[7px]` bằng `bg-red-600 hover:bg-red-700 rounded-lg` (đồng bộ với HomePage)
+- [x] `LocationsPage.jsx`: Table headers — uppercase tất cả label: `MÃ ĐỊA ĐIỂM`, `TÊN ĐỊA ĐIỂM`, `ĐỊA CHỈ`, `SĐT`, `TRẠNG THÁI`, `HÀNH ĐỘNG`
+- [x] Checkbox khi checked: nền cam #E67E22, dấu tick trắng, bo góc nhẹ, ring cam khi focus
+- [x] Font Nunito Sans được kế thừa từ body (không cần thêm class)
+
 ### 🔜 Next Steps
 
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)

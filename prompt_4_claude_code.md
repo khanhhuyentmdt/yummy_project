@@ -657,3 +657,239 @@ Cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
 Thực hiện git add . và git commit -m "feat: implement Add Purchase Order page with cost calculation and inline action buttons".
 
 Hãy thực hiện ngay để hoàn thiện quy trình thu mua.
+
+# Triển khai Danh sách Cài đặt địa điểm
+Claude, hãy triển khai chức năng Danh sách cài đặt địa điểm cho ứng dụng erp_yummy. Bạn cần đọc kỹ file CẤU_TRÚC_THƯ_MỤC.md để đảm bảo lưu file đúng vị trí.
+
+1. Yêu cầu về Vị trí thư mục (Theo CẤU_TRÚC_THƯ_MỤC.md):
+- Backend: Làm việc duy nhất trong thư mục backend/api/views/cai_dat/. Tạo file location_views.py (nếu chưa có) để xử lý API địa điểm.   
+
+Frontend: Làm việc duy nhất trong thư mục frontend/src/components/cai-dat/thiet-lap-dia-diem/. Tạo các component liên quan tại đây.   
+
+2. Backend (Django - Port 2344):
+
+Model: Tạo model Location với các trường: Mã địa điểm, Tên địa điểm, Địa chỉ, Số điện thoại, Trạng thái (Đang hoạt động/Tạm ngưng).
+
+API: Xây dựng CRUD API đầy đủ, hỗ trợ sắp xếp theo ID giảm dần (mới nhất lên đầu).
+
+Phân quyền: Chỉ cho phép role 'Admin' truy cập (dựa trên file sidebar.docx).
+
+3. Frontend (React - Port 2347):
+
+Giao diện: Tái hiện giao diện từ screenshot/ds-caidatdiadiem.png. Phong cách phải tương tự trang Danh sách sản phẩm và Danh sách nguyên vật liệu:
+
+Màu nền: #FFF6F3, Font: Nunito Sans.
+
+Table: Các cột Mã địa điểm, Tên địa điểm, Địa chỉ, SĐT, Trạng thái, Hành động (Dropdown).
+
+Trạng thái: Badge có border-radius 7px, padding 9px/20px.
+
+Thanh công cụ: Nút '+ Thêm địa điểm' màu cam đậm #E67E22, nút 'Bộ lọc', và ô tìm kiếm.
+
+4. Quy chuẩn kỹ thuật:
+- Luôn giữ cấu trúc song song giữa Backend và Frontend. - Đặt tên file/thư mục: Backend dùng snake_case, Frontend dùng kebab-case.   
+
+Tích hợp SuccessModal khi thực hiện các tác vụ lưu/xóa thành công.
+
+5. Quản lý quy trình:
+
+Cập nhật trạng thái vào CLAUDE.md và schema_manifest.json.
+
+Thực hiện git add . và git commit -m "feat: implement Location Settings list in module cai-dat per project structure".
+
+Hãy thực hiện ngay một cách tự chủ và chính xác theo cấu trúc thư mục quy định.
+
+# Triển khai Pop-up Thêm mới Địa điểm
+Claude, hãy triển khai chức năng Pop-up Thêm mới địa điểm cho ứng dụng erp_yummy. Bạn cần tuân thủ nghiêm ngặt file CẤU_TRÚC_THƯ_MỤC.md để lưu file đúng vị trí nghiệp vụ.  1. Yêu cầu về Vị trí thư mục (Phân cấp theo nghiệp vụ):
+* Backend: Làm việc trong thư mục backend/api/views/cai_dat/. Sử dụng hoặc cập nhật file location_views.py để xử lý logic lưu trữ dữ liệu.
+* Frontend: Làm việc trong thư mục frontend/src/components/cai-dat/thiet-lap-dia-diem/. Tạo component AddLocationModal.jsx tại đây.  2. Backend (Django - Port 2344):
+* API: Đảm bảo API POST /api/locations/ tiếp nhận các trường: Mã địa điểm, Tên địa điểm, Địa chỉ, Số điện thoại và Trạng thái.
+* Xác thực: Chỉ cho phép role 'Admin' thực hiện thao tác này.  3. Frontend (React - Port 2347):Giao diện Pop-up: Dựa trên hình ảnh screenshot/them-diadiem-popup.png.Cấu trúc: Modal nằm giữa màn hình, có lớp phủ (overlay) mờ phía sau.Ô nhập liệu: Mã địa điểm, Tên địa điểm (bắt buộc), Địa chỉ, Số điện thoại. Sử dụng border-radius: 7px cho tất cả các input.Font chữ: Sử dụng Nunito Sans xuyên suốt.Nút tác vụ (Căn lề phải):Nút 'Hủy': Nền trắng, viền xám nhạt, chữ đen.Nút 'Thêm': Nền màu cam đậm #E67E22, chữ trắng, border-radius: 7px.4. Logic & Quy trình:Validation: Hiển thị cảnh báo màu đỏ nếu bỏ trống các trường bắt buộc.Kết nối: Sau khi bấm 'Thêm' thành công:Đóng Pop-up.
+* Hiển thị SuccessModal thông báo thành công.  Tự động cập nhật lại danh sách địa điểm ở trang chính mà không cần tải lại trang.Hủy: Khi bấm 'Hủy' hoặc nhấn ra ngoài overlay, đóng Pop-up và xóa trắng dữ liệu đã nhập.5. Quản lý hệ thống:Cập nhật file CLAUDE.md và schema_manifest.json.Thực hiện git add . và git commit -m "feat: implement Add Location Pop-up in module cai-dat per project structure".Hãy thực hiện một cách tỉ mỉ để đảm bảo sự đồng bộ với các Modal khác trong hệ thống.
+
+# Triển khai Pop-up Chỉnh sửa Địa điểm & Logic Chuyển tiếp UX
+Claude, hãy triển khai chức năng Pop-up Chỉnh sửa địa điểm và cập nhật luồng trải nghiệm (UX Flow) cho ứng dụng erp_yummy. Bạn cần tuân thủ nghiêm ngặt file CẤU_TRÚC_THƯ_MỤC.md để lưu file đúng vị trí nghiệp vụ.
+
+1. Vị trí tệp tin (Phân cấp theo nghiệp vụ):
+
+Backend: Cập nhật backend/api/views/cai_dat/location_views.py để hỗ trợ API lấy chi tiết (GET) và cập nhật (PATCH/PUT) địa điểm.
+
+Frontend: Tạo component EditLocationModal.jsx trong thư mục frontend/src/components/cai-dat/thiet-lap-dia-diem/.
+
+2. Giao diện Pop-up Chỉnh sửa (Dựa trên ảnh screenshot/chinhsua-diadiem.png):
+
+Cấu trúc: Giống hệt Pop-up thêm mới nhưng có các điểm khác biệt sau:
+
+Tiêu đề: 'CHỈNH SỬA ĐỊA ĐIỂM {Mã_Địa_Điểm}' (Ví dụ: MDD006).
+
+Trường Trạng thái (Bổ sung): Thêm Dropdown 'Trạng thái' (Đang hoạt động/Tạm ngưng) nằm bên cạnh trường 'Nhân viên quản lý'.
+
+Khối Lịch sử (Phía dưới cùng): Hiển thị dòng nhật ký bao gồm: Ngày, Giờ, Tên người thực hiện và nội dung hành động (Ví dụ: '15/03/2026 - 16:15 - Trần Khánh Huyền - Thêm mới địa điểm MDD006').
+
+Nút tác vụ: Giữ nguyên icon reset, nút 'Hủy' (trắng) và nút 'Lưu' (cam #E67E22).
+
+3. Logic Chuyển tiếp UX (Quan trọng):
+
+Luồng hành động:
+
+Khi người dùng bấm 'Lưu' ở Pop-up Thêm mới thành công -> Hiển thị SuccessModal.
+
+Khi người dùng bấm 'OK' trên SuccessModal -> Hệ thống tự động mở Pop-up Chỉnh sửa cho chính địa điểm vừa tạo đó để người dùng xem lại thông tin.
+
+Nếu người dùng không cần sửa gì thêm, họ có thể bấm dấu 'X' (nhân) ở góc trên để thoát về trang danh sách.
+
+4. Quy chuẩn kỹ thuật & Style:
+
+Dữ liệu: Khi mở Modal chỉnh sửa, phải gọi API lấy dữ liệu theo ID và đổ đầy vào các trường (bao gồm các checkbox trong phần 'Thiết lập địa điểm').
+
+Style: Font Nunito Sans, border-radius 7px cho tất cả input và button. Màu nền #FFF6F3.
+
+5. Quản lý hệ thống:
+
+Cập nhật file CLAUDE.md và schema_manifest.json.
+
+Thực hiện git add . và git commit -m "feat: implement Edit Location Modal and auto-open edit flow after creation success".
+
+Hãy thực hiện một cách tỉ mỉ để đảm bảo dữ liệu được đồng bộ hóa mượt mà giữa các bước.
+# Cập nhật Giao diện Pop-up Xác nhận Xóa
+Claude, hãy thực hiện cập nhật giao diện cho Pop-up Xác nhận xóa địa điểm trong ứng dụng erp_yummy dựa trên thiết kế tại screenshot/popup-canhbaoxoa.png. Hãy tuân thủ cấu trúc thư mục nghiệp vụ trong CẤU_TRÚC_THƯ_MỤC.md.
+
+1. Vị trí tệp tin:
+
+Frontend: Chỉnh sửa component xác nhận xóa tại thư mục frontend/src/components/cai-dat/thiet-lap-dia-diem/ (có thể là DeleteLocationModal.jsx hoặc một component dùng chung trong common/).
+
+2. Giao diện & Thành phần (Dựa trên ảnh screenshot/popup-canhbaoxoa.png):
+
+Icon cảnh báo: Một vòng tròn màu vàng bao quanh dấu chấm than (!) nằm chính giữa phía trên. Sử dụng icon từ lucide-react hoặc SVG tương đương với màu vàng tươi.
+
+Nội dung thông báo:
+
+Văn bản: 'Bạn có chắc muốn xóa địa điểm “{Mã_Địa_Điểm}” không?'
+
+Kiểu chữ: Căn giữa, in nghiêng nhẹ, sử dụng font Nunito Sans.
+
+Hệ thống Nút bấm (Nằm ngang, khoảng cách đều):
+
+Nút bên trái ('Vâng, xóa đi'): Nền màu cam đậm #E67E22, chữ trắng, bo góc 7px.
+
+Nút bên phải ('Không, quay lại'): Nền màu cam nhạt/kem (bg-[#FFF0E6] hoặc tương đương), chữ màu cam, bo góc 7px.
+
+3. Logic & Hiệu ứng:
+
+Nền: Thẻ (Card) màu trắng, bo góc lớn, có bóng đổ (shadow) mềm mại, hiển thị trên lớp phủ (overlay) tối mờ.
+
+Hành động:
+
+Khi bấm 'Vâng, xóa đi': Gọi API xóa, hiện SuccessModal, đóng pop-up và cập nhật lại danh sách.
+
+Khi bấm 'Không, quay lại' hoặc click ra ngoài: Đóng pop-up mà không thực hiện thay đổi nào.
+
+4. Quy chuẩn kỹ thuật:
+
+Giữ nguyên các thông số padding và khoảng cách cân đối như trong hình ảnh tham chiếu.
+
+Đảm bảo mã địa điểm trong thông báo được truyền vào động (dynamic).
+
+5. Quản lý quy trình:
+
+Cập nhật file CLAUDE.md.
+
+Thực hiện git add . và git commit -m "style: refactor delete confirmation popup UI according to design".
+
+Hãy thực hiện thay đổi này để đảm bảo sự đồng bộ và thẩm mỹ cho toàn bộ hệ thống.
+# Triển khai tính năng Xóa hàng loạt (Bulk Delete)
+Claude, hãy triển khai tính năng Xóa hàng loạt (Bulk Delete) cho trang Danh sách địa điểm trong ứng dụng erp_yummy. Hãy tuân thủ cấu trúc thư mục nghiệp vụ trong CẤU_TRÚC_THƯ_MỤC.md.
+
+1. Vị trí tệp tin:
+
+Backend: backend/api/views/cai_dat/location_views.py.
+
+Frontend: frontend/src/components/cai-dat/thiet-lap-dia-diem/LocationList.jsx.
+
+2. Logic Hiển thị linh hoạt (Frontend):
+
+Trạng thái mặc định: Hiển thị nút '+ Thêm địa điểm' màu cam như hiện tại.
+
+Trạng thái khi có mục được chọn (Dựa trên ảnh screenshot/xoahangloat.png):
+
+Khi người dùng tích chọn ít nhất một ô checkbox ở đầu dòng trong danh sách, nút '+ Thêm địa điểm' sẽ biến mất.
+
+Thay thế vào vị trí đó là một cụm thông tin gồm:
+
+Văn bản: '{số_lượng} được chọn' (Ví dụ: 2 được chọn).
+
+Nút bấm: 'Xóa đã chọn' (Màu đỏ đậm, chữ trắng, bo góc 7px).
+
+Sử dụng hiệu ứng chuyển đổi mượt mà giữa hai trạng thái này.
+
+3. Logic Xác nhận & Xóa (Fullstack):
+
+Xác nhận: Khi bấm 'Xóa đã chọn', hãy hiển thị Pop-up cảnh báo xóa (đã làm ở bước trước) nhưng cập nhật nội dung thành: 'Bạn có chắc muốn xóa {số_lượng} địa điểm đã chọn không?'.
+
+Backend (Django):
+
+Xây dựng hoặc cập nhật API để tiếp nhận danh sách các ID cần xóa (ví dụ: POST hoặc DELETE kèm mảng ids).
+
+Thực hiện xóa các bản ghi trong một transaction để đảm bảo an toàn dữ liệu.
+
+Frontend:
+
+Sau khi xóa thành công, hiển thị SuccessModal, tự động bỏ chọn tất cả các checkbox và cập nhật lại danh sách địa điểm.
+
+4. Quy chuẩn kỹ thuật & Style:
+
+Font chữ: Nunito Sans.
+
+Nút 'Xóa đã chọn': Màu đỏ đặc trưng cho hành động xóa hàng loạt (ví dụ: #C00000 hoặc tương đương như trong ảnh).
+
+Đảm bảo tính nhất quán về khoảng cách và căn lề với thanh tìm kiếm và nút bộ lọc.
+
+5. Quản lý quy trình:
+
+Cập nhật file CLAUDE.md.
+
+Thực hiện git add . và git commit -m "feat: implement bulk delete functionality with dynamic action bar in location list".
+
+Hãy thực hiện thay đổi này để người dùng có thể quản lý danh sách địa điểm một cách nhanh chóng và chuyên nghiệp nhất.
+
+# Triển khai tính năng Sắp xếp (Sorting) 3 trạng thái
+Claude, hãy triển khai tính năng Sắp xếp (Sorting) cho tất cả các bảng danh sách trong ứng dụng erp_yummy (Sản phẩm, Nguyên vật liệu, Địa điểm, Phiếu đặt hàng). Hãy tuân thủ cấu trúc thư mục trong CẤU_TRÚC_THƯ_MỤC.md.
+
+1. Logic Sắp xếp (3 trạng thái):
+Áp dụng cơ chế chuyển đổi khi người dùng click vào tiêu đề cột (ngoại trừ cột 'Hành động' và 'Checkbox'):
+
+Click lần 1: Sắp xếp tăng dần (A-Z / Cũ đến mới).
+
+Click lần 2: Sắp xếp giảm dần (Z-A / Mới đến cũ).
+
+Click lần 3: Trả về trạng thái mặc định ban đầu (không sắp xếp/theo ID).
+
+2. Giao diện (Frontend):
+
+Icon chỉ báo: Hiển thị icon mũi tên lên/xuống nhỏ cạnh tiêu đề cột (Sử dụng ArrowUp, ArrowDown, hoặc ChevronsUpDown từ lucide-react).
+
+Trạng thái Active: Khi một cột đang được sort, icon phải đổi sang màu cam đậm #E67E22 để người dùng dễ nhận biết.
+
+Font chữ: Tiếp tục sử dụng Nunito Sans.
+
+3. Xử lý Backend (Django):
+
+Cập nhật các ViewSet/API tương ứng để nhận tham số sort từ URL (ví dụ: ?ordering=name, ?ordering=-name).
+
+Đảm bảo Backend xử lý sắp xếp chính xác cho các kiểu dữ liệu khác nhau (Văn bản, Số, Ngày tháng).
+
+4. Phạm vi áp dụng (Theo CẤU_TRÚC_THƯ_MỤC.md):
+
+Sản xuất: san-pham, nguyen-vat-lieu, phieu-dat-hang.
+
+Cài đặt: thiet-lap-dia-diem.
+
+Hãy viết một Reusable Hook (ví dụ: useSort) hoặc component Table dùng chung để dễ dàng áp dụng cho các trang hiện tại và tương lai.
+
+5. Quản lý quy trình:
+
+Cập nhật file CLAUDE.md.
+
+Thực hiện git add . và git commit -m "feat: implement 3-state sorting for all list tables across the system".
+
+Hãy thực hiện thay đổi này để tối ưu hóa khả năng khai thác dữ liệu cho người dùng.

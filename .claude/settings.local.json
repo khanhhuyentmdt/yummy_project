@@ -33,7 +33,12 @@
       "Bash(conda run *)",
       "Bash(echo \"exit:$?\")",
       "Bash(npm run *)",
-      "Bash(..\\\\\\\\.venv\\\\\\\\python.exe manage.py migrate)"
+      "Bash(..\\\\\\\\.venv\\\\\\\\python.exe manage.py migrate)",
+      "Bash(../.venv/python.exe manage.py makemigrations api --name add_location)",
+      "Bash(../.venv/python.exe manage.py seed_locations)",
+      "Bash(../.venv/python.exe manage.py makemigrations api --name location_extended_fields)",
+      "Bash(../.venv/python.exe manage.py migrate api 0012)",
+      "Bash(npx vite *)"
     ]
   }
 }
