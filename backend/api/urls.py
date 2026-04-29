@@ -47,6 +47,7 @@ from .views import (
     # Cài đặt
     location_list,
     location_detail,
+    staff_user_list,
     shipping_unit_list,
 )
 
@@ -112,5 +113,6 @@ urlpatterns = [
     # ─── Cài đặt ──────────────────────────────────────────────────────────────
     path('locations/',          location_list,   name='location-list'),
     path('locations/<int:pk>/', location_detail, name='location-detail'),
+    path('staff-users/',        staff_user_list, name='staff-user-list'),
     path('shipping-units/', shipping_unit_list, name='shipping-unit-list'),
 ]

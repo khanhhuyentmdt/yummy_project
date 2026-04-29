@@ -267,31 +267,95 @@ class PurchaseOrderWriteSerializer(serializers.ModelSerializer):
 # ─── Location ─────────────────────────────────────────────────────────────────
 
 class LocationSerializer(serializers.ModelSerializer):
+    manager_id   = serializers.IntegerField(source='manager.id', read_only=True, allow_null=True)
+    manager_name = serializers.SerializerMethodField()
+    location_types_list = serializers.SerializerMethodField()
+
+    def get_manager_name(self, obj):
+        if obj.manager:
+            return obj.manager.full_name or obj.manager.phone_number
+        return ''
+
+    def get_location_types_list(self, obj):
+        if not obj.location_types:
+            return []
+        return [t for t in obj.location_types.split(',') if t]
+
     class Meta:
         model  = Location
-        fields = ['id', 'code', 'name', 'address', 'phone', 'status', 'created_at', 'updated_at']
+        fields = [
+            'id', 'code', 'name',
+            'manager_id', 'manager_name',
+            'phone', 'email',
+            'address', 'province', 'district', 'ward',
+            'location_types', 'location_types_list',
+            'manage_nvl', 'manage_btp', 'manage_thanh_pham', 'allow_delivery',
+            'status', 'created_at', 'updated_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
-class LocationWriteSerializer(serializers.ModelSerializer):
-    code = serializers.CharField(max_length=20, required=False, allow_blank=True)
+class LocationWriteSerializer(serializers.Serializer):
+    code              = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+    name              = serializers.CharField(max_length=200)
+    manager_id        = serializers.IntegerField(required=False, allow_null=True)
+    phone             = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+    email             = serializers.CharField(max_length=200, required=False, allow_blank=True, default='')
+    address           = serializers.CharField(required=False, allow_blank=True, default='')
+    province          = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    district          = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    ward              = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    location_types    = serializers.ListField(
+        child=serializers.CharField(), required=False, default=list
+    )
+    manage_nvl        = serializers.BooleanField(required=False, default=False)
+    manage_btp        = serializers.BooleanField(required=False, default=False)
+    manage_thanh_pham = serializers.BooleanField(required=False, default=False)
+    allow_delivery    = serializers.BooleanField(required=False, default=False)
+    status            = serializers.ChoiceField(
+        choices=['active', 'inactive'], required=False, default='active'
+    )
 
-    class Meta:
-        model  = Location
-        fields = ['id', 'code', 'name', 'address', 'phone', 'status', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+    def _get_manager(self, manager_id):
+        if not manager_id:
+            return None
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            return User.objects.get(pk=manager_id)
+        except User.DoesNotExist:
+            return None
+
+    def _auto_code(self):
+        import time
+        suffix = int(time.time() * 1000) % 1000000
+        code = f'MDD{suffix:06d}'
+        while Location.objects.filter(code=code).exists():
+            suffix = (suffix + 1) % 1000000
+            code = f'MDD{suffix:06d}'
+        return code
 
     def create(self, validated_data):
-        if not validated_data.get('code'):
-            import time
-            suffix = int(time.time() * 1000) % 1000000
-            validated_data['code'] = f'MDD{suffix:06d}'
-            while Location.objects.filter(code=validated_data['code']).exists():
-                suffix = (suffix + 1) % 1000000
-                validated_data['code'] = f'MDD{suffix:06d}'
-        return Location.objects.create(**validated_data)
+        location_types_list = validated_data.pop('location_types', [])
+        manager_id          = validated_data.pop('manager_id', None)
+        code                = validated_data.pop('code', '').strip()
+
+        return Location.objects.create(
+            code=code or self._auto_code(),
+            manager=self._get_manager(manager_id),
+            location_types=','.join(location_types_list),
+            **validated_data,
+        )
 
     def update(self, instance, validated_data):
+        location_types_list = validated_data.pop('location_types', None)
+        manager_id          = validated_data.pop('manager_id', -1)
+
+        if location_types_list is not None:
+            instance.location_types = ','.join(location_types_list)
+        if manager_id != -1:
+            instance.manager = self._get_manager(manager_id)
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()

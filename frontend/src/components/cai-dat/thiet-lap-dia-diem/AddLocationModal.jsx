@@ -1,41 +1,104 @@
 import { useState, useEffect } from 'react'
-import { X, RotateCcw, Loader2 } from 'lucide-react'
+import { X, RotateCcw, Loader2, Settings } from 'lucide-react'
 import api from '../../../api/axios'
 
+// ─── Static data ─────────────────────────────────────────────────────────────
+
+const PROVINCES = [
+  'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
+  'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu',
+  'Bắc Ninh', 'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước',
+  'Bình Thuận', 'Cà Mau', 'Cao Bằng', 'Đắk Lắk', 'Đắk Nông',
+  'Điện Biên', 'Đồng Nai', 'Đồng Tháp', 'Gia Lai', 'Hà Giang',
+  'Hà Nam', 'Hà Tĩnh', 'Hải Dương', 'Hậu Giang', 'Hòa Bình',
+  'Hưng Yên', 'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu',
+  'Lâm Đồng', 'Lạng Sơn', 'Lào Cai', 'Long An', 'Nam Định',
+  'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên',
+  'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị',
+  'Sóc Trăng', 'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên',
+  'Thanh Hóa', 'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang',
+  'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái',
+]
+
+const LOCATION_TYPES = [
+  { value: 'san_xuat', label: 'Sản xuất' },
+  { value: 'kho_hang', label: 'Kho hàng' },
+  { value: 'cua_hang', label: 'Cửa hàng' },
+]
+
 const EMPTY_FORM = {
-  code:    '',
-  name:    '',
-  phone:   '',
-  address: '',
-  status:  'active',
+  name:             '',
+  manager_id:       '',
+  phone:            '',
+  email:            '',
+  address:          '',
+  province:         '',
+  district:         '',
+  ward:             '',
+  location_types:   [],
+  manage_nvl:       false,
+  manage_btp:       false,
+  manage_thanh_pham: false,
+  allow_delivery:   false,
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function AddLocationModal({ onClose, onSaved }) {
   const [form, setForm]       = useState(EMPTY_FORM)
   const [errors, setErrors]   = useState({})
   const [loading, setLoading] = useState(false)
+  const [staffUsers, setStaffUsers] = useState([])
 
+  // Fetch staff list for manager dropdown
+  useEffect(() => {
+    api.get('staff-users/')
+      .then(res => setStaffUsers(res.data.users || []))
+      .catch(() => setStaffUsers([]))
+  }, [])
+
+  // Escape key
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const set = (field) => (e) => {
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  const setField = (field) => (e) => {
     setForm(f => ({ ...f, [field]: e.target.value }))
     setErrors(er => ({ ...er, [field]: undefined }))
   }
 
-  const reset = () => {
-    setForm(EMPTY_FORM)
-    setErrors({})
+  const toggleType = (value) => {
+    setForm(f => ({
+      ...f,
+      location_types: f.location_types.includes(value)
+        ? f.location_types.filter(t => t !== value)
+        : [...f.location_types, value],
+    }))
+    setErrors(er => ({ ...er, location_types: undefined }))
   }
+
+  const toggleSetup = (field) => {
+    setForm(f => ({ ...f, [field]: !f[field] }))
+  }
+
+  const reset = () => { setForm(EMPTY_FORM); setErrors({}) }
+
+  // ── Validation ─────────────────────────────────────────────────────────────
 
   const validate = () => {
     const errs = {}
-    if (!form.name.trim()) errs.name = 'Tên địa điểm không được để trống'
+    if (!form.name.trim())          errs.name        = 'Vui lòng nhập tên địa điểm'
+    if (!form.manager_id)           errs.manager_id  = 'Vui lòng chọn nhân viên quản lý'
+    if (!form.phone.trim())         errs.phone       = 'Vui lòng nhập số điện thoại'
+    if (!form.location_types.length) errs.location_types = 'Vui lòng chọn ít nhất 1 loại'
     return errs
   }
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -45,13 +108,20 @@ export default function AddLocationModal({ onClose, onSaved }) {
     setLoading(true)
     try {
       const payload = {
-        name:    form.name.trim(),
-        address: form.address.trim(),
-        phone:   form.phone.trim(),
-        status:  form.status,
+        name:              form.name.trim(),
+        manager_id:        Number(form.manager_id),
+        phone:             form.phone.trim(),
+        email:             form.email.trim(),
+        address:           form.address.trim(),
+        province:          form.province,
+        district:          form.district.trim(),
+        ward:              form.ward.trim(),
+        location_types:    form.location_types,
+        manage_nvl:        form.manage_nvl,
+        manage_btp:        form.manage_btp,
+        manage_thanh_pham: form.manage_thanh_pham,
+        allow_delivery:    form.allow_delivery,
       }
-      if (form.code.trim()) payload.code = form.code.trim()
-
       const res = await api.post('locations/', payload)
       onSaved(res.data)
     } catch (err) {
@@ -70,136 +140,236 @@ export default function AddLocationModal({ onClose, onSaved }) {
     }
   }
 
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      {/* Modal container — scrollable */}
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 flex flex-col max-h-[92vh]">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide">
-            Thêm mới địa điểm
+        <div className="flex items-center justify-between px-7 pt-6 pb-5 flex-shrink-0">
+          <h2 className="text-base font-bold text-gray-900 tracking-wide">
+            THÊM MỚI ĐỊA ĐIỂM
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* ── Body ── */}
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="px-7 py-6 space-y-5">
+        {/* ── Scrollable body ── */}
+        <div className="overflow-y-auto flex-1 px-7">
+          <form id="add-location-form" onSubmit={handleSubmit} noValidate>
 
             {errors.__global__ && (
-              <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-[7px] px-3 py-2">
+              <div className="mb-4 text-sm text-red-500 bg-red-50 border border-red-200 rounded-[7px] px-3 py-2">
                 {errors.__global__}
-              </p>
+              </div>
             )}
 
-            {/* Tên địa điểm — full width */}
+            {/* 1 — Tên địa điểm */}
             <Field label="Tên địa điểm" required error={errors.name}>
               <input
                 type="text"
                 value={form.name}
-                onChange={set('name')}
+                onChange={setField('name')}
                 placeholder="Nhập tên địa điểm"
                 className={inputCls(errors.name)}
                 autoFocus
               />
             </Field>
 
-            {/* SĐT + Mã địa điểm — 2 cột */}
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Số điện thoại" error={errors.phone}>
+            {/* 2 — Nhân viên quản lý (half width, left) */}
+            <div className="mt-5 w-1/2 pr-2">
+              <Field label="Nhân viên quản lý" required error={errors.manager_id}>
+                <div className="relative">
+                  <select
+                    value={form.manager_id}
+                    onChange={setField('manager_id')}
+                    className={`${inputCls(errors.manager_id)} appearance-none pr-9`}
+                  >
+                    <option value="">Chọn nhân viên quản lý</option>
+                    {staffUsers.map(u => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
+                  </select>
+                  <ChevronSvg />
+                </div>
+              </Field>
+            </div>
+
+            {/* 3 — Số điện thoại | Email */}
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <Field label="Số điện thoại" required error={errors.phone}>
                 <input
                   type="text"
                   value={form.phone}
-                  onChange={set('phone')}
+                  onChange={setField('phone')}
                   placeholder="Nhập số điện thoại"
                   className={inputCls(errors.phone)}
                 />
               </Field>
-              <Field label="Mã địa điểm" error={errors.code}>
+              <Field label="Email" error={errors.email}>
                 <input
                   type="text"
-                  value={form.code}
-                  onChange={set('code')}
-                  placeholder="Tự động nếu để trống"
-                  className={inputCls(errors.code)}
+                  value={form.email}
+                  onChange={setField('email')}
+                  placeholder="Nhập email"
+                  className={inputCls(errors.email)}
                 />
               </Field>
             </div>
 
-            {/* Địa chỉ — full width */}
-            <Field label="Địa chỉ" error={errors.address}>
-              <input
-                type="text"
-                value={form.address}
-                onChange={set('address')}
-                placeholder="Nhập địa chỉ"
-                className={inputCls(errors.address)}
-              />
-            </Field>
+            {/* 4 — Địa chỉ | Tỉnh/Thành phố */}
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <Field label="Địa chỉ" error={errors.address}>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={setField('address')}
+                  placeholder="Nhập địa chỉ"
+                  className={inputCls(errors.address)}
+                />
+              </Field>
+              <Field label="Tỉnh/ Thành phố" error={errors.province}>
+                <div className="relative">
+                  <select
+                    value={form.province}
+                    onChange={setField('province')}
+                    className={`${inputCls(errors.province)} appearance-none pr-9`}
+                  >
+                    <option value="">Chọn tỉnh/ thành phố</option>
+                    {PROVINCES.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                  <ChevronSvg />
+                </div>
+              </Field>
+            </div>
 
-            {/* Trạng thái */}
-            <Field label="Trạng thái" error={errors.status}>
-              <div className="relative">
-                <select
-                  value={form.status}
-                  onChange={set('status')}
-                  className={`${inputCls(errors.status)} appearance-none pr-9`}
-                >
-                  <option value="active">Đang hoạt động</option>
-                  <option value="inactive">Tạm ngưng</option>
-                </select>
-                <svg
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  width="14" height="14" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" strokeWidth="2.5"
-                  strokeLinecap="round" strokeLinejoin="round"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
+            {/* 5 — Quận/Huyện | Phường/Xã */}
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <Field label="Quận/ Huyện" error={errors.district}>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={form.district}
+                    onChange={setField('district')}
+                    placeholder="Chọn quận/ huyện"
+                    className={inputCls(errors.district)}
+                  />
+                  <ChevronSvg />
+                </div>
+              </Field>
+              <Field label="Phường/ Xã" error={errors.ward}>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={form.ward}
+                    onChange={setField('ward')}
+                    placeholder="Chọn phường/ xã"
+                    className={inputCls(errors.ward)}
+                  />
+                  <ChevronSvg />
+                </div>
+              </Field>
+            </div>
+
+            {/* 6 — Loại địa điểm */}
+            <div className="mt-5">
+              <label className="text-sm font-medium text-gray-700">
+                Loại địa điểm
+                <span className="text-red-500 ml-0.5">*</span>
+              </label>
+              <div className="mt-2.5 flex items-center gap-8">
+                {LOCATION_TYPES.map(t => (
+                  <label key={t.value} className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={form.location_types.includes(t.value)}
+                      onChange={() => toggleType(t.value)}
+                      className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">{t.label}</span>
+                  </label>
+                ))}
               </div>
-            </Field>
+              {errors.location_types && (
+                <p className="mt-1 text-xs text-red-500">{errors.location_types}</p>
+              )}
+            </div>
 
-          </div>
+            {/* 7 — Thiết lập địa điểm */}
+            <div className="mt-5 mb-6 border border-gray-100 rounded-xl overflow-hidden">
+              <div
+                className="flex items-center gap-2 px-4 py-3"
+                style={{ borderLeft: '4px solid #E67E22' }}
+              >
+                <Settings size={15} className="text-orange-500 flex-shrink-0" />
+                <span className="text-sm font-semibold text-orange-500">Thiết lập địa điểm</span>
+              </div>
+              <div className="px-4 pb-4 grid grid-cols-2 gap-x-8 gap-y-3 mt-1">
+                {[
+                  { field: 'manage_nvl',        label: 'Quản lý nguyên vật liệu' },
+                  { field: 'manage_btp',        label: 'Quản lý bán thành phẩm' },
+                  { field: 'manage_thanh_pham', label: 'Quản lý thành phẩm' },
+                  { field: 'allow_delivery',    label: 'Cho phép giao hàng' },
+                ].map(item => (
+                  <label key={item.field} className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={form[item.field]}
+                      onChange={() => toggleSetup(item.field)}
+                      className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
 
-          {/* ── Footer ── */}
-          <div className="flex items-center justify-end gap-3 px-7 py-4 border-t border-gray-100 bg-gray-50/50">
-            <button
-              type="button"
-              onClick={reset}
-              title="Đặt lại"
-              className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-            >
-              <RotateCcw size={15} />
-            </button>
+          </form>
+        </div>
 
+        {/* ── Footer ── */}
+        <div className="flex items-center justify-between px-7 py-5 flex-shrink-0 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={reset}
+            title="Đặt lại"
+            className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
+          >
+            <RotateCcw size={16} />
+          </button>
+
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-[7px] hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-[7px] hover:bg-gray-50 transition-colors"
             >
               Hủy
             </button>
-
             <button
               type="submit"
+              form="add-location-form"
               disabled={loading}
               className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white rounded-[7px] hover:opacity-90 active:opacity-80 disabled:opacity-60 transition-opacity"
               style={{ backgroundColor: '#E67E22' }}
             >
               {loading && <Loader2 size={14} className="animate-spin" />}
-              Thêm
+              Lưu
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )
@@ -215,8 +385,21 @@ function Field({ label, required, error, children }) {
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-500 mt-0.5">{error}</p>}
     </div>
+  )
+}
+
+function ChevronSvg() {
+  return (
+    <svg
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+      width="14" height="14" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
   )
 }
 

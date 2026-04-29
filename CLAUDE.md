@@ -353,17 +353,28 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 **Seed command:** `python manage.py seed_locations`
 
-### ✅ Completed (Session 15 — 2026-04-29) — Pop-up Thêm mới địa điểm
+### ✅ Completed (Session 15 — 2026-04-29) — Pop-up Thêm mới địa điểm (v1 đơn giản)
 
-- [x] `src/components/cai-dat/thiet-lap-dia-diem/AddLocationModal.jsx`: Modal thêm địa điểm — 4 fields (Tên*, SĐT, Mã, Địa chỉ, Trạng thái), validation client-side, border-radius 7px, nút Reset/Hủy/Thêm, Escape để đóng
-- [x] `src/components/cai-dat/thiet-lap-dia-diem/LocationsPage.jsx`: Tích hợp AddLocationModal (quản lý state nội bộ), hiển thị SuccessModal sau khi thêm thành công, tự cập nhật danh sách (prepend) mà không reload trang
-- [x] `src/components/tong-quan/trang-chu/HomePage.jsx`: Bỏ prop `onCreateClick` khỏi `<LocationsPage>` (modal tự quản lý)
-- [x] Backend POST /api/locations/: Đã đủ — nhận code, name, address, phone, status, chỉ Admin
+- [x] `AddLocationModal.jsx` v1 — 4 fields cơ bản (Tên*, SĐT, Mã, Địa chỉ, Trạng thái)
+- [x] `LocationsPage.jsx`: Tích hợp modal, SuccessModal, prepend list
+- [x] `HomePage.jsx`: Bỏ prop onCreateClick
+
+### ✅ Completed (Session 16 — 2026-04-29) — Pop-up Thêm mới địa điểm (đầy đủ theo design)
+
+- [x] `api/models.py` Location: thêm 10 fields mới — email, manager (FK User), province, district, ward, location_types, manage_nvl, manage_btp, manage_thanh_pham, allow_delivery
+- [x] Migration `0011_location_extended_fields.py` — apply thành công
+- [x] `api/serializers.py`: Viết lại `LocationSerializer` (thêm manager_id, manager_name, location_types_list), `LocationWriteSerializer` (Serializer thuần — xử lý location_types list→csv, manager FK)
+- [x] `api/views/cai_dat/location_views.py`: Thêm `staff_user_list` — GET /api/staff-users/ trả danh sách user active
+- [x] `api/urls.py`: Thêm route `GET /api/staff-users/`
+- [x] `AddLocationModal.jsx`: Viết lại hoàn toàn theo screenshot — Tên*, Nhân viên quản lý* (dropdown fetch từ API), SĐT* | Email, Địa chỉ | Tỉnh/Thành phố, Quận/Huyện | Phường/Xã, Loại địa điểm* (3 checkboxes), Thiết lập địa điểm (4 checkboxes 2 cột với viền cam), footer Reset/Hủy/Lưu
 
 **Quy trình thêm địa điểm:**
 1. Vào Cài đặt → Thiết lập địa điểm → nhấn "+ Thêm địa điểm"
-2. Điền Tên địa điểm (bắt buộc), SĐT, Địa chỉ, Mã (để trống = auto-gen MDD{6-digit}), Trạng thái
-3. Nhấn "Thêm" → POST /api/locations/ → đóng modal → hiển thị SuccessModal → danh sách tự cập nhật
+2. Điền form (Tên*, Nhân viên quản lý*, SĐT* bắt buộc + Loại địa điểm*)
+3. Nhấn "Lưu" → POST /api/locations/ → đóng modal → SuccessModal → danh sách cập nhật
+
+**API mới:**
+- `GET /api/staff-users/` — danh sách user active cho dropdown (tất cả role truy cập)
 
 ### 🔜 Next Steps
 

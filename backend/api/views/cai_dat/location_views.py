@@ -1,7 +1,9 @@
 """
 Location views - Thiet lap dia diem
 CRUD API cho Location model. Chi Admin moi co quyen truy cap.
+staff_user_list: tra danh sach nhan vien cho dropdown.
 """
+from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +17,19 @@ def _is_admin(user):
     return user.is_superuser or user.is_staff or getattr(user, 'role', '') == 'Admin'
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def staff_user_list(request):
+    """GET /api/staff-users/ — danh sach user cho dropdown Nhan vien quan ly"""
+    User = get_user_model()
+    users = User.objects.filter(is_active=True).order_by('full_name', 'phone_number')
+    data = [
+        {'id': u.id, 'name': u.full_name or u.phone_number, 'role': u.role}
+        for u in users
+    ]
+    return Response({'users': data})
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def location_list(request):
@@ -23,7 +38,7 @@ def location_list(request):
         return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
-        qs = Location.objects.all()
+        qs = Location.objects.select_related('manager').all()
         search = request.query_params.get('search', '').strip()
         if search:
             qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
@@ -49,7 +64,7 @@ def location_detail(request, pk):
         return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
 
     try:
-        location = Location.objects.get(pk=pk)
+        location = Location.objects.select_related('manager').get(pk=pk)
     except Location.DoesNotExist:
         return Response({'detail': 'Dia diem khong ton tai.'}, status=status.HTTP_404_NOT_FOUND)
 
