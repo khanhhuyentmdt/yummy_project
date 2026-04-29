@@ -290,7 +290,7 @@ class LocationSerializer(serializers.ModelSerializer):
             'address', 'province', 'district', 'ward',
             'location_types', 'location_types_list',
             'manage_nvl', 'manage_btp', 'manage_thanh_pham', 'allow_delivery',
-            'status', 'created_at', 'updated_at',
+            'status', 'created_by_name', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

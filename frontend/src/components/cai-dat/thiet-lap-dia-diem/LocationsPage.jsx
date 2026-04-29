@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import api from '../../../api/axios'
 import AddLocationModal from './AddLocationModal'
+import EditLocationModal from './EditLocationModal'
 import SuccessModal from '../../common/SuccessModal'
 
 const ITEMS_PER_PAGE = 5
@@ -29,6 +30,8 @@ export default function LocationsPage() {
   const [deleteTarget, setDeleteTarget]     = useState(null)
   const [deleteLoading, setDeleteLoading]   = useState(false)
   const [addModalOpen, setAddModalOpen]     = useState(false)
+  const [editTarget, setEditTarget]         = useState(null)
+  const [pendingEdit, setPendingEdit]       = useState(null)
   const [successMsg, setSuccessMsg]         = useState(null)
   const filterRef = useRef(null)
 
@@ -103,7 +106,22 @@ export default function LocationsPage() {
   const handleAddSaved = (newLocation) => {
     setLocations(prev => [newLocation, ...prev])
     setAddModalOpen(false)
+    setPendingEdit(newLocation)
     setSuccessMsg(`Địa điểm "${newLocation.name}" đã được thêm thành công!`)
+  }
+
+  const handleSuccessClose = () => {
+    setSuccessMsg(null)
+    if (pendingEdit) {
+      setEditTarget(pendingEdit)
+      setPendingEdit(null)
+    }
+  }
+
+  const handleEditSaved = (updatedLocation) => {
+    setLocations(prev => prev.map(l => l.id === updatedLocation.id ? updatedLocation : l))
+    setEditTarget(null)
+    setSuccessMsg(`Địa điểm "${updatedLocation.name}" đã được cập nhật thành công!`)
   }
 
   return (
@@ -297,7 +315,7 @@ export default function LocationsPage() {
                         {openDropdownId === l.id && (
                           <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
                             <button
-                              onClick={() => { setOpenDropdownId(null) }}
+                              onClick={() => { setEditTarget(l); setOpenDropdownId(null) }}
                               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                             >
                               Chỉnh sửa
@@ -367,11 +385,20 @@ export default function LocationsPage() {
         />
       )}
 
+      {/* ── Edit Location Modal ────────────────────────────────────────────── */}
+      {editTarget && (
+        <EditLocationModal
+          location={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSaved={handleEditSaved}
+        />
+      )}
+
       {/* ── Success Modal ──────────────────────────────────────────────────── */}
       {successMsg && (
         <SuccessModal
           message={successMsg}
-          onClose={() => setSuccessMsg(null)}
+          onClose={handleSuccessClose}
         />
       )}
 

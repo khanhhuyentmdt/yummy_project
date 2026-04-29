@@ -289,6 +289,7 @@ class Location(models.Model):
         default=STATUS_ACTIVE,
         verbose_name='Trang thai',
     )
+    created_by_name = models.CharField(max_length=200, blank=True, verbose_name='Nguoi tao')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

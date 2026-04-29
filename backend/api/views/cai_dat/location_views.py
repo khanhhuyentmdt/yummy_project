@@ -51,7 +51,8 @@ def location_list(request):
     # POST
     serializer = LocationWriteSerializer(data=request.data)
     if serializer.is_valid():
-        location = serializer.save()
+        creator_name = request.user.full_name or request.user.phone_number
+        location = serializer.save(created_by_name=creator_name)
         return Response(LocationSerializer(location).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
