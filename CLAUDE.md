@@ -332,9 +332,30 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] `src/components/HomePage.jsx`: Wire `create-material` view, import `CreateMaterialPage`
 - [x] Footer style fix: bỏ sticky white bar, tất cả nút (RotateCcw + Hủy + Lưu) group bên phải, nền `#FFF6F3`, `rounded-xl`, `font-nunito-sans`
 
-### 🔜 Next Steps (Session 12+)
+### ✅ Completed (Session 14 — 2026-04-29) — Danh sách Cài đặt địa điểm
 
-- [ ] **CreateMaterialPage**: Trang thêm NVL mới (tương tự CreateProductPage)
+- [x] `api/models.py`: Thêm model `Location` (code, name, address, phone, status, ordering=[-id])
+- [x] Migration `0010_add_location.py` — apply thành công
+- [x] `api/serializers.py`: `LocationSerializer`, `LocationWriteSerializer` (auto-gen MDD{6-digit})
+- [x] `api/views/cai_dat/location_views.py`: `location_list` (GET+POST), `location_detail` (GET+PUT+PATCH+DELETE) — RBAC: chỉ Admin
+- [x] `api/views/cai_dat/settings_views.py`: Loại bỏ stub `location_list`, giữ `shipping_unit_list`
+- [x] `api/views/cai_dat/__init__.py`: Export `location_list`, `location_detail` từ `location_views.py`
+- [x] `api/urls.py`: Thêm `GET/POST /api/locations/` và `GET/PUT/PATCH/DELETE /api/locations/<pk>/`
+- [x] Management command `seed_locations` — seed 5 địa điểm mẫu (MDD001–MDD005)
+- [x] `src/components/cai-dat/thiet-lap-dia-diem/LocationsPage.jsx`: Danh sách địa điểm — search, filter status, pagination, action dropdown, delete confirm, status badge, breadcrumb, nút Nhập + Xuất + Thêm địa điểm
+- [x] `src/config/sidebarConfig.js`: `thiet-lap-dd.view` đổi từ `'coming-soon'` → `'locations'`
+- [x] `src/components/tong-quan/trang-chu/HomePage.jsx`: Import + render `LocationsPage` tại `activeView === 'locations'`
+
+**API endpoints mới:**
+- `GET /api/locations/?search=&status=` — danh sách địa điểm (chỉ Admin)
+- `POST /api/locations/` — tạo địa điểm (auto-gen code MDD{6-digit})
+- `GET/PUT/PATCH/DELETE /api/locations/{pk}/` — chi tiết/cập nhật/xóa
+
+**Seed command:** `python manage.py seed_locations`
+
+### 🔜 Next Steps
+
+- [ ] **CreateLocationPage / EditLocationPage**: Trang thêm/sửa địa điểm
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status

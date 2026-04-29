@@ -32,6 +32,7 @@ import EditProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong
 import MaterialsPage from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nguyen-vat-lieu/MaterialsPage";
 import CreateMaterialPage from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nguyen-vat-lieu/CreateMaterialPage";
 import PurchaseOrdersPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-lieu/phieu-dat-hang/PurchaseOrdersPage";
+import LocationsPage from "../../cai-dat/thiet-lap-dia-diem/LocationsPage";
 import Sidebar from "../../common/Sidebar";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
@@ -901,6 +902,9 @@ export default function HomePage({ user = {}, onLogout }) {
           {activeView === "purchase-orders" && (
             <PurchaseOrdersPage onCreateClick={() => {}} />
           )}
+          {activeView === "locations" && (
+            <LocationsPage onCreateClick={() => {}} />
+          )}
           {![
             "dashboard",
             "products",
@@ -909,6 +913,7 @@ export default function HomePage({ user = {}, onLogout }) {
             "materials",
             "create-material",
             "purchase-orders",
+            "locations",
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>

@@ -46,6 +46,7 @@ from .views import (
     customer_debt_list,
     # Cài đặt
     location_list,
+    location_detail,
     shipping_unit_list,
 )
 
@@ -109,6 +110,7 @@ urlpatterns = [
     path('customer-debts/', customer_debt_list, name='customer-debt-list'),
 
     # ─── Cài đặt ──────────────────────────────────────────────────────────────
-    path('locations/', location_list, name='location-list'),
+    path('locations/',          location_list,   name='location-list'),
+    path('locations/<int:pk>/', location_detail, name='location-detail'),
     path('shipping-units/', shipping_unit_list, name='shipping-unit-list'),
 ]

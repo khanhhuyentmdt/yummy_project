@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "erp_yummy",
   "version": "1.0.0",
-  "last_updated": "2026-04-26",
-  "session": 13,
+  "last_updated": "2026-04-29",
+  "session": 14,
 
   "environment": {
     "python": ".venv/python.exe",
@@ -146,6 +146,22 @@
         },
         "rbac": "is_staff OR role in {'Nhân viên thu mua', 'Admin'}",
         "seed_command": "python manage.py seed_purchase_orders"
+      },
+      "Location": {
+        "status": "done",
+        "migration": "api/migrations/0010_add_location.py",
+        "fields": {
+          "code": "CharField(max_length=20, unique=True) — auto-gen MDD{6-digit} if blank",
+          "name": "CharField(max_length=200)",
+          "address": "TextField(blank=True)",
+          "phone": "CharField(max_length=20, blank=True)",
+          "status": "CharField(choices=['active','inactive'], default='active')",
+          "created_at": "DateTimeField(auto_now_add=True)",
+          "updated_at": "DateTimeField(auto_now=True)"
+        },
+        "rbac": "is_staff OR is_superuser OR role == 'Admin'",
+        "ordering": "-id (newest first)",
+        "seed_command": "python manage.py seed_locations"
       },
       "PurchaseOrder": {
         "status": "done",
@@ -312,6 +328,57 @@
         "url": "/api/materials/{id}/",
         "view": "material_detail",
         "auth": "Bearer",
+        "status": "done"
+      },
+      {
+        "method": "GET",
+        "url": "/api/locations/?search=&status=",
+        "view": "location_list",
+        "auth": "Bearer",
+        "rbac": "Admin only",
+        "description": "Danh sach dia diem, ho tro ?search=&status=. Tra ve {locations: [...], total: int}",
+        "status": "done",
+        "data_source": "real_db"
+      },
+      {
+        "method": "POST",
+        "url": "/api/locations/",
+        "view": "location_list",
+        "auth": "Bearer",
+        "rbac": "Admin only",
+        "description": "Tao dia diem moi (auto-gen code MDD{6-digit})",
+        "status": "done"
+      },
+      {
+        "method": "GET",
+        "url": "/api/locations/{id}/",
+        "view": "location_detail",
+        "auth": "Bearer",
+        "rbac": "Admin only",
+        "status": "done"
+      },
+      {
+        "method": "PUT",
+        "url": "/api/locations/{id}/",
+        "view": "location_detail",
+        "auth": "Bearer",
+        "rbac": "Admin only",
+        "status": "done"
+      },
+      {
+        "method": "PATCH",
+        "url": "/api/locations/{id}/",
+        "view": "location_detail",
+        "auth": "Bearer",
+        "rbac": "Admin only",
+        "status": "done"
+      },
+      {
+        "method": "DELETE",
+        "url": "/api/locations/{id}/",
+        "view": "location_detail",
+        "auth": "Bearer",
+        "rbac": "Admin only",
         "status": "done"
       }
     ]

@@ -77,6 +77,7 @@ from .tai_chinh import (
 # Cài đặt
 from .cai_dat import (
     location_list,
+    location_detail,
     shipping_unit_list,
 )
 
@@ -129,5 +130,6 @@ __all__ = [
     'customer_debt_list',
     # Cài đặt
     'location_list',
+    'location_detail',
     'shipping_unit_list',
 ]

@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from .models import Customer, Material, Order, Product, RawMaterial, ProductBOM, Supplier, PurchaseOrder
+from .models import Customer, Location, Material, Order, Product, RawMaterial, ProductBOM, Supplier, PurchaseOrder
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -256,6 +256,40 @@ class PurchaseOrderWriteSerializer(serializers.ModelSerializer):
                 suffix = (suffix + 1) % 1000000
                 validated_data['code'] = f'PDH{suffix:06d}'
         return PurchaseOrder.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+# ─── Location ─────────────────────────────────────────────────────────────────
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Location
+        fields = ['id', 'code', 'name', 'address', 'phone', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class LocationWriteSerializer(serializers.ModelSerializer):
+    code = serializers.CharField(max_length=20, required=False, allow_blank=True)
+
+    class Meta:
+        model  = Location
+        fields = ['id', 'code', 'name', 'address', 'phone', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        if not validated_data.get('code'):
+            import time
+            suffix = int(time.time() * 1000) % 1000000
+            validated_data['code'] = f'MDD{suffix:06d}'
+            while Location.objects.filter(code=validated_data['code']).exists():
+                suffix = (suffix + 1) % 1000000
+                validated_data['code'] = f'MDD{suffix:06d}'
+        return Location.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():

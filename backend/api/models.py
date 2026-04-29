@@ -251,6 +251,37 @@ class Supplier(models.Model):
         return self.name
 
 
+# ─── Location ─────────────────────────────────────────────────────────────────
+
+class Location(models.Model):
+    STATUS_ACTIVE   = 'active'
+    STATUS_INACTIVE = 'inactive'
+    STATUS_CHOICES  = [
+        (STATUS_ACTIVE,   'Dang hoat dong'),
+        (STATUS_INACTIVE, 'Tam ngung'),
+    ]
+
+    code    = models.CharField(max_length=20, unique=True, verbose_name='Ma dia diem')
+    name    = models.CharField(max_length=200, verbose_name='Ten dia diem')
+    address = models.TextField(blank=True, verbose_name='Dia chi')
+    phone   = models.CharField(max_length=20, blank=True, verbose_name='So dien thoai')
+    status  = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
+        verbose_name='Trang thai',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering     = ['-id']
+        verbose_name = 'Location'
+
+    def __str__(self):
+        return f'{self.code} — {self.name}'
+
+
 # ─── PurchaseOrder ────────────────────────────────────────────────────────────
 
 class PurchaseOrder(models.Model):

@@ -468,7 +468,7 @@ const SIDEBAR_CONFIG = [
         id: "thiet-lap-dd",
         label: "Thiết lập địa điểm",
         roles: null,
-        view: "coming-soon",
+        view: "locations",
       },
       {
         id: "thiet-lap-vchuyen",

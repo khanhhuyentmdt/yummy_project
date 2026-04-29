@@ -1,0 +1,68 @@
+"""
+Location views - Thiet lap dia diem
+CRUD API cho Location model. Chi Admin moi co quyen truy cap.
+"""
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+from api.models import Location
+from api.serializers import LocationSerializer, LocationWriteSerializer
+
+
+def _is_admin(user):
+    return user.is_superuser or user.is_staff or getattr(user, 'role', '') == 'Admin'
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def location_list(request):
+    """GET/POST /api/locations/"""
+    if not _is_admin(request.user):
+        return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'GET':
+        qs = Location.objects.all()
+        search = request.query_params.get('search', '').strip()
+        if search:
+            qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
+        status_filter = request.query_params.get('status', '').strip()
+        if status_filter in ('active', 'inactive'):
+            qs = qs.filter(status=status_filter)
+        serializer = LocationSerializer(qs, many=True)
+        return Response({'locations': serializer.data, 'total': qs.count()})
+
+    # POST
+    serializer = LocationWriteSerializer(data=request.data)
+    if serializer.is_valid():
+        location = serializer.save()
+        return Response(LocationSerializer(location).data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def location_detail(request, pk):
+    """GET/PUT/PATCH/DELETE /api/locations/<pk>/"""
+    if not _is_admin(request.user):
+        return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        location = Location.objects.get(pk=pk)
+    except Location.DoesNotExist:
+        return Response({'detail': 'Dia diem khong ton tai.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(LocationSerializer(location).data)
+
+    if request.method == 'DELETE':
+        location.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    partial = request.method == 'PATCH'
+    serializer = LocationWriteSerializer(location, data=request.data, partial=partial)
+    if serializer.is_valid():
+        updated = serializer.save()
+        return Response(LocationSerializer(updated).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
