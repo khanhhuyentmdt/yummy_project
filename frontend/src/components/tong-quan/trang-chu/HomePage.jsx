@@ -2170,7 +2170,7 @@ function ProductsView({
                     type="checkbox"
                     checked={allPageChecked}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                    className="cursor-pointer"
                   />
                 </th>
                 <SortableTh columnKey="code"   label="Mã SP"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
@@ -2205,7 +2205,7 @@ function ProductsView({
                         type="checkbox"
                         checked={selected.has(p.id)}
                         onChange={() => toggleOne(p.id)}
-                        className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                        className="cursor-pointer"
                       />
                     </td>
                     <td className="px-4 py-3.5 font-mono text-xs text-gray-600 font-semibold">

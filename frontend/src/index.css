@@ -13,16 +13,43 @@ body {
   font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Custom checkbox style - Orange theme */
+/* Custom checkbox style - Orange background with white checkmark */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease-in-out;
+}
+
 input[type="checkbox"]:checked {
   background-color: #E67E22;
   border-color: #E67E22;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid white;
+  border-width: 0 2px 2px 0;
 }
 
 input[type="checkbox"]:focus {
-  outline: none;
-  ring: 2px;
-  ring-color: rgba(230, 126, 34, 0.3);
-  ring-offset: 0px;
+  outline: 2px solid rgba(230, 126, 34, 0.3);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"]:hover:not(:checked) {
+  border-color: #E67E22;
 }

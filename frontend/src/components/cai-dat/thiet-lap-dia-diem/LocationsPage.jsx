@@ -257,7 +257,7 @@ export default function LocationsPage() {
                     type="checkbox"
                     checked={allPageChecked}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                    className="cursor-pointer"
                   />
                 </th>
                 <SortableTh columnKey="code"    label="MÃ ĐỊA ĐIỂM" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
@@ -286,7 +286,7 @@ export default function LocationsPage() {
                         type="checkbox"
                         checked={selected.has(l.id)}
                         onChange={() => toggleOne(l.id)}
-                        className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                        className="cursor-pointer"
                       />
                     </td>
                     <td className="px-4 py-3.5 font-mono text-xs text-gray-600 font-semibold">{l.code}</td>
