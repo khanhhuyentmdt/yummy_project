@@ -392,6 +392,16 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 
 **API:** `GET /api/locations/` và `GET /api/locations/{pk}/` đều trả thêm trường `history: [{id, timestamp, actor_name, action}]`
 
+### ✅ Completed (Session 18 — 2026-04-29) — Delete Location Modal redesign
+
+- [x] `src/components/cai-dat/thiet-lap-dia-diem/DeleteLocationModal.jsx`: Component mới theo design `popup-canhbaoxoa.png`
+  - Vòng tròn vàng + dấu chấm than `!` canh giữa phía trên
+  - Text italic: `Bạn có chắc muốn xóa địa điểm "{code}" không?`
+  - Nút "Vâng, xóa đi" `#E67E22` + nút "Không, quay lại" `#FFF0E6` — cùng chiều rộng, bo góc `7px`
+  - Tự xử lý API DELETE, loading state, error inline
+  - Overlay click → đóng (khi không loading)
+- [x] `LocationsPage.jsx`: Thay inline delete dialog bằng `<DeleteLocationModal>`; xóa `deleteLoading` state; sau xóa thành công hiện `SuccessModal`
+
 ### 🔜 Next Steps
 
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)

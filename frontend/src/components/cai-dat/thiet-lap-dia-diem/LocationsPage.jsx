@@ -6,6 +6,7 @@ import {
 import api from '../../../api/axios'
 import AddLocationModal from './AddLocationModal'
 import EditLocationModal from './EditLocationModal'
+import DeleteLocationModal from './DeleteLocationModal'
 import SuccessModal from '../../common/SuccessModal'
 
 const ITEMS_PER_PAGE = 5
@@ -28,7 +29,6 @@ export default function LocationsPage() {
   const [filterOpen, setFilterOpen]         = useState(false)
   const [selected, setSelected]             = useState(new Set())
   const [deleteTarget, setDeleteTarget]     = useState(null)
-  const [deleteLoading, setDeleteLoading]   = useState(false)
   const [addModalOpen, setAddModalOpen]     = useState(false)
   const [editTarget, setEditTarget]         = useState(null)
   const [pendingEdit, setPendingEdit]       = useState(null)
@@ -89,18 +89,10 @@ export default function LocationsPage() {
     return s
   })
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return
-    setDeleteLoading(true)
-    try {
-      await api.delete(`locations/${deleteTarget.id}/`)
-      setLocations(prev => prev.filter(l => l.id !== deleteTarget.id))
-      setDeleteTarget(null)
-    } catch {
-      // keep modal open on error
-    } finally {
-      setDeleteLoading(false)
-    }
+  const handleDeleteDone = (locationId) => {
+    setLocations(prev => prev.filter(l => l.id !== locationId))
+    setDeleteTarget(null)
+    setSuccessMsg('Địa điểm đã được xóa thành công!')
   }
 
   const handleAddSaved = (newLocation) => {
@@ -403,41 +395,11 @@ export default function LocationsPage() {
 
       {/* ── Delete confirm dialog ──────────────────────────────────────────── */}
       {deleteTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => { if (e.target === e.currentTarget && !deleteLoading) setDeleteTarget(null) }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-2">Xác nhận xóa</h3>
-            <p className="text-sm text-gray-600 mb-5">
-              Bạn có chắc muốn xóa địa điểm{' '}
-              <span className="font-semibold text-gray-800">{deleteTarget.name}</span>?
-              Hành động này không thể hoàn tác.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                disabled={deleteLoading}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-              >
-                Huỷ
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={deleteLoading}
-                className="flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {deleteLoading && (
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                )}
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteLocationModal
+          location={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={handleDeleteDone}
+        />
       )}
     </div>
   )
