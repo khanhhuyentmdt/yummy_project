@@ -4,6 +4,7 @@ CRUD API cho Location model. Chi Admin moi co quyen truy cap.
 staff_user_list: tra danh sach nhan vien cho dropdown.
 """
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -65,6 +66,23 @@ def location_list(request):
         location = Location.objects.select_related('manager').prefetch_related('history').get(pk=location.pk)
         return Response(LocationSerializer(location).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def location_bulk_delete(request):
+    """POST /api/locations/bulk-delete/ — xoa nhieu dia diem cung luc"""
+    if not _is_admin(request.user):
+        return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
+
+    ids = request.data.get('ids', [])
+    if not ids or not isinstance(ids, list):
+        return Response({'detail': 'ids phai la danh sach khong rong.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    with transaction.atomic():
+        deleted_count, _ = Location.objects.filter(pk__in=ids).delete()
+
+    return Response({'deleted': deleted_count})
 
 
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])

@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import api from '../../../api/axios'
 
-export default function DeleteLocationModal({ location, onClose, onDeleted }) {
+/**
+ * Props:
+ *   Single delete: location={locationObj}
+ *   Bulk delete:   ids={[1,2,3]}
+ */
+export default function DeleteLocationModal({ location, ids, onClose, onDeleted }) {
+  const isBulk = Boolean(ids && ids.length > 0)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
 
@@ -10,10 +16,18 @@ export default function DeleteLocationModal({ location, onClose, onDeleted }) {
     setLoading(true)
     setError(null)
     try {
-      await api.delete(`locations/${location.id}/`)
-      onDeleted(location.id)
+      if (isBulk) {
+        await api.post('locations/bulk-delete/', { ids })
+        onDeleted(ids)
+      } else {
+        await api.delete(`locations/${location.id}/`)
+        onDeleted([location.id])
+      }
     } catch {
-      setError('Không thể xóa địa điểm. Vui lòng thử lại.')
+      setError(isBulk
+        ? 'Không thể xóa các địa điểm đã chọn. Vui lòng thử lại.'
+        : 'Không thể xóa địa điểm. Vui lòng thử lại.'
+      )
     } finally {
       setLoading(false)
     }
@@ -32,12 +46,25 @@ export default function DeleteLocationModal({ location, onClose, onDeleted }) {
         </div>
 
         {/* Message */}
-        <p className="text-base font-semibold text-gray-800 italic text-center mb-2 leading-relaxed">
-          Bạn có chắc muốn xóa địa điểm
-        </p>
-        <p className="text-base font-semibold text-gray-800 italic text-center mb-8 leading-relaxed">
-          "{location.code}" không?
-        </p>
+        {isBulk ? (
+          <>
+            <p className="text-base font-semibold text-gray-800 italic text-center leading-relaxed">
+              Bạn có chắc muốn xóa
+            </p>
+            <p className="text-base font-semibold text-gray-800 italic text-center mb-8 leading-relaxed">
+              <span className="not-italic font-bold">{ids.length}</span> địa điểm đã chọn không?
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-base font-semibold text-gray-800 italic text-center leading-relaxed">
+              Bạn có chắc muốn xóa địa điểm
+            </p>
+            <p className="text-base font-semibold text-gray-800 italic text-center mb-8 leading-relaxed">
+              "{location.code}" không?
+            </p>
+          </>
+        )}
 
         {error && (
           <p className="text-xs text-red-500 mb-4 text-center">{error}</p>

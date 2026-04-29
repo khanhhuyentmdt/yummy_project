@@ -409,6 +409,18 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] `api/serializers.py` `LocationWriteSerializer.validate_name()`: kiểm tra `name__iexact` trước khi lưu; trên update dùng `exclude(pk=self.instance.pk)`; trả về `ValidationError('Tên địa điểm này đã được sử dụng.')` nếu trùng
 - [x] Frontend không cần thay đổi: `errors.name` đã được map từ response 400 → hiển thị dưới field qua `<Field error={errors.name}>` + viền đỏ qua `inputCls(errors.name)` + tự xóa khi user gõ qua `setField('name')`
 
+### ✅ Completed (Session 20 — 2026-04-29) — Bulk Delete cho Location
+
+- [x] `api/views/cai_dat/location_views.py`: Thêm `location_bulk_delete` — `POST /api/locations/bulk-delete/` nhận `{ids: [...]}`, xóa trong `transaction.atomic()`, trả `{deleted: N}`
+- [x] `api/views/cai_dat/__init__.py`, `api/views/__init__.py`, `api/urls.py`: Export + route `locations/bulk-delete/` (đặt trước `locations/<int:pk>/`)
+- [x] `DeleteLocationModal.jsx`: Mở rộng hỗ trợ dual-mode — `location` prop (single) hoặc `ids` prop (bulk); thông báo và API call khác nhau theo mode; `onDeleted` luôn nhận array
+- [x] `LocationsPage.jsx`:
+  - Thêm `bulkDeleteOpen` state + `Trash2` icon
+  - Toolbar: khi `selected.size > 0` → ẩn "Thêm địa điểm", hiện `"{N} được chọn"` + nút "Xóa đã chọn" `#C00000`; khi không có selection → hiện "Thêm địa điểm" bình thường
+  - `handleDeleteDone` nhận array ids → xóa khỏi list + `setSelected(new Set())` + SuccessModal
+
+**API mới:** `POST /api/locations/bulk-delete/` body `{ids: [1,2,3]}` → `{deleted: 3}`
+
 ### 🔜 Next Steps
 
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)

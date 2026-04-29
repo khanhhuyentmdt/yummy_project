@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   MapPin, Search, ChevronRight, ChevronLeft, ChevronDown,
-  Plus, Filter, Download, Upload,
+  Plus, Filter, Download, Upload, Trash2,
 } from 'lucide-react'
 import api from '../../../api/axios'
 import AddLocationModal from './AddLocationModal'
@@ -29,6 +29,7 @@ export default function LocationsPage() {
   const [filterOpen, setFilterOpen]         = useState(false)
   const [selected, setSelected]             = useState(new Set())
   const [deleteTarget, setDeleteTarget]     = useState(null)
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [addModalOpen, setAddModalOpen]     = useState(false)
   const [editTarget, setEditTarget]         = useState(null)
   const [pendingEdit, setPendingEdit]       = useState(null)
@@ -89,10 +90,14 @@ export default function LocationsPage() {
     return s
   })
 
-  const handleDeleteDone = (locationId) => {
-    setLocations(prev => prev.filter(l => l.id !== locationId))
+  const handleDeleteDone = (deletedIds) => {
+    const idSet = new Set(deletedIds)
+    setLocations(prev => prev.filter(l => !idSet.has(l.id)))
+    setSelected(new Set())
     setDeleteTarget(null)
-    setSuccessMsg('Địa điểm đã được xóa thành công!')
+    setBulkDeleteOpen(false)
+    const count = idSet.size
+    setSuccessMsg(count === 1 ? 'Địa điểm đã được xóa thành công!' : `${count} địa điểm đã được xóa thành công!`)
   }
 
   const handleAddSaved = (newLocation) => {
@@ -212,16 +217,32 @@ export default function LocationsPage() {
             )}
           </div>
 
-          {/* Add button */}
-          <div className="ml-auto">
-            <button
-              onClick={() => setAddModalOpen(true)}
-              className="flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors hover:opacity-90 active:opacity-80"
-              style={{ backgroundColor: '#E67E22' }}
-            >
-              <Plus size={15} />
-              Thêm địa điểm
-            </button>
+          {/* Action zone — switches between Add button and bulk-delete bar */}
+          <div className="ml-auto flex items-center gap-3">
+            {selected.size > 0 ? (
+              <>
+                <span className="text-sm text-gray-600 font-medium">
+                  {selected.size} được chọn
+                </span>
+                <button
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="flex items-center gap-1.5 text-white text-sm font-bold px-4 py-2 rounded-[7px] hover:opacity-90 active:opacity-80 transition-opacity"
+                  style={{ backgroundColor: '#C00000' }}
+                >
+                  <Trash2 size={14} />
+                  Xóa đã chọn
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setAddModalOpen(true)}
+                className="flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-[7px] hover:opacity-90 active:opacity-80 transition-opacity"
+                style={{ backgroundColor: '#E67E22' }}
+              >
+                <Plus size={15} />
+                Thêm địa điểm
+              </button>
+            )}
           </div>
         </div>
 
@@ -393,11 +414,20 @@ export default function LocationsPage() {
         />
       )}
 
-      {/* ── Delete confirm dialog ──────────────────────────────────────────── */}
+      {/* ── Single delete confirm ──────────────────────────────────────────── */}
       {deleteTarget && (
         <DeleteLocationModal
           location={deleteTarget}
           onClose={() => setDeleteTarget(null)}
+          onDeleted={handleDeleteDone}
+        />
+      )}
+
+      {/* ── Bulk delete confirm ────────────────────────────────────────────── */}
+      {bulkDeleteOpen && (
+        <DeleteLocationModal
+          ids={Array.from(selected)}
+          onClose={() => setBulkDeleteOpen(false)}
           onDeleted={handleDeleteDone}
         />
       )}
