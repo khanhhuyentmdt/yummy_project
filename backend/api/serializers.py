@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from .models import Customer, Location, Material, Order, Product, RawMaterial, ProductBOM, Supplier, PurchaseOrder
+from .models import Customer, Location, LocationHistory, Material, Order, Product, RawMaterial, ProductBOM, Supplier, PurchaseOrder
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -266,10 +266,17 @@ class PurchaseOrderWriteSerializer(serializers.ModelSerializer):
 
 # ─── Location ─────────────────────────────────────────────────────────────────
 
+class LocationHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = LocationHistory
+        fields = ['id', 'timestamp', 'actor_name', 'action']
+
+
 class LocationSerializer(serializers.ModelSerializer):
     manager_id   = serializers.IntegerField(source='manager.id', read_only=True, allow_null=True)
     manager_name = serializers.SerializerMethodField()
     location_types_list = serializers.SerializerMethodField()
+    history = LocationHistorySerializer(many=True, read_only=True)
 
     def get_manager_name(self, obj):
         if obj.manager:
@@ -291,6 +298,7 @@ class LocationSerializer(serializers.ModelSerializer):
             'location_types', 'location_types_list',
             'manage_nvl', 'manage_btp', 'manage_thanh_pham', 'allow_delivery',
             'status', 'created_by_name', 'created_at', 'updated_at',
+            'history',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

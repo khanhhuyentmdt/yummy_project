@@ -120,8 +120,7 @@ export default function LocationsPage() {
 
   const handleEditSaved = (updatedLocation) => {
     setLocations(prev => prev.map(l => l.id === updatedLocation.id ? updatedLocation : l))
-    setEditTarget(null)
-    setSuccessMsg(`Địa điểm "${updatedLocation.name}" đã được cập nhật thành công!`)
+    // EditModal handles its own success modal and stays open — do not close here
   }
 
   return (

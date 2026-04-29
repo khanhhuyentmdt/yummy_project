@@ -301,6 +301,25 @@ class Location(models.Model):
         return f'{self.code} — {self.name}'
 
 
+# ─── LocationHistory ──────────────────────────────────────────────────────────
+
+class LocationHistory(models.Model):
+    location   = models.ForeignKey(
+        Location, on_delete=models.CASCADE, related_name='history',
+        verbose_name='Dia diem',
+    )
+    timestamp  = models.DateTimeField(auto_now_add=True)
+    actor_name = models.CharField(max_length=200, blank=True, verbose_name='Nguoi thuc hien')
+    action     = models.CharField(max_length=300, verbose_name='Hanh dong')
+
+    class Meta:
+        ordering     = ['-timestamp']
+        verbose_name = 'LocationHistory'
+
+    def __str__(self):
+        return f'{self.location.code} — {self.action}'
+
+
 # ─── PurchaseOrder ────────────────────────────────────────────────────────────
 
 class PurchaseOrder(models.Model):

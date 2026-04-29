@@ -376,9 +376,24 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 **API mới:**
 - `GET /api/staff-users/` — danh sách user active cho dropdown (tất cả role truy cập)
 
+### ✅ Completed (Session 17 — 2026-04-29) — Audit Trail cho địa điểm + Stay-on-page sau lưu
+
+- [x] `api/models.py`: Thêm model `LocationHistory` (location FK, timestamp, actor_name, action, ordering=['-timestamp'])
+- [x] Migration `0013_location_history.py` — apply thành công
+- [x] `api/serializers.py`: Thêm `LocationHistorySerializer`; thêm `history = LocationHistorySerializer(many=True, read_only=True)` vào `LocationSerializer`
+- [x] `api/views/cai_dat/location_views.py`:
+  - POST: tạo `LocationHistory` với action `'Thêm mới địa điểm {code}'`
+  - PATCH/PUT: so sánh `old_status` vs `new_status` → action `'Thay đổi trạng thái thành ...'` hoặc `'Cập nhật thông tin'`
+  - Thêm `prefetch_related('history')` vào tất cả queryset
+  - Re-fetch sau save để trả về fresh data (bao gồm history mới)
+- [x] `EditLocationModal.jsx`: Viết lại phần lịch sử — hiển thị toàn bộ history từ API, group by date, dấu cam •, code highlight màu cam
+- [x] **UX Flow Stay-on-page**: Sau khi PATCH thành công → cập nhật `locData` + `originalForm` + gọi `onSaved` (list update) → hiển thị internal SuccessModal (z-[60]) → user nhấn Xong → SuccessModal đóng, EditModal ở lại
+- [x] `LocationsPage.jsx`: `handleEditSaved` chỉ cập nhật list, không đóng modal, không hiện external SuccessModal
+
+**API:** `GET /api/locations/` và `GET /api/locations/{pk}/` đều trả thêm trường `history: [{id, timestamp, actor_name, action}]`
+
 ### 🔜 Next Steps
 
-- [ ] **EditLocationModal**: Pop-up sửa thông tin địa điểm
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)
 - [ ] **React Router**: Thêm `react-router-dom` để routing giữa các page thực sự
 - [ ] **OrdersPage**: Quản lý đơn hàng — list, create, update status

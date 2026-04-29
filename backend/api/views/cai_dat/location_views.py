@@ -9,12 +9,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.models import Location
+from api.models import Location, LocationHistory
 from api.serializers import LocationSerializer, LocationWriteSerializer
 
 
 def _is_admin(user):
     return user.is_superuser or user.is_staff or getattr(user, 'role', '') == 'Admin'
+
+
+def _actor(user):
+    return user.full_name or user.phone_number
 
 
 @api_view(['GET'])
@@ -38,7 +42,7 @@ def location_list(request):
         return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
-        qs = Location.objects.select_related('manager').all()
+        qs = Location.objects.select_related('manager').prefetch_related('history').all()
         search = request.query_params.get('search', '').strip()
         if search:
             qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
@@ -51,8 +55,14 @@ def location_list(request):
     # POST
     serializer = LocationWriteSerializer(data=request.data)
     if serializer.is_valid():
-        creator_name = request.user.full_name or request.user.phone_number
-        location = serializer.save(created_by_name=creator_name)
+        actor_name = _actor(request.user)
+        location = serializer.save(created_by_name=actor_name)
+        LocationHistory.objects.create(
+            location=location,
+            actor_name=actor_name,
+            action=f'Thêm mới địa điểm {location.code}',
+        )
+        location = Location.objects.select_related('manager').prefetch_related('history').get(pk=location.pk)
         return Response(LocationSerializer(location).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -65,7 +75,7 @@ def location_detail(request, pk):
         return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
 
     try:
-        location = Location.objects.select_related('manager').get(pk=pk)
+        location = Location.objects.select_related('manager').prefetch_related('history').get(pk=pk)
     except Location.DoesNotExist:
         return Response({'detail': 'Dia diem khong ton tai.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -76,9 +86,18 @@ def location_detail(request, pk):
         location.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    old_status = location.status
     partial = request.method == 'PATCH'
     serializer = LocationWriteSerializer(location, data=request.data, partial=partial)
     if serializer.is_valid():
         updated = serializer.save()
+        actor_name = _actor(request.user)
+        if old_status != updated.status:
+            label = 'Đang hoạt động' if updated.status == 'active' else 'Tạm ngưng'
+            action = f'Thay đổi trạng thái thành {label}'
+        else:
+            action = 'Cập nhật thông tin'
+        LocationHistory.objects.create(location=updated, actor_name=actor_name, action=action)
+        updated = Location.objects.select_related('manager').prefetch_related('history').get(pk=updated.pk)
         return Response(LocationSerializer(updated).data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

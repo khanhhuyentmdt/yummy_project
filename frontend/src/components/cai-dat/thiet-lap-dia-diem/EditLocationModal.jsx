@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, RotateCcw, Loader2, Settings } from 'lucide-react'
+import { X, RotateCcw, Loader2, Settings, Check } from 'lucide-react'
 import api from '../../../api/axios'
 
 // ─── Static data ─────────────────────────────────────────────────────────────
@@ -50,9 +50,7 @@ function formFromData(data) {
 function formatDate(isoStr) {
   if (!isoStr) return ''
   const d = new Date(isoStr)
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  return `${dd}/${mm}/${d.getFullYear()}`
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
 }
 
 function formatTime(isoStr) {
@@ -61,16 +59,41 @@ function formatTime(isoStr) {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+function groupHistoryByDate(history) {
+  const groups = {}
+  for (const entry of history) {
+    const date = formatDate(entry.timestamp)
+    if (!groups[date]) groups[date] = []
+    groups[date].push(entry)
+  }
+  return Object.entries(groups)
+}
+
+function ActionText({ action, code }) {
+  if (code && action.includes(code)) {
+    const idx = action.lastIndexOf(code)
+    return (
+      <>
+        {action.slice(0, idx)}
+        <span className="text-orange-500 font-semibold">{code}</span>
+        {action.slice(idx + code.length)}
+      </>
+    )
+  }
+  return <>{action}</>
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function EditLocationModal({ location, onClose, onSaved }) {
-  const [form, setForm]             = useState(formFromData(location))
+  const [form, setForm]               = useState(formFromData(location))
   const [originalForm, setOriginalForm] = useState(formFromData(location))
-  const [locData, setLocData]       = useState(location)
-  const [errors, setErrors]         = useState({})
-  const [loading, setLoading]       = useState(false)
+  const [locData, setLocData]         = useState(location)
+  const [errors, setErrors]           = useState({})
+  const [loading, setLoading]         = useState(false)
   const [fetchLoading, setFetchLoading] = useState(true)
-  const [staffUsers, setStaffUsers] = useState([])
+  const [staffUsers, setStaffUsers]   = useState([])
+  const [successVisible, setSuccessVisible] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -84,17 +107,17 @@ export default function EditLocationModal({ location, onClose, onSaved }) {
       setForm(f)
       setOriginalForm(f)
     }).catch(() => {
-      // keep location prop values as fallback
+      // keep location prop as fallback
     }).finally(() => {
       setFetchLoading(false)
     })
   }, [location.id])
 
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    const handler = (e) => { if (e.key === 'Escape' && !successVisible) onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [onClose, successVisible])
 
   const setField = (field) => (e) => {
     setForm(f => ({ ...f, [field]: e.target.value }))
@@ -111,9 +134,7 @@ export default function EditLocationModal({ location, onClose, onSaved }) {
     setErrors(er => ({ ...er, location_types: undefined }))
   }
 
-  const toggleSetup = (field) => {
-    setForm(f => ({ ...f, [field]: !f[field] }))
-  }
+  const toggleSetup = (field) => setForm(f => ({ ...f, [field]: !f[field] }))
 
   const reset = () => { setForm(originalForm); setErrors({}) }
 
@@ -150,7 +171,14 @@ export default function EditLocationModal({ location, onClose, onSaved }) {
         status:            form.status,
       }
       const res = await api.patch(`locations/${location.id}/`, payload)
-      onSaved(res.data)
+      const fresh = res.data
+      setLocData(fresh)
+      const f = formFromData(fresh)
+      setForm(f)
+      setOriginalForm(f)
+      setErrors({})
+      onSaved(fresh)
+      setSuccessVisible(true)
     } catch (err) {
       const data = err.response?.data
       if (data && typeof data === 'object') {
@@ -168,265 +196,293 @@ export default function EditLocationModal({ location, onClose, onSaved }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 flex flex-col max-h-[92vh]">
+    <>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        onMouseDown={(e) => { if (e.target === e.currentTarget && !successVisible) onClose() }}
+      >
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 flex flex-col max-h-[92vh]">
 
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between px-7 pt-6 pb-5 flex-shrink-0">
-          <h2 className="text-base font-bold text-gray-900 tracking-wide">
-            CHỈNH SỬA ĐỊA ĐIỂM {location.code}
-          </h2>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={20} />
-          </button>
-        </div>
+          {/* ── Header ── */}
+          <div className="flex items-center justify-between px-7 pt-6 pb-5 flex-shrink-0">
+            <h2 className="text-base font-bold text-gray-900 tracking-wide">
+              CHỈNH SỬA ĐỊA ĐIỂM {location.code}
+            </h2>
+            <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={20} />
+            </button>
+          </div>
 
-        {/* ── Scrollable body ── */}
-        <div className="overflow-y-auto flex-1 px-7">
-          {fetchLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 size={28} className="animate-spin text-orange-400" />
-            </div>
-          ) : (
-            <form id="edit-location-form" onSubmit={handleSubmit} noValidate>
-
-              {errors.__global__ && (
-                <div className="mb-4 text-sm text-red-500 bg-red-50 border border-red-200 rounded-[7px] px-3 py-2">
-                  {errors.__global__}
-                </div>
-              )}
-
-              {/* 1 — Tên địa điểm */}
-              <Field label="Tên địa điểm" required error={errors.name}>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={setField('name')}
-                  placeholder="Nhập tên địa điểm"
-                  className={inputCls(errors.name)}
-                />
-              </Field>
-
-              {/* 2 — Nhân viên quản lý | Trạng thái */}
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                <Field label="Nhân viên quản lý" required error={errors.manager_id}>
-                  <div className="relative">
-                    <select
-                      value={form.manager_id}
-                      onChange={setField('manager_id')}
-                      className={`${inputCls(errors.manager_id)} appearance-none pr-9`}
-                    >
-                      <option value="">Chọn nhân viên quản lý</option>
-                      {staffUsers.map(u => (
-                        <option key={u.id} value={u.id}>{u.name}</option>
-                      ))}
-                    </select>
-                    <ChevronSvg />
-                  </div>
-                </Field>
-                <Field label="Trạng thái" required error={errors.status}>
-                  <div className="relative">
-                    <select
-                      value={form.status}
-                      onChange={setField('status')}
-                      className={`${inputCls(errors.status)} appearance-none pr-9`}
-                    >
-                      <option value="active">Đang hoạt động</option>
-                      <option value="inactive">Tạm ngưng</option>
-                    </select>
-                    <ChevronSvg />
-                  </div>
-                </Field>
+          {/* ── Scrollable body ── */}
+          <div className="overflow-y-auto flex-1 px-7">
+            {fetchLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 size={28} className="animate-spin text-orange-400" />
               </div>
+            ) : (
+              <form id="edit-location-form" onSubmit={handleSubmit} noValidate>
 
-              {/* 3 — Số điện thoại | Email */}
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                <Field label="Số điện thoại" required error={errors.phone}>
-                  <input
-                    type="text"
-                    value={form.phone}
-                    onChange={setField('phone')}
-                    placeholder="Nhập số điện thoại"
-                    className={inputCls(errors.phone)}
-                  />
-                </Field>
-                <Field label="Email" error={errors.email}>
-                  <input
-                    type="text"
-                    value={form.email}
-                    onChange={setField('email')}
-                    placeholder="Nhập email"
-                    className={inputCls(errors.email)}
-                  />
-                </Field>
-              </div>
-
-              {/* 4 — Địa chỉ | Tỉnh/Thành phố */}
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                <Field label="Địa chỉ" error={errors.address}>
-                  <input
-                    type="text"
-                    value={form.address}
-                    onChange={setField('address')}
-                    placeholder="Nhập địa chỉ"
-                    className={inputCls(errors.address)}
-                  />
-                </Field>
-                <Field label="Tỉnh/ Thành phố" error={errors.province}>
-                  <div className="relative">
-                    <select
-                      value={form.province}
-                      onChange={setField('province')}
-                      className={`${inputCls(errors.province)} appearance-none pr-9`}
-                    >
-                      <option value="">Chọn tỉnh/ thành phố</option>
-                      {PROVINCES.map(p => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
-                    <ChevronSvg />
+                {errors.__global__ && (
+                  <div className="mb-4 text-sm text-red-500 bg-red-50 border border-red-200 rounded-[7px] px-3 py-2">
+                    {errors.__global__}
                   </div>
-                </Field>
-              </div>
-
-              {/* 5 — Quận/Huyện | Phường/Xã */}
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                <Field label="Quận/ Huyện" error={errors.district}>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={form.district}
-                      onChange={setField('district')}
-                      placeholder="Chọn quận/ huyện"
-                      className={inputCls(errors.district)}
-                    />
-                    <ChevronSvg />
-                  </div>
-                </Field>
-                <Field label="Phường/ Xã" error={errors.ward}>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={form.ward}
-                      onChange={setField('ward')}
-                      placeholder="Chọn phường/ xã"
-                      className={inputCls(errors.ward)}
-                    />
-                    <ChevronSvg />
-                  </div>
-                </Field>
-              </div>
-
-              {/* 6 — Loại địa điểm */}
-              <div className="mt-5">
-                <label className="text-sm font-medium text-gray-700">
-                  Loại địa điểm
-                  <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <div className="mt-2.5 flex items-center gap-8">
-                  {LOCATION_TYPES.map(t => (
-                    <label key={t.value} className="flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={form.location_types.includes(t.value)}
-                        onChange={() => toggleType(t.value)}
-                        className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
-                      />
-                      <span className="text-sm text-gray-700">{t.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {errors.location_types && (
-                  <p className="mt-1 text-xs text-red-500">{errors.location_types}</p>
                 )}
-              </div>
 
-              {/* 7 — Thiết lập địa điểm */}
-              <div className="mt-5 border border-gray-100 rounded-xl overflow-hidden">
-                <div
-                  className="flex items-center gap-2 px-4 py-3"
-                  style={{ borderLeft: '4px solid #E67E22' }}
-                >
-                  <Settings size={15} className="text-orange-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-orange-500">Thiết lập địa điểm</span>
+                {/* 1 — Tên địa điểm */}
+                <Field label="Tên địa điểm" required error={errors.name}>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={setField('name')}
+                    placeholder="Nhập tên địa điểm"
+                    className={inputCls(errors.name)}
+                  />
+                </Field>
+
+                {/* 2 — Nhân viên quản lý | Trạng thái */}
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <Field label="Nhân viên quản lý" required error={errors.manager_id}>
+                    <div className="relative">
+                      <select
+                        value={form.manager_id}
+                        onChange={setField('manager_id')}
+                        className={`${inputCls(errors.manager_id)} appearance-none pr-9`}
+                      >
+                        <option value="">Chọn nhân viên quản lý</option>
+                        {staffUsers.map(u => (
+                          <option key={u.id} value={u.id}>{u.name}</option>
+                        ))}
+                      </select>
+                      <ChevronSvg />
+                    </div>
+                  </Field>
+                  <Field label="Trạng thái" required error={errors.status}>
+                    <div className="relative">
+                      <select
+                        value={form.status}
+                        onChange={setField('status')}
+                        className={`${inputCls(errors.status)} appearance-none pr-9`}
+                      >
+                        <option value="active">Đang hoạt động</option>
+                        <option value="inactive">Tạm ngưng</option>
+                      </select>
+                      <ChevronSvg />
+                    </div>
+                  </Field>
                 </div>
-                <div className="px-4 pb-4 grid grid-cols-2 gap-x-8 gap-y-3 mt-1">
-                  {[
-                    { field: 'manage_nvl',        label: 'Quản lý nguyên vật liệu' },
-                    { field: 'manage_btp',        label: 'Quản lý bán thành phẩm' },
-                    { field: 'manage_thanh_pham', label: 'Quản lý thành phẩm' },
-                    { field: 'allow_delivery',    label: 'Cho phép giao hàng' },
-                  ].map(item => (
-                    <label key={item.field} className="flex items-center gap-2 cursor-pointer select-none">
+
+                {/* 3 — Số điện thoại | Email */}
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <Field label="Số điện thoại" required error={errors.phone}>
+                    <input
+                      type="text"
+                      value={form.phone}
+                      onChange={setField('phone')}
+                      placeholder="Nhập số điện thoại"
+                      className={inputCls(errors.phone)}
+                    />
+                  </Field>
+                  <Field label="Email" error={errors.email}>
+                    <input
+                      type="text"
+                      value={form.email}
+                      onChange={setField('email')}
+                      placeholder="Nhập email"
+                      className={inputCls(errors.email)}
+                    />
+                  </Field>
+                </div>
+
+                {/* 4 — Địa chỉ | Tỉnh/Thành phố */}
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <Field label="Địa chỉ" error={errors.address}>
+                    <input
+                      type="text"
+                      value={form.address}
+                      onChange={setField('address')}
+                      placeholder="Nhập địa chỉ"
+                      className={inputCls(errors.address)}
+                    />
+                  </Field>
+                  <Field label="Tỉnh/ Thành phố" error={errors.province}>
+                    <div className="relative">
+                      <select
+                        value={form.province}
+                        onChange={setField('province')}
+                        className={`${inputCls(errors.province)} appearance-none pr-9`}
+                      >
+                        <option value="">Chọn tỉnh/ thành phố</option>
+                        {PROVINCES.map(p => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
+                      <ChevronSvg />
+                    </div>
+                  </Field>
+                </div>
+
+                {/* 5 — Quận/Huyện | Phường/Xã */}
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <Field label="Quận/ Huyện" error={errors.district}>
+                    <div className="relative">
                       <input
-                        type="checkbox"
-                        checked={form[item.field]}
-                        onChange={() => toggleSetup(item.field)}
-                        className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
+                        type="text"
+                        value={form.district}
+                        onChange={setField('district')}
+                        placeholder="Chọn quận/ huyện"
+                        className={inputCls(errors.district)}
                       />
-                      <span className="text-sm text-gray-700">{item.label}</span>
-                    </label>
-                  ))}
+                      <ChevronSvg />
+                    </div>
+                  </Field>
+                  <Field label="Phường/ Xã" error={errors.ward}>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={form.ward}
+                        onChange={setField('ward')}
+                        placeholder="Chọn phường/ xã"
+                        className={inputCls(errors.ward)}
+                      />
+                      <ChevronSvg />
+                    </div>
+                  </Field>
                 </div>
-              </div>
 
-              {/* 8 — Lịch sử */}
-              {locData.created_at && (
-                <div className="mt-5 mb-6 pt-4 border-t border-gray-100">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    {formatDate(locData.created_at)}
-                  </p>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-orange-500 font-bold text-base leading-none">•</span>
-                    <span className="text-gray-400 font-medium">{formatTime(locData.created_at)}</span>
-                    <span className="text-gray-700 font-medium">{locData.created_by_name || '—'}</span>
-                    <span className="ml-auto text-gray-500">
-                      Thêm mới địa điểm{' '}
-                      <span className="text-orange-500 font-semibold">{locData.code}</span>
-                    </span>
+                {/* 6 — Loại địa điểm */}
+                <div className="mt-5">
+                  <label className="text-sm font-medium text-gray-700">
+                    Loại địa điểm
+                    <span className="text-red-500 ml-0.5">*</span>
+                  </label>
+                  <div className="mt-2.5 flex items-center gap-8">
+                    {LOCATION_TYPES.map(t => (
+                      <label key={t.value} className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={form.location_types.includes(t.value)}
+                          onChange={() => toggleType(t.value)}
+                          className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
+                        />
+                        <span className="text-sm text-gray-700">{t.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {errors.location_types && (
+                    <p className="mt-1 text-xs text-red-500">{errors.location_types}</p>
+                  )}
+                </div>
+
+                {/* 7 — Thiết lập địa điểm */}
+                <div className="mt-5 border border-gray-100 rounded-xl overflow-hidden">
+                  <div
+                    className="flex items-center gap-2 px-4 py-3"
+                    style={{ borderLeft: '4px solid #E67E22' }}
+                  >
+                    <Settings size={15} className="text-orange-500 flex-shrink-0" />
+                    <span className="text-sm font-semibold text-orange-500">Thiết lập địa điểm</span>
+                  </div>
+                  <div className="px-4 pb-4 grid grid-cols-2 gap-x-8 gap-y-3 mt-1">
+                    {[
+                      { field: 'manage_nvl',        label: 'Quản lý nguyên vật liệu' },
+                      { field: 'manage_btp',        label: 'Quản lý bán thành phẩm' },
+                      { field: 'manage_thanh_pham', label: 'Quản lý thành phẩm' },
+                      { field: 'allow_delivery',    label: 'Cho phép giao hàng' },
+                    ].map(item => (
+                      <label key={item.field} className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={form[item.field]}
+                          onChange={() => toggleSetup(item.field)}
+                          className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
+                        />
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
-              )}
 
-            </form>
-          )}
-        </div>
+                {/* 8 — Lịch sử */}
+                {locData.history && locData.history.length > 0 && (
+                  <div className="mt-5 mb-6 pt-4 border-t border-gray-100">
+                    {groupHistoryByDate(locData.history).map(([date, entries]) => (
+                      <div key={date} className="mb-4 last:mb-0">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">{date}</p>
+                        <div className="space-y-2">
+                          {entries.map(entry => (
+                            <div key={entry.id} className="flex items-center gap-3 text-sm">
+                              <span className="text-orange-500 font-bold text-base leading-none flex-shrink-0">•</span>
+                              <span className="text-gray-400 font-medium flex-shrink-0 w-10">{formatTime(entry.timestamp)}</span>
+                              <span className="text-gray-700 font-medium flex-shrink-0">{entry.actor_name}</span>
+                              <span className="ml-auto text-gray-500 text-right">
+                                <ActionText action={entry.action} code={locData.code} />
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-        {/* ── Footer ── */}
-        <div className="flex items-center justify-between px-7 py-5 flex-shrink-0 border-t border-gray-100">
-          <button
-            type="button"
-            onClick={reset}
-            title="Đặt lại"
-            className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
-          >
-            <RotateCcw size={16} />
-          </button>
-          <div className="flex items-center gap-3">
+              </form>
+            )}
+          </div>
+
+          {/* ── Footer ── */}
+          <div className="flex items-center justify-between px-7 py-5 flex-shrink-0 border-t border-gray-100">
             <button
               type="button"
-              onClick={onClose}
-              className="px-6 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-[7px] hover:bg-gray-50 transition-colors"
+              onClick={reset}
+              title="Đặt lại"
+              className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
             >
-              Hủy
+              <RotateCcw size={16} />
             </button>
-            <button
-              type="submit"
-              form="edit-location-form"
-              disabled={loading || fetchLoading}
-              className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white rounded-[7px] hover:opacity-90 active:opacity-80 disabled:opacity-60 transition-opacity"
-              style={{ backgroundColor: '#E67E22' }}
-            >
-              {loading && <Loader2 size={14} className="animate-spin" />}
-              Lưu
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-[7px] hover:bg-gray-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                form="edit-location-form"
+                disabled={loading || fetchLoading}
+                className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white rounded-[7px] hover:opacity-90 active:opacity-80 disabled:opacity-60 transition-opacity"
+                style={{ backgroundColor: '#E67E22' }}
+              >
+                {loading && <Loader2 size={14} className="animate-spin" />}
+                Lưu
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* ── Internal SuccessModal — stay on page after save ── */}
+      {successVisible && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-80 mx-4 px-8 py-10 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full border-4 border-green-500 flex items-center justify-center mb-6">
+              <Check size={38} strokeWidth={3} className="text-green-500" />
+            </div>
+            <p className="text-base font-semibold text-gray-800 italic text-center mb-8 leading-relaxed">
+              Thông tin địa điểm đã được cập nhật thành công!
+            </p>
+            <button
+              onClick={() => setSuccessVisible(false)}
+              className="px-10 py-2.5 rounded-lg text-white font-semibold text-sm hover:opacity-90 active:opacity-80 transition-opacity"
+              style={{ backgroundColor: '#E67E22' }}
+            >
+              Xong
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
