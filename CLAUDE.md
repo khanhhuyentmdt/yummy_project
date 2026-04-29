@@ -402,6 +402,13 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
   - Overlay click → đóng (khi không loading)
 - [x] `LocationsPage.jsx`: Thay inline delete dialog bằng `<DeleteLocationModal>`; xóa `deleteLoading` state; sau xóa thành công hiện `SuccessModal`
 
+### ✅ Completed (Session 19 — 2026-04-29) — Unique name validation cho Location
+
+- [x] `api/models.py`: Thêm `unique=True` vào `Location.name` — DB-level enforcement
+- [x] Migration `0014_location_name_unique.py` — apply thành công
+- [x] `api/serializers.py` `LocationWriteSerializer.validate_name()`: kiểm tra `name__iexact` trước khi lưu; trên update dùng `exclude(pk=self.instance.pk)`; trả về `ValidationError('Tên địa điểm này đã được sử dụng.')` nếu trùng
+- [x] Frontend không cần thay đổi: `errors.name` đã được map từ response 400 → hiển thị dưới field qua `<Field error={errors.name}>` + viền đỏ qua `inputCls(errors.name)` + tự xóa khi user gõ qua `setField('name')`
+
 ### 🔜 Next Steps
 
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)

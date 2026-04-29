@@ -324,6 +324,15 @@ class LocationWriteSerializer(serializers.Serializer):
         choices=['active', 'inactive'], required=False, default='active'
     )
 
+    def validate_name(self, value):
+        name = value.strip()
+        qs = Location.objects.filter(name__iexact=name)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('Tên địa điểm này đã được sử dụng.')
+        return value
+
     def _get_manager(self, manager_id):
         if not manager_id:
             return None
