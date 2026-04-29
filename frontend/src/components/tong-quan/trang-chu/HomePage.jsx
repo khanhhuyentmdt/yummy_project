@@ -10,7 +10,6 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  ChevronUp,
   Activity,
   LogOut,
   CloudSync,
@@ -26,6 +25,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "../../../api/axios";
+import { useSort, SortableTh } from "../../../hooks/useSort";
 import vnSvgRaw from "../../../assets/vn.svg?raw";
 import CreateProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/san-pham/CreateProductPage";
 import EditProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/san-pham/EditProductPage";
@@ -1755,7 +1755,7 @@ function ProductsView({
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState("xlsx");
   const [exportScope, setExportScope] = useState("all");
-  const [statusSortOrder, setStatusSortOrder] = useState("none");
+  const { sortKey, sortDir, handleSort, applySort } = useSort();
   const [bulkResult, setBulkResult] = useState({
     open: false,
     success: 0,
@@ -1799,20 +1799,10 @@ function ProductsView({
     return matchSearch && matchStatus;
   });
 
-  const sortedFiltered =
-    statusSortOrder === "none"
-      ? filtered
-      : [...filtered].sort((a, b) => {
-          const aLabel = a.status === "active" ? "Đang hoạt động" : "Tạm ngưng";
-          const bLabel = b.status === "active" ? "Đang hoạt động" : "Tạm ngưng";
-          const cmp = aLabel.localeCompare(bLabel, "vi", {
-            sensitivity: "base",
-          });
-          return statusSortOrder === "asc" ? cmp : -cmp;
-        });
+  const sorted = applySort(filtered);
 
-  const totalPages = Math.ceil(sortedFiltered.length / ITEMS_PER_PAGE);
-  const paged = sortedFiltered.slice(
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
+  const paged = sorted.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
@@ -1826,17 +1816,6 @@ function ProductsView({
     setCurrentPage(1);
     setFilterOpen(false);
   };
-  const handleStatusSort = () => {
-    setStatusSortOrder((prev) => {
-      if (prev === "none") return "asc";
-      if (prev === "asc") return "desc";
-      return "none";
-    });
-    setCurrentPage(1);
-  };
-  const statusSortLabel =
-    statusSortOrder === "asc" ? "A-Z" : statusSortOrder === "desc" ? "Z-A" : "";
-
   const allPageChecked =
     paged.length > 0 && paged.every((p) => selected.has(p.id));
   const toggleAll = () => {
@@ -2047,7 +2026,7 @@ function ProductsView({
                   type="button"
                   onClick={() => {
                     const selectedRows =
-                      exportScope === "filtered" ? sortedFiltered : products;
+                      exportScope === "filtered" ? sorted : products;
                     setExportModalOpen(false);
                     onExportClick?.({
                       format: exportFormat,
@@ -2194,41 +2173,12 @@ function ProductsView({
                     className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
                   />
                 </th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Mã SP
-                </th>
-                <th
-                  className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider"
-                  colSpan={2}
-                >
-                  Tên Sản Phẩm
-                </th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Nhóm Sản Phẩm
-                </th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Đơn Vị Tính
-                </th>
-                <th className="text-right px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Giá Bán
-                </th>
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  <button
-                    type="button"
-                    onClick={handleStatusSort}
-                    className="inline-flex items-center gap-1.5 hover:text-gray-700 transition-colors"
-                    title="Sắp xếp trạng thái: A-Z, Z-A, mặc định"
-                  >
-                    <span>Trạng Thái</span>
-                    {statusSortLabel && (
-                      <span className="text-[10px] text-[#8D9AB6] font-semibold">
-                        {statusSortLabel}
-                      </span>
-                    )}
-                    {statusSortOrder === "asc" && <ChevronUp size={13} />}
-                    {statusSortOrder === "desc" && <ChevronDown size={13} />}
-                  </button>
-                </th>
+                <SortableTh columnKey="code"   label="Mã SP"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="name"   label="Tên Sản Phẩm"  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" colSpan={2} />
+                <SortableTh columnKey="group"  label="Nhóm Sản Phẩm" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="unit"   label="Đơn Vị Tính"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="price"  label="Giá Bán"        sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-right" />
+                <SortableTh columnKey="status" label="Trạng Thái"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
                 <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
                   Hành Động
                 </th>
@@ -2353,7 +2303,7 @@ function ProductsView({
             <span className="font-bold text-gray-700">{paged.length}</span> trên
             tổng số{" "}
             <span className="font-bold text-orange-500">
-              {sortedFiltered.length}
+              {sorted.length}
             </span>
           </p>
           <div className="flex items-center gap-1">

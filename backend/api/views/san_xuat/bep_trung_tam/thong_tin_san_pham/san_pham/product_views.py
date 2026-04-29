@@ -31,6 +31,11 @@ def product_list(request):
         qs = Product.objects.all()
         if search:
             qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
+        ordering = request.query_params.get('ordering', '').strip()
+        ALLOWED = {'code', '-code', 'name', '-name', 'group', '-group', 'unit', '-unit',
+                   'price', '-price', 'status', '-status'}
+        if ordering in ALLOWED:
+            qs = qs.order_by(ordering)
         serializer = ProductSerializer(qs, many=True, context=ctx)
         return Response({'products': serializer.data, 'total': qs.count()})
 

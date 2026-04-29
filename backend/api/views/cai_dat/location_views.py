@@ -50,6 +50,10 @@ def location_list(request):
         status_filter = request.query_params.get('status', '').strip()
         if status_filter in ('active', 'inactive'):
             qs = qs.filter(status=status_filter)
+        ordering = request.query_params.get('ordering', '').strip()
+        ALLOWED = {'code', '-code', 'name', '-name', 'address', '-address', 'phone', '-phone', 'status', '-status'}
+        if ordering in ALLOWED:
+            qs = qs.order_by(ordering)
         serializer = LocationSerializer(qs, many=True)
         return Response({'locations': serializer.data, 'total': qs.count()})
 

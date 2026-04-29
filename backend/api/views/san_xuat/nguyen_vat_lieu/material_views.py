@@ -34,6 +34,10 @@ def material_list(request):
         qs = Material.objects.all()
         if search:
             qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
+        ordering = request.query_params.get('ordering', '').strip()
+        ALLOWED = {'code', '-code', 'name', '-name', 'group', '-group', 'unit', '-unit', 'status', '-status'}
+        if ordering in ALLOWED:
+            qs = qs.order_by(ordering)
         serializer = MaterialSerializer(qs, many=True, context=ctx)
         return Response({'materials': serializer.data, 'total': qs.count()})
 

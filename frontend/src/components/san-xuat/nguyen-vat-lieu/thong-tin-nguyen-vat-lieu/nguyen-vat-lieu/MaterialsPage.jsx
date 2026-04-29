@@ -4,6 +4,7 @@ import {
   Plus, Filter, Download,
 } from 'lucide-react'
 import api from '../../../../../api/axios'
+import { useSort, SortableTh } from '../../../../../hooks/useSort'
 
 const ITEMS_PER_PAGE = 5
 
@@ -27,6 +28,7 @@ export default function MaterialsPage({ onCreateClick, onEditClick }) {
   const [deleteTarget, setDeleteTarget]   = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const filterRef = useRef(null)
+  const { sortKey, sortDir, handleSort, applySort } = useSort()
 
   const loadMaterials = () => {
     setLoading(true)
@@ -61,8 +63,9 @@ export default function MaterialsPage({ onCreateClick, onEditClick }) {
     return matchSearch && matchStatus
   })
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
-  const paged      = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+  const sorted     = applySort(filtered)
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE)
+  const paged      = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   const handleSearchChange = (v) => { setSearch(v); setCurrentPage(1) }
   const handleStatusFilter = (v) => { setStatusFilter(v); setCurrentPage(1); setFilterOpen(false) }
@@ -216,11 +219,11 @@ export default function MaterialsPage({ onCreateClick, onEditClick }) {
                     className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
                   />
                 </th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Mã NVL</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider" colSpan={2}>Tên Nguyên Vật Liệu</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Nhóm Nguyên Vật Liệu</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Đơn Vị Tính</th>
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                <SortableTh columnKey="code"   label="Mã NVL"             sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="name"   label="Tên Nguyên Vật Liệu" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" colSpan={2} />
+                <SortableTh columnKey="group"  label="Nhóm NVL"            sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="unit"   label="Đơn Vị Tính"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="status" label="Trạng Thái"          sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
                 <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Hành Động</th>
               </tr>
             </thead>
@@ -320,7 +323,7 @@ export default function MaterialsPage({ onCreateClick, onEditClick }) {
             Hiển thị{' '}
             <span className="font-bold text-gray-700">{paged.length}</span>{' '}
             trên tổng số{' '}
-            <span className="font-bold text-orange-500">{filtered.length}</span>
+            <span className="font-bold text-orange-500">{sorted.length}</span>
           </p>
           <div className="flex items-center gap-1">
             <button

@@ -4,6 +4,7 @@ import {
   Plus, Filter, Download,
 } from 'lucide-react'
 import api from '../../../../../api/axios'
+import { useSort, SortableTh } from '../../../../../hooks/useSort'
 
 const ITEMS_PER_PAGE = 10
 
@@ -51,6 +52,7 @@ export default function PurchaseOrdersPage({ onCreateClick }) {
   const [deleteTarget, setDeleteTarget]   = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const filterRef = useRef(null)
+  const { sortKey, sortDir, handleSort, applySort } = useSort()
 
   const loadOrders = () => {
     setLoading(true)
@@ -85,8 +87,9 @@ export default function PurchaseOrdersPage({ onCreateClick }) {
     return matchSearch && matchStatus
   })
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
-  const paged      = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+  const sorted     = applySort(filtered)
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE)
+  const paged      = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   const handleSearchChange = (v) => { setSearch(v); setCurrentPage(1) }
   const handleStatusFilter = (v) => { setStatusFilter(v); setCurrentPage(1); setFilterOpen(false) }
@@ -236,11 +239,11 @@ export default function PurchaseOrdersPage({ onCreateClick }) {
                     className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
                   />
                 </th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Mã Phiếu</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Ngày Tạo Phiếu</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Nhà Cung Cấp</th>
-                <th className="text-right px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Tổng Giá Trị</th>
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                <SortableTh columnKey="code"          label="Mã Phiếu"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="created_at"    label="Ngày Tạo Phiếu" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="supplier_name" label="Nhà Cung Cấp"  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="total_value"   label="Tổng Giá Trị"  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-right" />
+                <SortableTh columnKey="status"        label="Trạng Thái"    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
                 <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Hành Động</th>
               </tr>
             </thead>
@@ -328,7 +331,7 @@ export default function PurchaseOrdersPage({ onCreateClick }) {
             Hiển thị{' '}
             <span className="font-bold text-gray-700">{paged.length}</span>{' '}
             trên tổng số{' '}
-            <span className="font-bold text-orange-500">{filtered.length}</span>
+            <span className="font-bold text-orange-500">{sorted.length}</span>
           </p>
           <div className="flex items-center gap-1">
             <button

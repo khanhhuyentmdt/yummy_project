@@ -64,6 +64,13 @@ def purchase_order_list(request):
             qs = qs.filter(code__icontains=search) | qs.filter(supplier__name__icontains=search)
         if status_filter:
             qs = qs.filter(status=status_filter)
+        ordering = request.query_params.get('ordering', '').strip()
+        ALLOWED_DIRECT = {'code', '-code', 'created_at', '-created_at', 'total_value', '-total_value', 'status', '-status'}
+        SUPPLIER_MAP = {'supplier_name': 'supplier__name', '-supplier_name': '-supplier__name'}
+        if ordering in ALLOWED_DIRECT:
+            qs = qs.order_by(ordering)
+        elif ordering in SUPPLIER_MAP:
+            qs = qs.order_by(SUPPLIER_MAP[ordering])
         serializer = PurchaseOrderSerializer(qs, many=True)
         return Response({'purchase_orders': serializer.data, 'total': qs.count()})
 

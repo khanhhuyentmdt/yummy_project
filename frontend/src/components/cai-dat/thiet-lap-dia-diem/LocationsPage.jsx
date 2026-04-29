@@ -4,6 +4,7 @@ import {
   Plus, Filter, Download, Upload, Trash2,
 } from 'lucide-react'
 import api from '../../../api/axios'
+import { useSort, SortableTh } from '../../../hooks/useSort'
 import AddLocationModal from './AddLocationModal'
 import EditLocationModal from './EditLocationModal'
 import DeleteLocationModal from './DeleteLocationModal'
@@ -35,6 +36,7 @@ export default function LocationsPage() {
   const [pendingEdit, setPendingEdit]       = useState(null)
   const [successMsg, setSuccessMsg]         = useState(null)
   const filterRef = useRef(null)
+  const { sortKey, sortDir, handleSort, applySort } = useSort()
 
   const loadLocations = () => {
     setLoading(true)
@@ -70,8 +72,9 @@ export default function LocationsPage() {
     return matchSearch && matchStatus
   })
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
-  const paged      = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+  const sorted     = applySort(filtered)
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE)
+  const paged      = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   const handleSearchChange = (v) => { setSearch(v); setCurrentPage(1) }
   const handleStatusFilter = (v) => { setStatusFilter(v); setCurrentPage(1); setFilterOpen(false) }
@@ -259,11 +262,11 @@ export default function LocationsPage() {
                     className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
                   />
                 </th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Mã Địa Điểm</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Tên Địa Điểm</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Địa Chỉ</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">SĐT</th>
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                <SortableTh columnKey="code"    label="Mã Địa Điểm" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="name"    label="Tên Địa Điểm" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="address" label="Địa Chỉ"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="phone"   label="SĐT"          sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="status"  label="Trạng Thái"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
                 <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Hành Động</th>
               </tr>
             </thead>
@@ -355,7 +358,7 @@ export default function LocationsPage() {
             Hiển thị{' '}
             <span className="font-bold text-gray-700">{paged.length}</span>{' '}
             trên tổng số{' '}
-            <span className="font-bold text-orange-500">{filtered.length}</span>
+            <span className="font-bold text-orange-500">{sorted.length}</span>
           </p>
           <div className="flex items-center gap-1">
             <button
