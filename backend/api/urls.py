@@ -50,6 +50,8 @@ from .views import (
     location_bulk_delete,
     staff_user_list,
     shipping_unit_list,
+    shipping_unit_detail,
+    shipping_unit_bulk_delete,
 )
 
 urlpatterns = [
@@ -115,6 +117,9 @@ urlpatterns = [
     path('locations/',                  location_list,        name='location-list'),
     path('locations/bulk-delete/',      location_bulk_delete, name='location-bulk-delete'),
     path('locations/<int:pk>/',         location_detail,      name='location-detail'),
-    path('staff-users/',        staff_user_list, name='staff-user-list'),
-    path('shipping-units/', shipping_unit_list, name='shipping-unit-list'),
+    path('staff-users/',                staff_user_list,      name='staff-user-list'),
+    path('shipping-units/',             shipping_unit_list,        name='shipping-unit-list'),
+    path('shipping-units/bulk-delete/', shipping_unit_bulk_delete, name='shipping-unit-bulk-delete'),
+    path('shipping-units/<int:pk>/',    shipping_unit_detail,      name='shipping-unit-detail'),
 ]
+

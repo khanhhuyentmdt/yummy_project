@@ -81,6 +81,8 @@ from .cai_dat import (
     location_bulk_delete,
     staff_user_list,
     shipping_unit_list,
+    shipping_unit_detail,
+    shipping_unit_bulk_delete,
 )
 
 __all__ = [
@@ -136,4 +138,6 @@ __all__ = [
     'location_bulk_delete',
     'staff_user_list',
     'shipping_unit_list',
+    'shipping_unit_detail',
+    'shipping_unit_bulk_delete',
 ]

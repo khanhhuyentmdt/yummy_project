@@ -472,9 +472,9 @@ const SIDEBAR_CONFIG = [
       },
       {
         id: "thiet-lap-vchuyen",
-        label: "Thiết lập đơn vị vận chuyển",
+        label: "Đối tác vận chuyển",
         roles: null,
-        view: "coming-soon",
+        view: "shipping-units",  // ← ĐÃ ĐỔI
       },
     ],
   },
