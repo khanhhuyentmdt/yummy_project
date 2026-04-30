@@ -18,6 +18,12 @@ from .san_xuat import (
 # Bán hàng
 from .ban_hang import CustomerSerializer, OrderSerializer
 
+# Nhân sự
+from .nhan_su import *
+
+# Tài chính
+from .tai_chinh import *
+
 # Cài đặt
 from .cai_dat import (
     LocationSerializer, LocationWriteSerializer, LocationHistorySerializer,
@@ -30,25 +36,25 @@ from .cai_dat import (
 __all__ = [
     # Auth
     'PhoneLoginSerializer',
-    
+
     # Sản xuất - Nguyên vật liệu
     'MaterialSerializer',
     'MaterialWriteSerializer',
     'SupplierSerializer',
     'PurchaseOrderSerializer',
     'PurchaseOrderWriteSerializer',
-    
+
     # Sản xuất - Bếp trung tâm
     'ProductSerializer',
     'ProductCreateSerializer',
     'RawMaterialSerializer',
     'ProductBOMReadSerializer',
     'ProductBOMWriteSerializer',
-    
+
     # Bán hàng
     'CustomerSerializer',
     'OrderSerializer',
-    
+
     # Cài đặt
     'LocationSerializer',
     'LocationWriteSerializer',

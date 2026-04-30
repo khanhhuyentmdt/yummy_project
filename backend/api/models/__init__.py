@@ -14,6 +14,12 @@ from .san_xuat import (
 # Bán hàng
 from .ban_hang import Customer, Order
 
+# Nhân sự
+from .nhan_su import *
+
+# Tài chính
+from .tai_chinh import *
+
 # Cài đặt
 from .cai_dat import Location, LocationHistory, ShippingUnit, ShippingUnitHistory
 
@@ -24,21 +30,21 @@ __all__ = [
     # Auth
     'User',
     'UserManager',
-    
+
     # Sản xuất - Nguyên vật liệu
     'Material',
     'Supplier',
     'PurchaseOrder',
-    
+
     # Sản xuất - Bếp trung tâm
     'Product',
     'RawMaterial',
     'ProductBOM',
-    
+
     # Bán hàng
     'Customer',
     'Order',
-    
+
     # Cài đặt
     'Location',
     'LocationHistory',
