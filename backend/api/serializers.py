@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from api.models import ShippingUnit, ShippingUnitHistory
-from .models import Customer, Location, LocationHistory, Material, Order, Product, RawMaterial, ProductBOM, Supplier, PurchaseOrder
+from .models import (
+    Customer, Location, LocationHistory, Material, Order, Product, 
+    RawMaterial, ProductBOM, Supplier, PurchaseOrder, ShippingUnit, ShippingUnitHistory
+)
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
