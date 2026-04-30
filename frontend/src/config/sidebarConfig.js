@@ -368,7 +368,7 @@ const SIDEBAR_CONFIG = [
             id: "ho-so-nv",
             label: "Hồ sơ nhân viên",
             roles: ["Chuyên viên nhân sự"],
-            view: "coming-soon",
+            view: "employees",
           },
           {
             id: "vai-tro-nv",

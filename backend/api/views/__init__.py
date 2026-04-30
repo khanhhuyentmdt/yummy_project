@@ -54,8 +54,17 @@ from .ban_hang import (
 from .nhan_su import (
     # Thiết lập nhân viên
     employee_list,
+    employee_detail,
+    employee_bulk_delete,
     employee_role_list,
     employee_account_list,
+    # Vietnam Location
+    province_list,
+    district_list,
+    ward_list,
+    # Salary & Benefits
+    salary_type_list,
+    benefits_policy_list,
     # Quản lý chấm công
     shift_list,
     schedule_list,
@@ -117,8 +126,17 @@ __all__ = [
     'order_list',
     # Nhân sự - Thiết lập nhân viên
     'employee_list',
+    'employee_detail',
+    'employee_bulk_delete',
     'employee_role_list',
     'employee_account_list',
+    # Nhân sự - Vietnam Location
+    'province_list',
+    'district_list',
+    'ward_list',
+    # Nhân sự - Salary & Benefits
+    'salary_type_list',
+    'benefits_policy_list',
     # Nhân sự - Quản lý chấm công
     'shift_list',
     'schedule_list',

@@ -31,8 +31,15 @@ from .views import (
     order_list,
     # Nhân sự
     employee_list,
+    employee_detail,
+    employee_bulk_delete,
     employee_role_list,
     employee_account_list,
+    province_list,
+    district_list,
+    ward_list,
+    salary_type_list,
+    benefits_policy_list,
     shift_list,
     schedule_list,
     attendance_list,
@@ -93,9 +100,20 @@ urlpatterns = [
     path('orders/', order_list, name='order-list'),
 
     # ─── Nhân sự > Thiết lập nhân viên ────────────────────────────────────────
-    path('employees/', employee_list, name='employee-list'),
+    path('employees/',              employee_list,         name='employee-list'),
+    path('employees/bulk-delete/',  employee_bulk_delete,  name='employee-bulk-delete'),
+    path('employees/<int:pk>/',     employee_detail,       name='employee-detail'),
     path('employee-roles/', employee_role_list, name='employee-role-list'),
     path('employee-accounts/', employee_account_list, name='employee-account-list'),
+    
+    # ─── Địa lý Việt Nam ──────────────────────────────────────────────────────
+    path('provinces/', province_list, name='province-list'),
+    path('districts/', district_list, name='district-list'),
+    path('wards/', ward_list, name='ward-list'),
+    
+    # ─── Lương & Phúc lợi ─────────────────────────────────────────────────────
+    path('salary-types/', salary_type_list, name='salary-type-list'),
+    path('benefits-policies/', benefits_policy_list, name='benefits-policy-list'),
 
     # ─── Nhân sự > Quản lý chấm công ──────────────────────────────────────────
     path('shifts/', shift_list, name='shift-list'),

@@ -15,7 +15,11 @@ from .san_xuat import (
 from .ban_hang import Customer, Order
 
 # Nhân sự
-from .nhan_su import *
+from .nhan_su import (
+    Employee, EmployeeHistory,
+    SalaryType, BenefitsPolicy,
+    Province, District, Ward,
+)
 
 # Tài chính
 from .tai_chinh import *
@@ -44,6 +48,15 @@ __all__ = [
     # Bán hàng
     'Customer',
     'Order',
+
+    # Nhân sự
+    'Employee',
+    'EmployeeHistory',
+    'SalaryType',
+    'BenefitsPolicy',
+    'Province',
+    'District',
+    'Ward',
 
     # Cài đặt
     'Location',

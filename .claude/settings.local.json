@@ -38,7 +38,11 @@
       "Bash(../.venv/python.exe manage.py seed_locations)",
       "Bash(../.venv/python.exe manage.py makemigrations api --name location_extended_fields)",
       "Bash(../.venv/python.exe manage.py migrate api 0012)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(D:\\\\project_yummy\\\\.venv\\\\python.exe manage.py makemigrations api --name=\"add_employee\")",
+      "Bash(/d/project_yummy/.venv/python.exe manage.py makemigrations api --name=\"add_employee\")",
+      "Bash(/d/project_yummy/.venv/python.exe *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

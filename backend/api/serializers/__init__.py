@@ -19,7 +19,11 @@ from .san_xuat import (
 from .ban_hang import CustomerSerializer, OrderSerializer
 
 # Nhân sự
-from .nhan_su import *
+from .nhan_su import (
+    EmployeeSerializer, EmployeeWriteSerializer, EmployeeHistorySerializer,
+    ProvinceSerializer, DistrictSerializer, WardSerializer,
+    SalaryTypeSerializer, BenefitsPolicySerializer,
+)
 
 # Tài chính
 from .tai_chinh import *
@@ -54,6 +58,16 @@ __all__ = [
     # Bán hàng
     'CustomerSerializer',
     'OrderSerializer',
+
+    # Nhân sự
+    'EmployeeSerializer',
+    'EmployeeWriteSerializer',
+    'EmployeeHistorySerializer',
+    'ProvinceSerializer',
+    'DistrictSerializer',
+    'WardSerializer',
+    'SalaryTypeSerializer',
+    'BenefitsPolicySerializer',
 
     # Cài đặt
     'LocationSerializer',

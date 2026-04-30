@@ -35,6 +35,9 @@ import PurchaseOrdersPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-li
 import LocationsPage from "../../cai-dat/thiet-lap-dia-diem/LocationsPage";
 import Sidebar from "../../common/Sidebar";
 import ShippingUnitsPage from "../../cai-dat/thiet-lap-don-vi-van-chuyen/ShippingUnitsPage";
+import EmployeesPage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/EmployeesPage";
+import CreateEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/CreateEmployeePage";
+import EditEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/EditEmployeePage";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -330,6 +333,7 @@ export default function HomePage({ user = {}, onLogout }) {
 
   const [activeView, setActiveView] = useState("dashboard");
   const [activeMenuId, setActiveMenuId] = useState("dashboard");
+  const [editEmployeeId, setEditEmployeeId] = useState(null);
   const [stats, setStats] = useState(STATS_FALLBACK);
   const [products, setProducts] = useState(PRODUCTS_FALLBACK);
   const [headerSearch, setHeaderSearch] = useState("");
@@ -909,6 +913,25 @@ export default function HomePage({ user = {}, onLogout }) {
           {activeView === "shipping-units" && (
             <ShippingUnitsPage />
           )}
+          {activeView === "employees" && (
+            <EmployeesPage
+              onCreateClick={() => setActiveView("create-employee")}
+              onEditClick={(emp) => { setEditEmployeeId(emp.id); setActiveView("edit-employee") }}
+            />
+          )}
+          {activeView === "create-employee" && (
+            <CreateEmployeePage
+              onCancel={() => setActiveView("employees")}
+              onSaved={(emp) => { setEditEmployeeId(emp.id); setActiveView("edit-employee") }}
+            />
+          )}
+          {activeView === "edit-employee" && editEmployeeId && (
+            <EditEmployeePage
+              employeeId={editEmployeeId}
+              onCancel={() => setActiveView("employees")}
+              onSaved={() => {}}
+            />
+          )}
           {![
             "dashboard",
             "products",
@@ -919,6 +942,9 @@ export default function HomePage({ user = {}, onLogout }) {
             "purchase-orders",
             "locations",
             "shipping-units",
+            "employees",
+            "create-employee",
+            "edit-employee",
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>

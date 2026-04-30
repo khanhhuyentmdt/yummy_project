@@ -893,3 +893,108 @@ Cập nhật file CLAUDE.md.
 Thực hiện git add . và git commit -m "feat: implement 3-state sorting for all list tables across the system".
 
 Hãy thực hiện thay đổi này để tối ưu hóa khả năng khai thác dữ liệu cho người dùng.
+
+# Hồ sơ nhân viên
+Claude, hãy triển khai module Hồ sơ nhân viên cho dự án erp_yummy dựa trên các hình ảnh tham chiếu image_28fe80.png, image_28fabe.png, và image_28fabc.png.
+
+1. Vị trí tệp tin (Tuân thủ cấu trúc phân cấp mới):
+
+Backend (Django):
+
+Models: Tạo/Cập nhật tại backend/api/models/nhan_su/thiet_lap_nhan_vien/.  
+
+Serializers: Tạo/Cập nhật tại backend/api/serializers/nhan_su/thiet_lap_nhan_vien/.  
+
+Views: Thực hiện tại backend/api/views/nhan_su/thiet_lap_nhan_vien/employee_views.py.  
+
+Frontend (React): frontend/src/components/nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/.  
+
+2. Trang Danh sách (Dựa trên image_28fe80.png):
+
+Tiêu đề: 'DANH SÁCH HỒ SƠ NHÂN VIÊN' (In hoa toàn bộ).  
+
+Bảng dữ liệu:
+
+Các cột: MÃ TK, HỌ VÀ TÊN (kèm avatar và SĐT), VAI TRÒ, KHU VỰC LÀM VIỆC, NGÀY VÀO LÀM, TRẠNG THÁI, HÀNH ĐỘNG.
+
+Tiêu đề cột in hoa. Checkbox nền cam #E67E22 dấu tick trắng.  
+
+Sắp xếp 3 trạng thái (A-Z, Z-A, Mặc định) cho tất cả các cột trừ Hành động.
+
+Tính năng: Tìm kiếm, Bộ lọc, Xuất file, và Xóa hàng loạt (hiện nút 'Xóa đã chọn' màu đỏ khi có checkbox được tích).
+
+3. Trang Thêm mới (Dựa trên image_28fabe.png và image_28fabc.png):
+
+Cấu trúc: Form 2 cột trên nền #FFF6F3.
+
+Trường dữ liệu:
+
+Thông tin khởi tạo (có upload ảnh), Thông tin công việc (Ngày vào làm, Vai trò, Ca làm việc), Thông tin cá nhân (Ngày sinh, CMND, Email, Địa chỉ hành chính 3 cấp).
+
+Phần 'Lương thưởng' ở cuối trang.
+
+Tác vụ: Nút 'Thêm' màu cam #E67E22, nút 'Hủy' trắng, icon tải lại.
+
+4. Logic & Quy chuẩn dự án:
+
+Style: Font Nunito Sans, border-radius 7px cho mọi input/button.  
+
+Validation: Unique validation cho Email/SĐT, báo lỗi chữ đỏ dưới input.
+
+UX Flow: Sau khi Thêm thành công -> Hiện SuccessModal -> Bấm OK tự động mở trang Chỉnh sửa của nhân viên đó.  
+
+Audit Trail: Triển khai cơ chế lưu vết lịch sử chỉnh sửa tại Backend và hiển thị ở trang Chỉnh sửa.  
+
+Hãy thực hiện đồng bộ cả Backend API và Frontend Component theo đúng sơ đồ thư mục đã nêu.
+# Ca làm việc
+Claude, hãy triển khai module Ca làm việc cho dự án erp_yummy dựa trên hình ảnh danh sách image_27f456.png và pop-up thêm mới image_27f123.png.
+
+1. Vị trí tệp tin (Theo cấu trúc nghiệp vụ):
+
+Backend (Django):
+
+Models: backend/api/models/nhan_su/quan_ly_cham_cong/.  
+
+Serializers: backend/api/serializers/nhan_su/quan_ly_cham_cong/.  
+
+Views: backend/api/views/nhan_su/quan_ly_cham_cong/shift_views.py.  
+
+Frontend (React): frontend/src/components/nhan-su/quan-ly-cham-cong/ca-lam-viec/.  
+
+2. Trang Danh sách (Dựa trên screenshot/ds-calamviec.png):
+
+Tiêu đề: 'DANH SÁCH CA LÀM VIỆC' (In hoa toàn bộ).  
+
+Bảng dữ liệu:
+
+Các cột: MÃ CLV, TÊN CA LÀM VIỆC, THỜI GIAN LÀM VIỆC (Bắt đầu - Kết thúc), TỔNG GIỜ LÀM VIỆC, TRẠNG THÁI, HÀNH ĐỘNG.
+
+Tiêu đề cột in hoa. Checkbox nền cam #E67E22 dấu tick trắng khi được chọn.  
+
+Sắp xếp 3 trạng thái cho mọi cột trừ Hành động.  
+
+Tính năng: Tìm kiếm, Bộ lọc, Xuất file, và Xóa hàng loạt (hiện nút 'Xóa đã chọn' màu đỏ khi có checkbox được tích).  
+
+3. Pop-up Thêm mới (Dựa trên screenshot/them-calamviec.png):
+
+Tiêu đề: 'THÊM MỚI CA LÀM VIỆC'.  
+
+Các trường:
+
+Tên ca làm việc (Bắt buộc, dấu * đỏ).
+
+Giờ bắt đầu, Giờ kết thúc (Sử dụng TimePicker).
+
+Khối 'Nghỉ giữa ca': Đóng khung nét đứt, có nút (+) màu cam để thêm khoảng nghỉ. Bao gồm Giờ bắt đầu nghỉ và Giờ kết thúc nghỉ.
+
+Tác vụ: Nút 'Lưu' màu cam #E67E22, nút 'Hủy' trắng, icon tải lại.  
+
+4. Quy chuẩn kỹ thuật:
+
+Style: Font Nunito Sans, border-radius 7px cho mọi input/button.  
+
+UX Flow: Thêm mới thành công -> Hiện SuccessModal -> Bấm OK mở ngay trang Chỉnh sửa của ca làm việc đó.  
+
+Audit Trail: Model phải có cơ chế lưu vết lịch sử chỉnh sửa.  
+
+Hãy thực hiện đồng bộ Backend API, Models, Serializers và Frontend Component để hoàn thiện chức năng quản lý ca làm việc.
