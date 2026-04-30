@@ -4,13 +4,15 @@
 from .auth import User, UserManager
 
 # Sản xuất
-from .san_xuat import Product, RawMaterial, ProductBOM
+from .san_xuat import (
+    # Nguyên vật liệu
+    Material, Supplier, PurchaseOrder,
+    # Bếp trung tâm
+    Product, RawMaterial, ProductBOM,
+)
 
 # Bán hàng
 from .ban_hang import Customer, Order
-
-# Mua hàng
-from .mua_hang import Material, Supplier, PurchaseOrder
 
 # Cài đặt
 from .cai_dat import Location, LocationHistory, ShippingUnit, ShippingUnitHistory
@@ -23,7 +25,12 @@ __all__ = [
     'User',
     'UserManager',
     
-    # Sản xuất
+    # Sản xuất - Nguyên vật liệu
+    'Material',
+    'Supplier',
+    'PurchaseOrder',
+    
+    # Sản xuất - Bếp trung tâm
     'Product',
     'RawMaterial',
     'ProductBOM',
@@ -31,11 +38,6 @@ __all__ = [
     # Bán hàng
     'Customer',
     'Order',
-    
-    # Mua hàng
-    'Material',
-    'Supplier',
-    'PurchaseOrder',
     
     # Cài đặt
     'Location',
