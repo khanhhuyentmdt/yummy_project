@@ -947,7 +947,7 @@ Audit Trail: Triển khai cơ chế lưu vết lịch sử chỉnh sửa tại B
 
 Hãy thực hiện đồng bộ cả Backend API và Frontend Component theo đúng sơ đồ thư mục đã nêu.
 # Ca làm việc
-Claude, hãy triển khai module Ca làm việc cho dự án erp_yummy dựa trên hình ảnh danh sách image_27f456.png và pop-up thêm mới image_27f123.png.
+Claude, hãy triển khai module Ca làm việc cho dự án erp_yummy dựa trên hình ảnh danh sách screenshot/ds-calamviec.png và pop-up thêm mới screenshot/them-calamviec.png.
 
 1. Vị trí tệp tin (Theo cấu trúc nghiệp vụ):
 
@@ -998,3 +998,61 @@ UX Flow: Thêm mới thành công -> Hiện SuccessModal -> Bấm OK mở ngay t
 Audit Trail: Model phải có cơ chế lưu vết lịch sử chỉnh sửa.  
 
 Hãy thực hiện đồng bộ Backend API, Models, Serializers và Frontend Component để hoàn thiện chức năng quản lý ca làm việc.
+# Thưởng
+Claude, hãy triển khai module Quản lý thưởng cho dự án erp_yummy dựa trên hình ảnh danh sách screenshot/ds-thuong.png và giao diện thêm mới screenshot/them-thuong.png.
+
+1. Vị trí tệp tin (Tuân thủ cấu trúc phân cấp):
+
+Backend (Django):
+
+Models: backend/api/models/nhan_su/quan_ly_luong/.  
+
+Serializers: backend/api/serializers/nhan_su/quan_ly_luong/.  
+
+Views: backend/api/views/nhan_su/quan_ly_luong/bonus_views.py.  
+
+Frontend (React): frontend/src/components/nhan-su/quan-ly-luong/thuong/.  
+
+2. Logic sinh mã tự động (Sequential ID):
+
+Tại Backend, hãy viết logic tự động sinh mã MTH theo số thứ tự (ví dụ: MTH001, MTH002,...). Tuyệt đối không dùng số ngẫu nhiên.  
+
+3. Trang Danh sách (Dựa trên screenshot/ds-thuong.png):
+
+Tiêu đề: 'DANH SÁCH THƯỞNG' (In hoa toàn bộ).  
+
+Bảng dữ liệu:
+
+Các cột: MÃ THƯỞNG, LÝ DO THƯỞNG, SỐ LƯỢNG NV ĐƯỢC THƯỞNG, TỔNG TIỀN, NGÀY THƯỞNG, TRẠNG THÁI, HÀNH ĐỘNG.
+
+Tiêu đề cột in hoa. Checkbox nền cam #E67E22 dấu tick trắng khi được chọn.  
+
+Sắp xếp 3 trạng thái cho mọi cột trừ Hành động.  
+
+Tính năng: Tìm kiếm, Bộ lọc, Xuất file, và Xóa hàng loạt (hiện cụm 'X được chọn' và nút 'Xóa đã chọn' màu đỏ khi có checkbox được tích).  
+
+4. Giao diện Thêm mới (Dựa trên screenshot/them-thuong.png):
+
+Cấu trúc: Form 2 cột trên nền #FFF6F3.
+
+Thành phần:
+
+Khối 'Thông tin chung': Lý do thưởng (bắt buộc), Ngày thưởng (datepicker), Mức thưởng tổng (input số kèm đơn vị đ).
+
+Nhân viên được thưởng (Checkbox: Tất cả nhân viên / Tùy chọn).
+
+Hình thức thưởng (Checkbox: Thưởng trực tiếp / Thưởng cộng vào lương).
+
+Khối 'Ghi chú' ở bên phải.
+
+Tác vụ: Nút 'Thêm' màu cam #E67E22, nút 'Hủy bỏ' trắng, icon tải lại.  
+
+5. Quy chuẩn Kỹ thuật & UX:
+
+Style: Font Nunito Sans, border-radius 7px cho mọi input/button.  
+
+UX Flow: Thêm mới thành công -> SuccessModal -> Bấm OK mở ngay Pop-up Chỉnh sửa của bản ghi đó.  
+
+Chỉnh sửa: Phải sử dụng Pop-up (Modal). Trang chỉnh sửa bổ sung trường 'Trạng thái' và khối 'Lịch sử' (Audit Trail) ở cuối.  
+
+Hãy thực hiện đồng bộ Backend API và Frontend Component để hoàn thiện chức năng quản lý thưởng.

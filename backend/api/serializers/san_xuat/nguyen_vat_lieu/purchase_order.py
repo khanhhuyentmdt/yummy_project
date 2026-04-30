@@ -24,12 +24,17 @@ class PurchaseOrderWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if not validated_data.get('code'):
-            import time
-            suffix = int(time.time() * 1000) % 1000000
-            validated_data['code'] = f'PDH{suffix:06d}'
-            while PurchaseOrder.objects.filter(code=validated_data['code']).exists():
-                suffix = (suffix + 1) % 1000000
-                validated_data['code'] = f'PDH{suffix:06d}'
+            # Generate sequential code PDH001, PDH002, etc.
+            latest = PurchaseOrder.objects.order_by('-code').first()
+            if not latest or not latest.code.startswith('PDH'):
+                validated_data['code'] = 'PDH001'
+            else:
+                try:
+                    last_num = int(latest.code[3:])
+                    new_num = last_num + 1
+                    validated_data['code'] = f'PDH{new_num:03d}'
+                except (ValueError, IndexError):
+                    validated_data['code'] = 'PDH001'
         return PurchaseOrder.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

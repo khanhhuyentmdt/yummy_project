@@ -34,12 +34,17 @@ class MaterialWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if not validated_data.get('code'):
-            import time
-            suffix = int(time.time() * 1000) % 1000000
-            validated_data['code'] = f'NVL{suffix:06d}'
-            while Material.objects.filter(code=validated_data['code']).exists():
-                suffix = (suffix + 1) % 1000000
-                validated_data['code'] = f'NVL{suffix:06d}'
+            # Generate sequential code NVL001, NVL002, etc.
+            latest = Material.objects.order_by('-code').first()
+            if not latest or not latest.code.startswith('NVL'):
+                validated_data['code'] = 'NVL001'
+            else:
+                try:
+                    last_num = int(latest.code[3:])
+                    new_num = last_num + 1
+                    validated_data['code'] = f'NVL{new_num:03d}'
+                except (ValueError, IndexError):
+                    validated_data['code'] = 'NVL001'
         return Material.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

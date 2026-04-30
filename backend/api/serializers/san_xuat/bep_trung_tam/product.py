@@ -42,14 +42,18 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         bom_data = validated_data.pop('bom_items', [])
 
-        # Auto-generate unique code when not provided
+        # Auto-generate sequential code SP001, SP002, etc.
         if not validated_data.get('code'):
-            import time
-            suffix = int(time.time() * 1000) % 1000000
-            validated_data['code'] = f'SP{suffix:06d}'
-            while Product.objects.filter(code=validated_data['code']).exists():
-                suffix = (suffix + 1) % 1000000
-                validated_data['code'] = f'SP{suffix:06d}'
+            latest = Product.objects.order_by('-code').first()
+            if not latest or not latest.code.startswith('SP'):
+                validated_data['code'] = 'SP001'
+            else:
+                try:
+                    last_num = int(latest.code[2:])
+                    new_num = last_num + 1
+                    validated_data['code'] = f'SP{new_num:03d}'
+                except (ValueError, IndexError):
+                    validated_data['code'] = 'SP001'
 
         product = Product.objects.create(**validated_data)
 

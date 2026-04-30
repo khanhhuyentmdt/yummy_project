@@ -42,7 +42,10 @@
       "Bash(D:\\\\project_yummy\\\\.venv\\\\python.exe manage.py makemigrations api --name=\"add_employee\")",
       "Bash(/d/project_yummy/.venv/python.exe manage.py makemigrations api --name=\"add_employee\")",
       "Bash(/d/project_yummy/.venv/python.exe *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(..\\\\\\\\.venv\\\\\\\\python.exe manage.py makemigrations api --name workshift)",
+      "Bash(../.venv/python.exe manage.py makemigrations api --name workshift)",
+      "Bash(../.venv/python.exe *)"
     ]
   }
 }

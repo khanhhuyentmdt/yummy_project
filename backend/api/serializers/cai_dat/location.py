@@ -80,13 +80,19 @@ class LocationWriteSerializer(serializers.Serializer):
             return None
 
     def _auto_code(self):
-        import time
-        suffix = int(time.time() * 1000) % 1000000
-        code = f'MDD{suffix:06d}'
-        while Location.objects.filter(code=code).exists():
-            suffix = (suffix + 1) % 1000000
-            code = f'MDD{suffix:06d}'
-        return code
+        """Generate sequential code MDD001, MDD002, etc."""
+        # Get the latest location code
+        latest = Location.objects.order_by('-code').first()
+        if not latest or not latest.code.startswith('MDD'):
+            return 'MDD001'
+        
+        try:
+            # Extract number from code like 'MDD004'
+            last_num = int(latest.code[3:])
+            new_num = last_num + 1
+            return f'MDD{new_num:03d}'
+        except (ValueError, IndexError):
+            return 'MDD001'
 
     def create(self, validated_data):
         location_types_list = validated_data.pop('location_types', [])

@@ -39,9 +39,17 @@ class ShippingUnitWriteSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
-        last = ShippingUnit.objects.order_by('-id').first()
-        next_id = (last.id + 1) if last else 1
-        code = f'MDT{next_id:04d}'
+        # Generate sequential code MDT001, MDT002, etc.
+        latest = ShippingUnit.objects.order_by('-code').first()
+        if not latest or not latest.code.startswith('MDT'):
+            code = 'MDT001'
+        else:
+            try:
+                last_num = int(latest.code[3:])
+                new_num = last_num + 1
+                code = f'MDT{new_num:03d}'
+            except (ValueError, IndexError):
+                code = 'MDT001'
         return ShippingUnit.objects.create(code=code, **validated_data)
 
     def update(self, instance, validated_data):
