@@ -38,6 +38,9 @@ import ShippingUnitsPage from "../../cai-dat/thiet-lap-don-vi-van-chuyen/Shippin
 import EmployeesPage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/EmployeesPage";
 import CreateEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/CreateEmployeePage";
 import EditEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/EditEmployeePage";
+import WorkShiftsPage from "../../nhan-su/quan-ly-cham-cong/ca-lam-viec/WorkShiftsPage";
+import EditShiftPage from "../../nhan-su/quan-ly-cham-cong/ca-lam-viec/EditShiftPage";
+import BonusPage from "../../nhan-su/quan-ly-luong/thuong/BonusPage";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -334,6 +337,7 @@ export default function HomePage({ user = {}, onLogout }) {
   const [activeView, setActiveView] = useState("dashboard");
   const [activeMenuId, setActiveMenuId] = useState("dashboard");
   const [editEmployeeId, setEditEmployeeId] = useState(null);
+  const [editShiftId,    setEditShiftId]    = useState(null);
   const [stats, setStats] = useState(STATS_FALLBACK);
   const [products, setProducts] = useState(PRODUCTS_FALLBACK);
   const [headerSearch, setHeaderSearch] = useState("");
@@ -932,6 +936,21 @@ export default function HomePage({ user = {}, onLogout }) {
               onSaved={() => {}}
             />
           )}
+          {activeView === "work-shifts" && (
+            <WorkShiftsPage
+              onEditClick={(shift) => { setEditShiftId(shift.id); setActiveView("edit-shift") }}
+            />
+          )}
+          {activeView === "edit-shift" && editShiftId && (
+            <EditShiftPage
+              shiftId={editShiftId}
+              onBack={() => setActiveView("work-shifts")}
+              onSaved={() => {}}
+            />
+          )}
+          {activeView === "bonuses" && (
+            <BonusPage />
+          )}
           {![
             "dashboard",
             "products",
@@ -945,6 +964,8 @@ export default function HomePage({ user = {}, onLogout }) {
             "employees",
             "create-employee",
             "edit-employee",
+            "work-shifts",
+            "edit-shift",
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>

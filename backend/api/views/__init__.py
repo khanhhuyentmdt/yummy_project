@@ -67,10 +67,14 @@ from .nhan_su import (
     benefits_policy_list,
     # Quản lý chấm công
     shift_list,
+    shift_detail,
+    shift_bulk_delete,
     schedule_list,
     attendance_list,
     # Quản lý lương
     bonus_list,
+    bonus_detail,
+    bonus_bulk_delete,
     benefit_list,
     payroll_list,
 )
@@ -139,10 +143,14 @@ __all__ = [
     'benefits_policy_list',
     # Nhân sự - Quản lý chấm công
     'shift_list',
+    'shift_detail',
+    'shift_bulk_delete',
     'schedule_list',
     'attendance_list',
     # Nhân sự - Quản lý lương
     'bonus_list',
+    'bonus_detail',
+    'bonus_bulk_delete',
     'benefit_list',
     'payroll_list',
     # Tài chính

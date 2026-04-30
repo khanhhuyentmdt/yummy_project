@@ -393,7 +393,7 @@ const SIDEBAR_CONFIG = [
             id: "ca-lam-viec",
             label: "Ca làm việc",
             roles: ["Trợ lý nhân sự"],
-            view: "coming-soon",
+            view: "work-shifts",
           },
           {
             id: "lich-lam-viec",
@@ -418,7 +418,7 @@ const SIDEBAR_CONFIG = [
             id: "thuong",
             label: "Thưởng",
             roles: ["Chuyên viên nhân sự"],
-            view: "coming-soon",
+            view: "bonuses",
           },
           {
             id: "phuc-loi",

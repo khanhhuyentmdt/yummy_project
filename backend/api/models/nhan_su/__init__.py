@@ -3,8 +3,8 @@ from .thiet_lap_nhan_vien import (
     SalaryType, BenefitsPolicy,
     Province, District, Ward,
 )
-from .quan_ly_cham_cong import *
-from .quan_ly_luong import *
+from .quan_ly_cham_cong import WorkShift, WorkShiftBreak, WorkShiftHistory
+from .quan_ly_luong import Bonus, BonusHistory
 
 __all__ = [
     'Employee',
@@ -14,4 +14,9 @@ __all__ = [
     'Province',
     'District',
     'Ward',
+    'WorkShift',
+    'WorkShiftBreak',
+    'WorkShiftHistory',
+    'Bonus',
+    'BonusHistory',
 ]

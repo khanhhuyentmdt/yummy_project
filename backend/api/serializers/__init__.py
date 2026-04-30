@@ -23,6 +23,9 @@ from .nhan_su import (
     EmployeeSerializer, EmployeeWriteSerializer, EmployeeHistorySerializer,
     ProvinceSerializer, DistrictSerializer, WardSerializer,
     SalaryTypeSerializer, BenefitsPolicySerializer,
+    WorkShiftSerializer, WorkShiftWriteSerializer,
+    WorkShiftBreakSerializer, WorkShiftHistorySerializer,
+    BonusSerializer, BonusWriteSerializer, BonusHistorySerializer,
 )
 
 # Tài chính
@@ -68,6 +71,13 @@ __all__ = [
     'WardSerializer',
     'SalaryTypeSerializer',
     'BenefitsPolicySerializer',
+    'WorkShiftSerializer',
+    'WorkShiftWriteSerializer',
+    'WorkShiftBreakSerializer',
+    'WorkShiftHistorySerializer',
+    'BonusSerializer',
+    'BonusWriteSerializer',
+    'BonusHistorySerializer',
 
     # Cài đặt
     'LocationSerializer',

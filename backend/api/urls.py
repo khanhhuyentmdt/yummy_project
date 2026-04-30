@@ -41,9 +41,13 @@ from .views import (
     salary_type_list,
     benefits_policy_list,
     shift_list,
+    shift_detail,
+    shift_bulk_delete,
     schedule_list,
     attendance_list,
     bonus_list,
+    bonus_detail,
+    bonus_bulk_delete,
     benefit_list,
     payroll_list,
     # Tài chính
@@ -116,14 +120,18 @@ urlpatterns = [
     path('benefits-policies/', benefits_policy_list, name='benefits-policy-list'),
 
     # ─── Nhân sự > Quản lý chấm công ──────────────────────────────────────────
-    path('shifts/', shift_list, name='shift-list'),
-    path('schedules/', schedule_list, name='schedule-list'),
-    path('attendances/', attendance_list, name='attendance-list'),
+    path('shifts/',               shift_list,         name='shift-list'),
+    path('shifts/bulk-delete/',   shift_bulk_delete,  name='shift-bulk-delete'),
+    path('shifts/<int:pk>/',      shift_detail,       name='shift-detail'),
+    path('schedules/',            schedule_list,      name='schedule-list'),
+    path('attendances/',          attendance_list,    name='attendance-list'),
 
     # ─── Nhân sự > Quản lý lương ──────────────────────────────────────────────
-    path('bonuses/', bonus_list, name='bonus-list'),
-    path('benefits/', benefit_list, name='benefit-list'),
-    path('payrolls/', payroll_list, name='payroll-list'),
+    path('bonuses/',               bonus_list,         name='bonus-list'),
+    path('bonuses/bulk-delete/',   bonus_bulk_delete,  name='bonus-bulk-delete'),
+    path('bonuses/<int:pk>/',      bonus_detail,       name='bonus-detail'),
+    path('benefits/',              benefit_list,       name='benefit-list'),
+    path('payrolls/',              payroll_list,       name='payroll-list'),
 
     # ─── Tài chính ────────────────────────────────────────────────────────────
     path('fund-sources/', fund_source_list, name='fund-source-list'),

@@ -47,13 +47,37 @@ def employee_list(request):
 
     # POST
     import json
-    data = request.data.copy()
+    from django.http import QueryDict
     
-    # Parse benefits_ids if it's a JSON string
-    if 'benefits_ids' in data and isinstance(data['benefits_ids'], str):
-        try:
-            data['benefits_ids'] = json.loads(data['benefits_ids'])
-        except (json.JSONDecodeError, ValueError):
+    # Convert QueryDict to mutable dict
+    if isinstance(request.data, QueryDict):
+        data = dict(request.data.lists())
+        # Flatten single-value lists
+        for key, value in data.items():
+            if isinstance(value, list) and len(value) == 1:
+                data[key] = value[0]
+    else:
+        data = dict(request.data)
+    
+    # Parse has_salary_info from string to boolean
+    if 'has_salary_info' in data:
+        val = data['has_salary_info']
+        if isinstance(val, str):
+            data['has_salary_info'] = val.lower() in ('true', '1', 'yes')
+    
+    # Handle benefits_ids
+    if 'benefits_ids' not in data:
+        data['benefits_ids'] = []
+    else:
+        benefits = data.get('benefits_ids')
+        if isinstance(benefits, str):
+            try:
+                data['benefits_ids'] = json.loads(benefits)
+            except (json.JSONDecodeError, ValueError):
+                data['benefits_ids'] = []
+        elif isinstance(benefits, list):
+            data['benefits_ids'] = [int(b) for b in benefits if str(b).isdigit()]
+        else:
             data['benefits_ids'] = []
     
     serializer = EmployeeWriteSerializer(data=data)
@@ -65,6 +89,7 @@ def employee_list(request):
             EmployeeSerializer(employee, context={'request': request}).data,
             status=status.HTTP_201_CREATED,
         )
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -97,13 +122,37 @@ def employee_detail(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     import json
-    data = request.data.copy()
+    from django.http import QueryDict
     
-    # Parse benefits_ids if it's a JSON string
-    if 'benefits_ids' in data and isinstance(data['benefits_ids'], str):
-        try:
-            data['benefits_ids'] = json.loads(data['benefits_ids'])
-        except (json.JSONDecodeError, ValueError):
+    # Convert QueryDict to mutable dict
+    if isinstance(request.data, QueryDict):
+        data = dict(request.data.lists())
+        # Flatten single-value lists
+        for key, value in data.items():
+            if isinstance(value, list) and len(value) == 1:
+                data[key] = value[0]
+    else:
+        data = dict(request.data)
+    
+    # Parse has_salary_info from string to boolean
+    if 'has_salary_info' in data:
+        val = data['has_salary_info']
+        if isinstance(val, str):
+            data['has_salary_info'] = val.lower() in ('true', '1', 'yes')
+    
+    # Handle benefits_ids
+    if 'benefits_ids' not in data:
+        data['benefits_ids'] = []
+    else:
+        benefits = data.get('benefits_ids')
+        if isinstance(benefits, str):
+            try:
+                data['benefits_ids'] = json.loads(benefits)
+            except (json.JSONDecodeError, ValueError):
+                data['benefits_ids'] = []
+        elif isinstance(benefits, list):
+            data['benefits_ids'] = [int(b) for b in benefits if str(b).isdigit()]
+        else:
             data['benefits_ids'] = []
     
     old_status = employee.status

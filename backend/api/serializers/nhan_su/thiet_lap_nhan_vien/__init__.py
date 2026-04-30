@@ -170,13 +170,14 @@ class EmployeeWriteSerializer(serializers.Serializer):
     notes            = serializers.CharField(required=False, allow_blank=True, default='')
     
     # Salary & Benefits
-    has_salary_info  = serializers.BooleanField(required=False, default=False)
+    has_salary_info  = serializers.BooleanField(required=False, default=False, allow_null=True)
     salary_type_id   = serializers.IntegerField(required=False, allow_null=True)
-    salary_amount    = serializers.DecimalField(max_digits=15, decimal_places=0, required=False, default=0)
+    salary_amount    = serializers.DecimalField(max_digits=15, decimal_places=0, required=False, default=0, allow_null=True)
     benefits_ids     = serializers.ListField(
         child=serializers.IntegerField(),
         required=False,
         default=list,
+        allow_empty=True,
     )
     
     # Keep old salary fields for compatibility
@@ -223,13 +224,29 @@ class EmployeeWriteSerializer(serializers.Serializer):
             return None
 
     def _auto_code(self):
-        import time
-        suffix = int(time.time() * 1000) % 1000000
-        code = f'MNV{suffix:06d}'
-        while Employee.objects.filter(code=code).exists():
-            suffix = (suffix + 1) % 1000000
-            code = f'MNV{suffix:06d}'
-        return code
+        """Generate sequential code MNV001, MNV002, etc."""
+        from django.db.models import Max
+        from django.db.models.functions import Cast, Substr
+        from django.db.models import IntegerField
+        
+        # Get all codes that start with 'MNV' and extract the numeric part
+        latest = Employee.objects.filter(
+            code__startswith='MNV',
+            code__regex=r'^MNV\d{3}$'
+        ).order_by('-code').first()
+        
+        if not latest:
+            return 'MNV001'
+        
+        try:
+            # Extract number from code like 'MNV004'
+            last_num = int(latest.code[3:])
+            new_num = last_num + 1
+            return f'MNV{new_num:03d}'
+        except (ValueError, IndexError):
+            # Fallback: count all employees and add 1
+            count = Employee.objects.filter(code__startswith='MNV').count()
+            return f'MNV{count + 1:03d}'
     
     def _track_changes(self, instance, old_data, new_data, actor_name):
         """Track field changes for audit trail"""

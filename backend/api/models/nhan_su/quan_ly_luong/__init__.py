@@ -1,5 +1,3 @@
-# Quản lý lương
-# Bao gồm: Bảng lương, Phúc lợi, Thưởng
-# TODO: Thêm models khi cần
+from .bonus import Bonus, BonusHistory
 
-__all__ = []
+__all__ = ['Bonus', 'BonusHistory']

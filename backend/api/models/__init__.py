@@ -19,6 +19,8 @@ from .nhan_su import (
     Employee, EmployeeHistory,
     SalaryType, BenefitsPolicy,
     Province, District, Ward,
+    WorkShift, WorkShiftBreak, WorkShiftHistory,
+    Bonus, BonusHistory,
 )
 
 # Tài chính
@@ -57,6 +59,11 @@ __all__ = [
     'Province',
     'District',
     'Ward',
+    'WorkShift',
+    'WorkShiftBreak',
+    'WorkShiftHistory',
+    'Bonus',
+    'BonusHistory',
 
     # Cài đặt
     'Location',

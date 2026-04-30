@@ -210,29 +210,60 @@ export default function CreateEmployeePage({ onCancel, onSaved }) {
 
   const handleSave = async () => {
     const e = validate()
-    if (Object.keys(e).length) { setErrors(e); return }
+    if (Object.keys(e).length) { 
+      setErrors(e)
+      return 
+    }
+    
     setSaving(true)
     try {
       const fd = new FormData()
+      
+      // Add all form fields
       Object.entries(form).forEach(([k, v]) => {
         if (k === 'benefits_ids') {
-          // Send as JSON array
-          fd.append(k, JSON.stringify(v))
+          // Skip benefits_ids, we'll handle it separately
+          return
+        } else if (k === 'has_salary_info') {
+          // Send boolean as string 'true' or 'false'
+          fd.append(k, v ? 'true' : 'false')
+        } else if (k === 'salary_amount' && v === '') {
+          // Skip empty salary_amount
+          return
+        } else if (k === 'salary_type_id' && v === '') {
+          // Skip empty salary_type_id
+          return
         } else if (v !== '' && v !== null && v !== undefined) {
           fd.append(k, v)
         }
       })
+      
+      // Only add benefits_ids if there are any
+      if (Array.isArray(form.benefits_ids) && form.benefits_ids.length > 0) {
+        form.benefits_ids.forEach(id => {
+          fd.append('benefits_ids', id)
+        })
+      }
+      // If no benefits, don't send the field at all
+      
+      // Add files
       if (avatarFile)   fd.append('avatar', avatarFile)
       if (contractFile) fd.append('contract_image', contractFile)
 
+      console.log('Sending employee data...')
       const res = await api.post('employees/', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
+      console.log('Employee created successfully:', res.data)
       setSuccessData(res.data)
     } catch (err) {
+      console.error('Error creating employee:', err)
+      console.error('Error response:', err.response?.data)
       const data = err.response?.data || {}
       const mapped = {}
-      Object.entries(data).forEach(([k, v]) => { mapped[k] = Array.isArray(v) ? v[0] : v })
+      Object.entries(data).forEach(([k, v]) => { 
+        mapped[k] = Array.isArray(v) ? v[0] : v 
+      })
       setErrors(mapped)
     } finally {
       setSaving(false)
@@ -616,7 +647,7 @@ export default function CreateEmployeePage({ onCancel, onSaved }) {
 
       {successData && (
         <SuccessModal
-          message={`Nhân viên "${successData.full_name}" đã được thêm thành công!`}
+          message="Thêm nhân viên thành công!"
           onClose={handleSuccessClose}
         />
       )}

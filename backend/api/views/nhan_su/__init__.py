@@ -15,11 +15,15 @@ from .thiet_lap_nhan_vien import (
 )
 from .quan_ly_cham_cong import (
     shift_list,
+    shift_detail,
+    shift_bulk_delete,
     schedule_list,
     attendance_list,
 )
 from .quan_ly_luong import (
     bonus_list,
+    bonus_detail,
+    bonus_bulk_delete,
     benefit_list,
     payroll_list,
 )
@@ -38,10 +42,14 @@ __all__ = [
     'benefits_policy_list',
     # Quản lý chấm công
     'shift_list',
+    'shift_detail',
+    'shift_bulk_delete',
     'schedule_list',
     'attendance_list',
     # Quản lý lương
     'bonus_list',
+    'bonus_detail',
+    'bonus_bulk_delete',
     'benefit_list',
     'payroll_list',
 ]
