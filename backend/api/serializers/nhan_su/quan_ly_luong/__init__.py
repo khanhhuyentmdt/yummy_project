@@ -169,6 +169,8 @@ class BonusWriteSerializer(serializers.Serializer):
         }
         
         employee_ids = validated_data.pop('employee_ids', None)
+        # Remove code from validated_data to prevent overwriting
+        validated_data.pop('code', None)
         
         # Update fields
         for attr, value in validated_data.items():
