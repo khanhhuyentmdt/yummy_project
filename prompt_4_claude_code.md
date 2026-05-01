@@ -1103,3 +1103,56 @@ Trang Chỉnh sửa bổ sung trường 'Trạng thái' và khối 'Lịch sử'
 Sử dụng các thông báo (toast/alert) giống hệt module Sản phẩm.  
 
 Hãy thực hiện đồng bộ Backend API và Frontend Component. Đảm bảo mọi văn bản có dấu và giao diện chuẩn xác theo yêu cầu.
+
+# Bảng lương
+Claude, hãy triển khai module Quản lý bảng lương cho dự án erp_yummy dựa trên các hình ảnh tham chiếu: danh sách (ds-bangluong.png), thêm mới (them-bangluong-1 of 3.png, them-bangluong-2 of 3.png, them-bangluong-3 of 3.png) và chỉnh sửa (chinhsua-bangluong.png).
+
+1. Quy định về Ngôn ngữ & Vị trí:
+
+Ngôn ngữ: Sử dụng Tiếng Việt có dấu chuẩn 100% cho toàn bộ UI và thông báo.
+
+Backend (Django):
+
+Models: backend/api/models/nhan_su/quan_ly_luong/.
+
+Serializers: backend/api/serializers/nhan_su/quan_ly_luong/.
+
+Views: backend/api/views/nhan_su/quan_ly_luong/payroll_views.py.
+
+Frontend (React): frontend/src/components/nhan-su/quan-ly-luong/bang-luong/.
+
+2. Trang Danh sách (Dựa trên ds-bangluong.png):
+
+Tiêu đề bảng: 'DANH SÁCH BẢNG LƯƠNG' và các cột (MÃ BL, TÊN BẢNG LƯƠNG, KỲ TÍNH LƯƠNG, TỔNG LƯƠNG (đ), ĐÃ TRẢ (đ), TRẠNG THÁI, HÀNH ĐỘNG) phải IN HOA.
+
+Checkbox: Nền cam #E67E22 kèm dấu tick trắng khi chọn.
+
+Tính năng: Sắp xếp 3 trạng thái, Tìm kiếm, Bộ lọc, và Xóa hàng loạt (hiển thị nút màu đỏ khi có chọn).
+
+3. Trang Thêm mới & Chỉnh sửa (Dựa trên các ảnh them-bangluong-x và chinhsua-bangluong.png):
+
+Stepper: Triển khai thanh trạng thái 2 bước: 1. Thông tin chung -> 2. Kiểm tra và lưu.
+
+Giao diện: Form 2 cột trên nền #FFF6F3. Khối nhập liệu bên trái, khung 'Ghi chú' bên phải.
+
+Logic Mã số: Tự động sinh mã MBL theo số thứ tự (ví dụ: MBL006) dựa trên bản ghi lớn nhất.
+
+Phạm vi áp dụng:
+
+Nếu 'Tất cả nhân viên': Tự động lấy danh sách nhân viên đang làm việc.
+
+Nếu 'Tùy chọn': Hiển thị thanh tìm kiếm nhân viên và bảng danh sách có nút xóa (X) ở cuối mỗi dòng.
+
+Xác nhận hủy: Nếu đang nhập mà nhấn 'Hủy bỏ', hiện Pop-up xác nhận kèm icon dấu chấm than vàng chuẩn dự án.
+
+4. Logic & Kỹ thuật nâng cao:
+
+Tính toán: Tự động tính toán 'TỔNG CỘNG' lương thực nhận từ danh sách nhân viên hiển thị.
+
+Unique Validation: Tên bảng lương không được trùng lặp. Nếu trùng, báo lỗi chữ đỏ dưới input.
+
+UX Flow: Thêm thành công -> SuccessModal -> Bấm OK mở ngay trang Chỉnh sửa của bảng lương đó.
+
+Audit Trail: Trang Chỉnh sửa (trang riêng) phải có trường 'Trạng thái' và khối 'Lịch sử' lưu vết ở cuối trang.
+
+Hãy thực hiện đồng bộ Backend và Frontend. Đảm bảo giao diện giống hệt ảnh mẫu về khoảng cách, màu sắc và font Nunito Sans.
