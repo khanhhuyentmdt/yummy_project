@@ -76,6 +76,8 @@ from .nhan_su import (
     bonus_detail,
     bonus_bulk_delete,
     benefit_list,
+    benefit_detail,
+    benefit_bulk_delete,
     payroll_list,
 )
 
@@ -152,6 +154,8 @@ __all__ = [
     'bonus_detail',
     'bonus_bulk_delete',
     'benefit_list',
+    'benefit_detail',
+    'benefit_bulk_delete',
     'payroll_list',
     # Tài chính
     'fund_source_list',

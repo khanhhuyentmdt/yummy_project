@@ -49,6 +49,8 @@ from .views import (
     bonus_detail,
     bonus_bulk_delete,
     benefit_list,
+    benefit_detail,
+    benefit_bulk_delete,
     payroll_list,
     # Tài chính
     fund_source_list,
@@ -130,7 +132,9 @@ urlpatterns = [
     path('bonuses/',               bonus_list,         name='bonus-list'),
     path('bonuses/bulk-delete/',   bonus_bulk_delete,  name='bonus-bulk-delete'),
     path('bonuses/<int:pk>/',      bonus_detail,       name='bonus-detail'),
-    path('benefits/',              benefit_list,       name='benefit-list'),
+    path('benefits/',               benefit_list,        name='benefit-list'),
+    path('benefits/bulk-delete/',   benefit_bulk_delete, name='benefit-bulk-delete'),
+    path('benefits/<int:pk>/',      benefit_detail,      name='benefit-detail'),
     path('payrolls/',              payroll_list,       name='payroll-list'),
 
     # ─── Tài chính ────────────────────────────────────────────────────────────

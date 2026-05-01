@@ -424,7 +424,7 @@ const SIDEBAR_CONFIG = [
             id: "phuc-loi",
             label: "Phúc lợi",
             roles: ["Chuyên viên nhân sự"],
-            view: "coming-soon",
+            view: "phuc-loi",
           },
           {
             id: "bang-luong",

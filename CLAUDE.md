@@ -429,6 +429,34 @@ D: && cd D:\TheALAB_VibeCoding\demo_app && claude
 - [x] Checkbox khi checked: nền cam #E67E22, dấu tick trắng, bo góc nhẹ, ring cam khi focus
 - [x] Font Nunito Sans được kế thừa từ body (không cần thêm class)
 
+### ✅ Completed (Session 25 — 2026-05-01) — Module Quản lý Phúc lợi
+
+- [x] `api/models/nhan_su/quan_ly_luong/welfare.py`: Model `Benefit` (code MPL auto-gen, name, benefit_type, scope, cycle, effective_from/to, value, value_unit, attachment FileField, notes, status, created_by_name) + `BenefitHistory` (audit trail)
+- [x] Migration `0026_add_benefit_model.py` — apply thành công
+- [x] Management command `seed_benefits` — seed 4 bản ghi mẫu (MPL001–MPL004)
+- [x] `api/serializers/nhan_su/quan_ly_luong/__init__.py`: Thêm `BenefitSerializer`, `BenefitWriteSerializer` (auto-gen code, file upload), `BenefitHistorySerializer`
+- [x] `api/views/nhan_su/quan_ly_luong/benefit_views.py`: `benefit_list` (GET+POST), `benefit_bulk_delete` (POST), `benefit_detail` (GET+PUT+PATCH+DELETE) — hỗ trợ multipart FormData cho file upload
+- [x] `api/urls.py`: `GET/POST /api/benefits/`, `POST /api/benefits/bulk-delete/`, `GET/PUT/PATCH/DELETE /api/benefits/<pk>/`
+- [x] `src/components/nhan-su/quan-ly-luong/phucloi/WelfarePage.jsx`: Orchestrator quản lý view state (list/create/edit)
+- [x] `src/components/nhan-su/quan-ly-luong/phucloi/WelfareListPage.jsx`: Danh sách phúc lợi — search, filter status, sort 3 trạng thái (SortableTh), pagination, checkbox bulk-select, bulk delete, action dropdown, status badge, export CSV
+- [x] `src/components/nhan-su/quan-ly-luong/phucloi/CreateWelfarePage.jsx`: Trang thêm mới — 2 cột (form trái + Tóm tắt/Ghi chú phải), drag-drop file attachment, validation, SuccessModal → mở Edit
+- [x] `src/components/nhan-su/quan-ly-luong/phucloi/EditWelfarePage.jsx`: Trang chỉnh sửa — thêm field Trạng thái, audit trail (Lịch sử), drag-drop attachment, SuccessModal stay-on-page
+- [x] `src/components/nhan-su/quan-ly-luong/phucloi/DeleteWelfareModal.jsx`: Delete confirm modal (single + bulk)
+- [x] `src/config/sidebarConfig.js`: `phuc-loi.view` đổi từ `'coming-soon'` → `'phuc-loi'`
+- [x] `src/components/tong-quan/trang-chu/HomePage.jsx`: Import + render `WelfarePage` tại `activeView === 'phuc-loi'`
+
+**API endpoints mới:**
+- `GET /api/benefits/?search=&status=` — danh sách phúc lợi
+- `POST /api/benefits/` — tạo phúc lợi (auto-gen code MPL{3-digit}, hỗ trợ file upload)
+- `POST /api/benefits/bulk-delete/` — xóa hàng loạt
+- `GET/PUT/PATCH/DELETE /api/benefits/{pk}/` — chi tiết/cập nhật/xóa
+
+**Seed command:** `python manage.py seed_benefits`
+
+**Loại phúc lợi:** Phụ cấp | Chính sách | Văn hoá | Khác  
+**Phạm vi:** Toàn công ty | Theo vai trò | Cá nhân  
+**Chu kỳ:** Hàng ngày | Hàng tháng | Hàng quý | Hàng năm | Ngày lễ, tết | Sự kiện
+
 ### 🔜 Next Steps
 
 - [ ] **EditMaterialPage**: Trang sửa NVL (tương tự EditProductPage)

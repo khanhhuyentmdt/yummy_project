@@ -41,6 +41,7 @@ import EditEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/
 import WorkShiftsPage from "../../nhan-su/quan-ly-cham-cong/ca-lam-viec/WorkShiftsPage";
 import EditShiftPage from "../../nhan-su/quan-ly-cham-cong/ca-lam-viec/EditShiftPage";
 import BonusPage from "../../nhan-su/quan-ly-luong/thuong/BonusPage";
+import WelfarePage from "../../nhan-su/quan-ly-luong/phucloi/WelfarePage";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -951,6 +952,9 @@ export default function HomePage({ user = {}, onLogout }) {
           {activeView === "bonuses" && (
             <BonusPage />
           )}
+          {activeView === "phuc-loi" && (
+            <WelfarePage />
+          )}
           {![
             "dashboard",
             "products",
@@ -967,6 +971,7 @@ export default function HomePage({ user = {}, onLogout }) {
             "work-shifts",
             "edit-shift",
             "bonuses",
+            "phuc-loi",
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>

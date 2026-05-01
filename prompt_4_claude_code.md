@@ -1056,3 +1056,50 @@ UX Flow: Thêm mới thành công -> SuccessModal -> Bấm OK mở ngay Pop-up C
 Chỉnh sửa: Phải sử dụng Pop-up (Modal). Trang chỉnh sửa bổ sung trường 'Trạng thái' và khối 'Lịch sử' (Audit Trail) ở cuối.  
 
 Hãy thực hiện đồng bộ Backend API và Frontend Component để hoàn thiện chức năng quản lý thưởng.
+
+# Phúc lợi
+Claude, hãy triển khai module Quản lý phúc lợi cho dự án erp_yummy dựa trên hình ảnh danh sách screenshot/ds-phucloi.png và giao diện thêm mới screenshot/them-phucloi.png.
+
+1. Quy định về Ngôn ngữ & Vị trí:
+
+Ngôn ngữ: Sử dụng Tiếng Việt có dấu chuẩn cho toàn bộ UI và thông báo.  
+
+Backend (Django):
+
+Models: backend/api/models/nhan_su/quan_ly_luong/.  
+
+Serializers: backend/api/serializers/nhan_su/quan_ly_luong/.  
+
+Views: backend/api/views/nhan_su/quan_ly_luong/benefit_views.py.  
+
+Frontend (React): frontend/src/components/nhan-su/quan-ly-luong/phucloi/.  
+
+2. Đồng bộ giao diện Thêm/Sửa (Trang riêng biệt):
+
+Dựa trên screenshot/them-phucloi.png, trang Thêm mới là một trang riêng. Hãy làm trang Chỉnh sửa cũng là một trang riêng biệt để đảm bảo tính đồng nhất.  
+
+3. Trang Danh sách (Dựa trên screenshot/ds-phucloi.png):
+
+Tiêu đề bảng: 'DANH SÁCH PHÚC LỢI' và tất cả tiêu đề cột (MÃ PL, TÊN PHÚC LỢI, PHẠM VI...) phải IN HOA toàn bộ.  
+
+Checkbox: Khi chọn, nền màu cam #E67E22 kèm dấu tick trắng.  
+
+Tính năng: Sắp xếp 3 trạng thái cho mọi cột (trừ Hành động), Tìm kiếm, Bộ lọc, và Xóa hàng loạt (hiện cụm 'X được chọn' và nút 'Xóa đã chọn' màu đỏ).  
+
+4. Trang Thêm mới & Chỉnh sửa (Dựa trên screenshot/them-phucloi.png):
+
+Logic Mã số: Tự động sinh mã MPL theo số thứ tự (ví dụ: MPL001, MPL002,...) dựa trên bản ghi gần nhất.  
+
+Giao diện: Form 2 cột trên nền #FFF6F3, font Nunito Sans, border-radius 7px.  
+
+Thành phần: Khối nhập liệu trái, khung 'Tóm tắt thông tin' và 'Ghi chú' ở bên phải. Phần đính kèm quyết định hỗ trợ kéo thả file.
+
+UX Flow: Thêm mới thành công -> Hiện SuccessModal -> Bấm OK mở ngay trang Chỉnh sửa của bản ghi đó.  
+
+5. Audit Trail & Trạng thái:
+
+Trang Chỉnh sửa bổ sung trường 'Trạng thái' và khối 'Lịch sử' (Audit Trail) lưu vết chi tiết (Thời gian, Người dùng, Hành động) ở cuối trang.  
+
+Sử dụng các thông báo (toast/alert) giống hệt module Sản phẩm.  
+
+Hãy thực hiện đồng bộ Backend API và Frontend Component. Đảm bảo mọi văn bản có dấu và giao diện chuẩn xác theo yêu cầu.
