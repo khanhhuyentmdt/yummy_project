@@ -54,7 +54,7 @@ export function SortableTh({ columnKey, label, sortKey, sortDir, onSort, classNa
       <button
         type="button"
         onClick={() => onSort(columnKey)}
-        className={`inline-flex items-center gap-1 transition-colors hover:text-gray-700 ${
+        className={`inline-flex items-center gap-1 uppercase tracking-wider transition-colors hover:text-gray-700 ${
           active ? 'text-orange-500' : 'text-gray-500'
         }`}
       >

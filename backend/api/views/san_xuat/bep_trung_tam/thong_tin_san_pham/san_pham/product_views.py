@@ -11,12 +11,24 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.models import Product
+from api.models import Product, ProductGroup
 from api.serializers import ProductSerializer, ProductCreateSerializer
 
 logger = logging.getLogger(__name__)
 
-DATA_SYNC_FILE = Path(settings.BASE_DIR).parent / 'data_sync' / 'products.json'
+DATA_SYNC_FILE = Path(settings.BASE_DIR).parent / 'data_sync' / 'san-pham' / 'products.json'
+
+
+def _generate_next_product_group_code():
+    groups = ProductGroup.objects.filter(code__regex=r'^NSP\d+$').order_by('-code')
+    if not groups.exists():
+        return 'NSP001'
+    highest_code = groups.first().code
+    try:
+        number = int(highest_code[3:])
+        return f'NSP{number + 1:03d}'
+    except (ValueError, IndexError):
+        return 'NSP001'
 
 
 @api_view(['GET', 'POST'])
@@ -28,14 +40,26 @@ def product_list(request):
 
     if request.method == 'GET':
         search = request.query_params.get('search', '').strip()
-        qs = Product.objects.all()
+        qs = Product.objects.select_related('group').prefetch_related('bom_items__raw_material').all()
         if search:
-            qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search)
+            qs = qs.filter(name__icontains=search) | qs.filter(code__icontains=search) | qs.filter(group__name__icontains=search)
         ordering = request.query_params.get('ordering', '').strip()
-        ALLOWED = {'code', '-code', 'name', '-name', 'group', '-group', 'unit', '-unit',
-                   'price', '-price', 'status', '-status'}
-        if ordering in ALLOWED:
-            qs = qs.order_by(ordering)
+        ORDERING_MAP = {
+            'code': 'code',
+            '-code': '-code',
+            'name': 'name',
+            '-name': '-name',
+            'group': 'group__name',
+            '-group': '-group__name',
+            'unit': 'unit',
+            '-unit': '-unit',
+            'price': 'price',
+            '-price': '-price',
+            'status': 'status',
+            '-status': '-status',
+        }
+        if ordering in ORDERING_MAP:
+            qs = qs.order_by(ORDERING_MAP[ordering])
         serializer = ProductSerializer(qs, many=True, context=ctx)
         return Response({'products': serializer.data, 'total': qs.count()})
 
@@ -52,7 +76,7 @@ def product_list(request):
 def product_detail(request, pk):
     """GET/PUT/PATCH/DELETE /api/products/{pk}/"""
     try:
-        product = Product.objects.get(pk=pk)
+        product = Product.objects.select_related('group').prefetch_related('bom_items__raw_material').get(pk=pk)
     except Product.DoesNotExist:
         return Response({'detail': 'Khong tim thay san pham.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -79,7 +103,7 @@ def product_detail(request, pk):
 def product_sync(request):
     """
     POST /api/products/sync/
-    Doc data_sync/products.json, upsert theo id vao DB.
+    Doc data_sync/san-pham/products.json, upsert theo id vao DB.
     Tra ve: {updated, created, message}
     """
     if not DATA_SYNC_FILE.exists():
@@ -108,7 +132,7 @@ def product_sync(request):
     created = 0
     errors  = []
 
-    ALLOWED_FIELDS = {'code', 'name', 'group', 'unit', 'quantity', 'price', 'status'}
+    ALLOWED_FIELDS = {'code', 'name', 'unit', 'quantity', 'price', 'status'}
 
     for item in items:
         item_id = item.get('id')
@@ -117,6 +141,21 @@ def product_sync(request):
             continue
 
         defaults = {k: v for k, v in item.items() if k in ALLOWED_FIELDS}
+        group_name = str(item.get('group') or '').strip()
+        group_code = str(item.get('group_code') or '').strip()
+        if group_name or group_code:
+            group = None
+            if group_code:
+                group = ProductGroup.objects.filter(code__iexact=group_code).first()
+            if not group and group_name:
+                group = ProductGroup.objects.filter(name__iexact=group_name).first()
+            if not group and group_name:
+                group = ProductGroup.objects.create(
+                    code=_generate_next_product_group_code(),
+                    name=group_name,
+                    status=ProductGroup.STATUS_ACTIVE,
+                )
+            defaults['group'] = group
 
         try:
             _, is_new = Product.objects.update_or_create(

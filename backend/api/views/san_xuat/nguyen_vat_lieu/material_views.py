@@ -1,6 +1,7 @@
 """
 Material views - Sản xuất > Nguyên vật liệu > Thông tin nguyên vật liệu
 """
+from django.db.models import ProtectedError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -73,5 +74,11 @@ def material_detail(request, pk):
             return Response(MaterialSerializer(updated, context=ctx).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    material.delete()
+    try:
+        material.delete()
+    except ProtectedError:
+        return Response(
+            {'detail': 'Không thể xóa nguyên vật liệu vì đang được dùng trong định mức sản phẩm.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     return Response(status=status.HTTP_204_NO_CONTENT)

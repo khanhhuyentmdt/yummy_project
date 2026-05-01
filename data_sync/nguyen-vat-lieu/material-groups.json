@@ -1,0 +1,25 @@
+﻿{
+  "material_groups": [
+    {
+      "id": 1,
+      "code": "MNH001",
+      "name": "Tra nen",
+      "description": "Nguyen lieu nen tra",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "code": "MNH002",
+      "name": "Bot sua",
+      "description": "Nguyen lieu bot sua va topping kho",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "code": "MNH003",
+      "name": "Syrup",
+      "description": "Nhom syrup va dung dich tao vi",
+      "status": "active"
+    }
+  ]
+}

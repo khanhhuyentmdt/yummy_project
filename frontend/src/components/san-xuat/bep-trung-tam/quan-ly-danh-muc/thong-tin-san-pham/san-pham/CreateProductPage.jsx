@@ -1,180 +1,227 @@
-import { useState, useEffect, useRef } from 'react'
-import { ChevronRight, ChevronDown, Plus, X, Upload, Loader2, AlertTriangle } from 'lucide-react'
-import api from '../../../../../../api/axios'
-import SuccessModal from '../../../../../common/SuccessModal'
+import { useState, useEffect, useRef } from "react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Plus,
+  X,
+  Upload,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
+import api from "../../../../../../api/axios";
+import SuccessModal from "../../../../../common/SuccessModal";
 
-const PRODUCT_GROUPS = [
-  'Trà hồ Singapore',
-  'Matcha Trà hồ',
-  'Cà phê',
-  'Trà hoa quả',
-  'Khác',
-]
+const PRODUCT_UNITS = ["Ly", "Phần", "Chai", "Hộp", "Gói", "Kg"];
 
-const PRODUCT_UNITS = ['Ly', 'Phần', 'Chai', 'Hộp', 'Gói', 'Kg']
-
-const BOM_UNITS = ['g', 'kg', 'ml', 'l', 'muỗng', 'muỗng cà phê', 'lá', 'viên', 'gói']
+const BOM_UNITS = [
+  "g",
+  "kg",
+  "ml",
+  "l",
+  "muỗng",
+  "muỗng cà phê",
+  "lá",
+  "viên",
+  "gói",
+];
 
 const formatCurrency = (val) => {
-  const n = parseFloat(val) || 0
-  return new Intl.NumberFormat('vi-VN').format(n)
-}
+  const n = parseFloat(val) || 0;
+  return new Intl.NumberFormat("vi-VN").format(n);
+};
 
 export default function CreateProductPage({ onCancel, onSaved }) {
   const [form, setForm] = useState({
-    name: '',
-    group: '',
-    unit: '',
-    description: '',
-    price: '',
-    cost_price: '',
-    compare_price: '',
-    production_notes: '',
-    notes: '',
-    status: 'active',
-  })
+    name: "",
+    group_id: "",
+    unit: "",
+    description: "",
+    price: "",
+    cost_price: "",
+    compare_price: "",
+    production_notes: "",
+    notes: "",
+    status: "active",
+  });
   const [bomRows, setBomRows] = useState([
-    { raw_material_id: '', quantity: '', unit: '' },
-    { raw_material_id: '', quantity: '', unit: '' },
-  ])
-  const [rawMaterials, setRawMaterials] = useState([])
-  const [saving, setSaving]             = useState(false)
-  const [errors, setErrors]             = useState({})
-  const [imagePreview, setImagePreview] = useState(null)
-  const [showSuccess, setShowSuccess]   = useState(false)
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
-  const fileInputRef                    = useRef(null)
-  const imageFileRef                    = useRef(null)  // stores the actual File object
-  const pendingSavedRef                 = useRef(null)  // product data to pass to onSaved
+    { raw_material_id: "", quantity: "", unit: "" },
+    { raw_material_id: "", quantity: "", unit: "" },
+  ]);
+  const [productGroups, setProductGroups] = useState([]);
+  const [rawMaterials, setRawMaterials] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [errors, setErrors] = useState({});
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const fileInputRef = useRef(null);
+  const imageFileRef = useRef(null); // stores the actual File object
+  const pendingSavedRef = useRef(null); // product data to pass to onSaved
 
   useEffect(() => {
-    api.get('raw-materials/')
-      .then(res => setRawMaterials(res.data.raw_materials || []))
+    Promise.all([
+      api.get("materials/").catch(() => ({ data: { materials: [] } })),
+      api
+        .get("product-groups/")
+        .catch(() => ({ data: { product_groups: [] } })),
+    ])
+      .then(([rmRes, groupRes]) => {
+        setRawMaterials(rmRes.data.materials || []);
+        setProductGroups(groupRes.data.product_groups || []);
+      })
       .catch(() => {})
-  }, [])
+      .finally(() => setLoadingData(false));
+  }, []);
 
   /* ── Computed pricing ─────────────────────────────────── */
-  const price      = parseFloat(form.price)       || 0
-  const costPrice  = parseFloat(form.cost_price)  || 0
-  const profit     = price - costPrice
-  const margin     = price > 0 ? ((profit / price) * 100).toFixed(1) + '%' : '--'
-  const profitDisp = price > 0 ? formatCurrency(profit) + ' đ' : '0 đ'
+  const price = parseFloat(form.price) || 0;
+  const costPrice = parseFloat(form.cost_price) || 0;
+  const profit = price - costPrice;
+  const margin = price > 0 ? ((profit / price) * 100).toFixed(1) + "%" : "--";
+  const profitDisp = price > 0 ? formatCurrency(profit) + " đ" : "0 đ";
 
   /* ── Handlers ─────────────────────────────────────────── */
   const setField = (key, val) => {
-    setForm(f => ({ ...f, [key]: val }))
-    if (errors[key]) setErrors(e => ({ ...e, [key]: undefined }))
-  }
+    setForm((f) => ({ ...f, [key]: val }));
+    if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+  };
 
   const addBomRow = () =>
-    setBomRows(rows => [...rows, { raw_material_id: '', quantity: '', unit: '' }])
+    setBomRows((rows) => [
+      ...rows,
+      { raw_material_id: "", quantity: "", unit: "" },
+    ]);
 
   const removeBomRow = (idx) =>
-    setBomRows(rows => rows.filter((_, i) => i !== idx))
+    setBomRows((rows) => rows.filter((_, i) => i !== idx));
 
   const updateBomRow = (idx, key, val) => {
-    setBomRows(rows => rows.map((row, i) => {
-      if (i !== idx) return row
-      const updated = { ...row, [key]: val }
-      if (key === 'raw_material_id' && val) {
-        const mat = rawMaterials.find(m => String(m.id) === String(val))
-        if (mat) updated.unit = mat.unit
-      }
-      return updated
-    }))
-  }
+    setBomRows((rows) =>
+      rows.map((row, i) => {
+        if (i !== idx) return row;
+        const updated = { ...row, [key]: val };
+        if (key === "raw_material_id" && val) {
+          const mat = rawMaterials.find((m) => String(m.id) === String(val));
+          if (mat) updated.unit = mat.unit;
+        }
+        return updated;
+      }),
+    );
+  };
 
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    imageFileRef.current = file
-    const reader = new FileReader()
-    reader.onload = (ev) => setImagePreview(ev.target.result)
-    reader.readAsDataURL(file)
-  }
+    const file = e.target.files?.[0];
+    if (!file) return;
+    imageFileRef.current = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
 
   const handleDrop = (e) => {
-    e.preventDefault()
-    const file = e.dataTransfer.files?.[0]
-    if (!file || !file.type.startsWith('image/')) return
-    imageFileRef.current = file
-    const reader = new FileReader()
-    reader.onload = (ev) => setImagePreview(ev.target.result)
-    reader.readAsDataURL(file)
-  }
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    imageFileRef.current = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
 
   const validate = () => {
-    const errs = {}
-    if (!form.name.trim()) errs.name  = 'Vui lòng nhập tên sản phẩm'
-    if (!form.group)       errs.group = 'Vui lòng chọn nhóm sản phẩm'
-    if (!form.unit)        errs.unit  = 'Vui lòng chọn đơn vị tính'
+    const errs = {};
+    if (!form.name.trim()) errs.name = "Vui lòng nhập tên sản phẩm";
+    if (!form.group_id) errs.group_id = "Vui lòng chọn nhóm sản phẩm";
+    if (!form.unit) errs.unit = "Vui lòng chọn đơn vị tính";
     if (!form.price || Number(form.price) <= 0)
-      errs.price = 'Vui lòng nhập giá bán hợp lệ'
-    return errs
-  }
+      errs.price = "Vui lòng nhập giá bán hợp lệ";
+    const validBom = bomRows.filter(
+      (r) => r.raw_material_id && Number(r.quantity) > 0,
+    );
+    if (validBom.length === 0)
+      errs.bom_items = "Vui lòng thêm ít nhất 1 nguyên vật liệu";
+    return errs;
+  };
 
   const handleSubmit = async () => {
-    const errs = validate()
-    if (Object.keys(errs).length) { setErrors(errs); return }
-    setSaving(true)
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+    setSaving(true);
     try {
-      const validBom = bomRows.filter(r => r.raw_material_id && r.quantity)
-      const payload  = {
-        name:             form.name.trim(),
-        group:            form.group,
-        unit:             form.unit,
-        description:      form.description,
-        price:            parseFloat(form.price)         || 0,
-        cost_price:       parseFloat(form.cost_price)    || 0,
-        compare_price:    parseFloat(form.compare_price) || 0,
+      const validBom = bomRows.filter(
+        (r) => r.raw_material_id && Number(r.quantity) > 0,
+      );
+      const payload = {
+        name: form.name.trim(),
+        group_id: parseInt(form.group_id),
+        unit: form.unit,
+        description: form.description,
+        price: parseFloat(form.price) || 0,
+        cost_price: parseFloat(form.cost_price) || 0,
+        compare_price: parseFloat(form.compare_price) || 0,
         production_notes: form.production_notes,
-        notes:            form.notes,
-        status:           form.status,
-        quantity:         0,
-        bom_items: validBom.map(r => ({
+        notes: form.notes,
+        status: form.status,
+        quantity: 0,
+        bom_items: validBom.map((r) => ({
           raw_material_id: parseInt(r.raw_material_id),
-          quantity:        parseFloat(r.quantity) || 0,
-          unit:            r.unit || '',
+          quantity: parseFloat(r.quantity) || 0,
+          unit: r.unit || "",
         })),
-      }
+      };
 
       // Step 1: create product via JSON
-      const res      = await api.post('products/', payload)
-      const newId    = res.data.id
-      let   saved    = res.data
+      const res = await api.post("products/", payload);
+      const newId = res.data.id;
+      let saved = res.data;
 
       // Step 2: upload image if a file was selected
       if (imageFileRef.current) {
-        const fd = new FormData()
-        fd.append('image', imageFileRef.current)
-        await api.patch(`products/${newId}/`, fd)
+        const fd = new FormData();
+        fd.append("image", imageFileRef.current);
+        await api.patch(`products/${newId}/`, fd);
         // fetch fresh copy with absolute image URL
-        const detail = await api.get(`products/${newId}/`)
-        saved = detail.data
+        const detail = await api.get(`products/${newId}/`);
+        saved = detail.data;
       }
 
-      pendingSavedRef.current = saved
-      setShowSuccess(true)
+      pendingSavedRef.current = saved;
+      setShowSuccess(true);
     } catch (err) {
-      const data = err.response?.data
-      if (data && typeof data === 'object') {
-        const mapped = {}
+      const data = err.response?.data;
+      if (data && typeof data === "object") {
+        const mapped = {};
         for (const [k, v] of Object.entries(data)) {
-          mapped[k] = Array.isArray(v) ? v[0] : v
+          mapped[k] = Array.isArray(v) ? v[0] : v;
         }
-        setErrors(mapped)
+        setErrors(mapped);
       } else {
-        setErrors({ submit: 'Có lỗi xảy ra, thử lại sau.' })
+        setErrors({ submit: "Có lỗi xảy ra, thử lại sau." });
       }
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const requestCancel = () => {
-    if (saving) return
-    setShowCancelConfirm(true)
-  }
+    if (saving) return;
+    setShowCancelConfirm(true);
+  };
+
+  const requestSubmit = () => {
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+    if (window.confirm("Bạn có chắc muốn lưu sản phẩm này không?")) {
+      handleSubmit();
+    }
+  };
 
   /* ── Render ───────────────────────────────────────────── */
   return (
@@ -191,7 +238,9 @@ export default function CreateProductPage({ onCancel, onSaved }) {
           <ChevronRight size={14} />
           <span className="text-orange-500 font-medium">Thêm mới sản phẩm</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">THÊM MỚI SẢN PHẨM</h1>
+        <h1 className="text-2xl font-bold text-gray-800 tracking-wide">
+          THÊM MỚI SẢN PHẨM
+        </h1>
       </div>
 
       {/* Global error */}
@@ -203,13 +252,13 @@ export default function CreateProductPage({ onCancel, onSaved }) {
 
       {/* 2-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         {/* ── Left column ───────────────────────────────── */}
         <div className="lg:col-span-2 space-y-6">
-
           {/* Section: Thông tin chung */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-800 mb-5">Thông tin chung</h2>
+            <h2 className="text-base font-semibold text-gray-800 mb-5">
+              Thông tin chung
+            </h2>
 
             {/* Tên sản phẩm */}
             <div className="mb-4">
@@ -219,13 +268,17 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               <input
                 type="text"
                 value={form.name}
-                onChange={e => setField('name', e.target.value)}
+                onChange={(e) => setField("name", e.target.value)}
                 placeholder="Nhập tên sản phẩm"
                 className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
-                  errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
+                  errors.name
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 bg-gray-50 focus:bg-white"
                 }`}
               />
-              {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+              {errors.name && (
+                <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+              )}
             </div>
 
             {/* Nhóm SP + Đơn vị tính */}
@@ -236,18 +289,44 @@ export default function CreateProductPage({ onCancel, onSaved }) {
                 </label>
                 <div className="relative">
                   <select
-                    value={form.group}
-                    onChange={e => setField('group', e.target.value)}
+                    value={form.group_id}
+                    onChange={(e) => setField("group_id", e.target.value)}
                     className={`w-full px-3 pr-8 py-2.5 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
-                      errors.group ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
+                      errors.group_id || errors.group
+                        ? "border-red-400 bg-red-50"
+                        : "border-gray-200 bg-gray-50 focus:bg-white"
                     }`}
                   >
                     <option value="">Chọn nhóm sản phẩm</option>
-                    {PRODUCT_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+                    {productGroups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                      </option>
+                    ))}
                   </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <ChevronDown
+                    size={14}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
                 </div>
-                {errors.group && <p className="mt-1 text-xs text-red-500">{errors.group}</p>}
+                {(errors.group_id || errors.group) && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.group_id || errors.group}
+                  </p>
+                )}
+                {!(errors.group_id || errors.group) && loadingData && (
+                  <p className="mt-1 text-xs text-gray-400">
+                    Đang tải nhóm sản phẩm...
+                  </p>
+                )}
+                {!(errors.group_id || errors.group) &&
+                  !loadingData &&
+                  productGroups.length === 0 && (
+                    <p className="mt-1 text-xs text-amber-600">
+                      Chưa có nhóm sản phẩm hoạt động. Hãy tạo nhóm trước khi
+                      thêm sản phẩm.
+                    </p>
+                  )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -256,26 +335,39 @@ export default function CreateProductPage({ onCancel, onSaved }) {
                 <div className="relative">
                   <select
                     value={form.unit}
-                    onChange={e => setField('unit', e.target.value)}
+                    onChange={(e) => setField("unit", e.target.value)}
                     className={`w-full px-3 pr-8 py-2.5 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
-                      errors.unit ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
+                      errors.unit
+                        ? "border-red-400 bg-red-50"
+                        : "border-gray-200 bg-gray-50 focus:bg-white"
                     }`}
                   >
                     <option value="">Chọn đơn vị tính</option>
-                    {PRODUCT_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                    {PRODUCT_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
                   </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <ChevronDown
+                    size={14}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
                 </div>
-                {errors.unit && <p className="mt-1 text-xs text-red-500">{errors.unit}</p>}
+                {errors.unit && (
+                  <p className="mt-1 text-xs text-red-500">{errors.unit}</p>
+                )}
               </div>
             </div>
 
             {/* Mô tả */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mô tả sản phẩm</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Mô tả sản phẩm
+              </label>
               <textarea
                 value={form.description}
-                onChange={e => setField('description', e.target.value)}
+                onChange={(e) => setField("description", e.target.value)}
                 placeholder="Nhập mô tả sản phẩm"
                 rows={3}
                 className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors resize-none"
@@ -285,17 +377,26 @@ export default function CreateProductPage({ onCancel, onSaved }) {
 
           {/* Section: Thông tin sản xuất */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-800 mb-5">Thông tin sản xuất</h2>
+            <h2 className="text-base font-semibold text-gray-800 mb-5">
+              Thông tin sản xuất
+            </h2>
 
             {/* BOM header */}
             <p className="text-sm font-medium text-gray-700 mb-3">
               Định mức nguyên liệu (BOM) <span className="text-red-500">*</span>
             </p>
+            {errors.bom_items && (
+              <p className="mb-3 text-xs text-red-500">{errors.bom_items}</p>
+            )}
 
             {/* BOM table header */}
             <div className="grid grid-cols-[1fr_120px_140px_36px] gap-2 mb-2 px-1">
-              <span className="text-xs font-medium text-gray-500">Nguyên liệu</span>
-              <span className="text-xs font-medium text-gray-500">Định lượng</span>
+              <span className="text-xs font-medium text-gray-500">
+                Nguyên liệu
+              </span>
+              <span className="text-xs font-medium text-gray-500">
+                Định lượng
+              </span>
               <span className="text-xs font-medium text-gray-500">Đơn vị</span>
               <span />
             </div>
@@ -303,39 +404,60 @@ export default function CreateProductPage({ onCancel, onSaved }) {
             {/* BOM rows */}
             <div className="space-y-2 mb-3">
               {bomRows.map((row, idx) => (
-                <div key={idx} className="grid grid-cols-[1fr_120px_140px_36px] gap-2 items-center">
+                <div
+                  key={idx}
+                  className="grid grid-cols-[1fr_120px_140px_36px] gap-2 items-center"
+                >
                   <div className="relative">
                     <select
                       value={row.raw_material_id}
-                      onChange={e => updateBomRow(idx, 'raw_material_id', e.target.value)}
+                      onChange={(e) =>
+                        updateBomRow(idx, "raw_material_id", e.target.value)
+                      }
                       className="w-full px-3 pr-8 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300"
                     >
                       <option value="">Chọn nguyên liệu</option>
-                      {rawMaterials.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                      {rawMaterials.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.code ? `${m.code} - ${m.name}` : m.name}
+                        </option>
                       ))}
                     </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <ChevronDown
+                      size={14}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
                   </div>
                   <input
                     type="number"
                     min="0"
                     step="0.001"
                     value={row.quantity}
-                    onChange={e => updateBomRow(idx, 'quantity', e.target.value)}
+                    onChange={(e) =>
+                      updateBomRow(idx, "quantity", e.target.value)
+                    }
                     placeholder="0"
                     className="w-full px-3 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
                   />
                   <div className="relative">
                     <select
                       value={row.unit}
-                      onChange={e => updateBomRow(idx, 'unit', e.target.value)}
+                      onChange={(e) =>
+                        updateBomRow(idx, "unit", e.target.value)
+                      }
                       className="w-full px-3 pr-8 py-2 text-sm border border-gray-200 bg-gray-50 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-300"
                     >
                       <option value="">Chọn đơn vị</option>
-                      {BOM_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                      {BOM_UNITS.map((u) => (
+                        <option key={u} value={u}>
+                          {u}
+                        </option>
+                      ))}
                     </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <ChevronDown
+                      size={14}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
                   </div>
                   <button
                     type="button"
@@ -360,10 +482,12 @@ export default function CreateProductPage({ onCancel, onSaved }) {
 
             {/* Ghi chú sản xuất */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Ghi chú sản xuất</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Ghi chú sản xuất
+              </label>
               <textarea
                 value={form.production_notes}
-                onChange={e => setField('production_notes', e.target.value)}
+                onChange={(e) => setField("production_notes", e.target.value)}
                 placeholder="Nhập ghi chú sản xuất"
                 rows={3}
                 className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors resize-none"
@@ -373,7 +497,9 @@ export default function CreateProductPage({ onCancel, onSaved }) {
 
           {/* Section: Thông tin giá */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-800 mb-5">Thông tin giá</h2>
+            <h2 className="text-base font-semibold text-gray-800 mb-5">
+              Thông tin giá
+            </h2>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               {/* Giá bán */}
@@ -387,50 +513,66 @@ export default function CreateProductPage({ onCancel, onSaved }) {
                     min="0"
                     step="500"
                     value={form.price}
-                    onChange={e => setField('price', e.target.value)}
+                    onChange={(e) => setField("price", e.target.value)}
                     placeholder="0"
                     className={`w-full px-3 py-2.5 pr-8 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors ${
-                      errors.price ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white'
+                      errors.price
+                        ? "border-red-400 bg-red-50"
+                        : "border-gray-200 bg-gray-50 focus:bg-white"
                     }`}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">đ</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    đ
+                  </span>
                 </div>
-                {errors.price && <p className="mt-1 text-xs text-red-500">{errors.price}</p>}
+                {errors.price && (
+                  <p className="mt-1 text-xs text-red-500">{errors.price}</p>
+                )}
               </div>
 
               {/* Giá so sánh */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Giá so sánh</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Giá so sánh
+                </label>
                 <div className="relative">
                   <input
                     type="number"
                     min="0"
                     step="500"
                     value={form.compare_price}
-                    onChange={e => setField('compare_price', e.target.value)}
+                    onChange={(e) => setField("compare_price", e.target.value)}
                     placeholder="0"
                     className="w-full px-3 py-2.5 pr-8 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">đ</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    đ
+                  </span>
                 </div>
-                <p className="mt-1 text-xs text-gray-400">Số tiền chưa giảm giá</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Số tiền chưa giảm giá
+                </p>
               </div>
             </div>
 
             {/* Giá vốn */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Giá vốn</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Giá vốn
+              </label>
               <div className="relative w-1/2">
                 <input
                   type="number"
                   min="0"
                   step="500"
                   value={form.cost_price}
-                  onChange={e => setField('cost_price', e.target.value)}
+                  onChange={(e) => setField("cost_price", e.target.value)}
                   placeholder="0"
                   className="w-full px-3 py-2.5 pr-8 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">đ</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  đ
+                </span>
               </div>
             </div>
 
@@ -442,7 +584,9 @@ export default function CreateProductPage({ onCancel, onSaved }) {
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-0.5">Lợi nhuận:</p>
-                <p className="text-sm font-semibold text-gray-700">{profitDisp}</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  {profitDisp}
+                </p>
               </div>
             </div>
           </div>
@@ -450,12 +594,13 @@ export default function CreateProductPage({ onCancel, onSaved }) {
 
         {/* ── Right column ──────────────────────────────── */}
         <div className="space-y-6">
-
           {/* Section: Hình ảnh sản phẩm */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-800 mb-4">Hình ảnh sản phẩm</h2>
+            <h2 className="text-base font-semibold text-gray-800 mb-4">
+              Hình ảnh sản phẩm
+            </h2>
             <div
-              onDragOver={e => e.preventDefault()}
+              onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-orange-300 hover:bg-orange-50/30 transition-colors min-h-[180px]"
@@ -490,7 +635,10 @@ export default function CreateProductPage({ onCancel, onSaved }) {
             {imagePreview && (
               <button
                 type="button"
-                onClick={() => { setImagePreview(null); imageFileRef.current = null }}
+                onClick={() => {
+                  setImagePreview(null);
+                  imageFileRef.current = null;
+                }}
                 className="mt-2 text-xs text-gray-400 hover:text-red-500 transition-colors"
               >
                 Xoá ảnh
@@ -500,10 +648,12 @@ export default function CreateProductPage({ onCancel, onSaved }) {
 
           {/* Section: Ghi chú */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-800 mb-4">Ghi chú</h2>
+            <h2 className="text-base font-semibold text-gray-800 mb-4">
+              Ghi chú
+            </h2>
             <textarea
               value={form.notes}
-              onChange={e => setField('notes', e.target.value)}
+              onChange={(e) => setField("notes", e.target.value)}
               placeholder="Nhập ghi chú..."
               rows={5}
               className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50 focus:bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors resize-none"
@@ -524,10 +674,10 @@ export default function CreateProductPage({ onCancel, onSaved }) {
         </button>
         <button
           type="button"
-          onClick={handleSubmit}
-          disabled={saving}
+          onClick={requestSubmit}
+          disabled={saving || loadingData || productGroups.length === 0}
           className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors disabled:opacity-60"
-          style={{ backgroundColor: '#E67E22' }}
+          style={{ backgroundColor: "#E67E22" }}
         >
           {saving && <Loader2 size={15} className="animate-spin" />}
           Lưu
@@ -539,8 +689,8 @@ export default function CreateProductPage({ onCancel, onSaved }) {
         <SuccessModal
           message="Thêm sản phẩm thành công!"
           onClose={() => {
-            setShowSuccess(false)
-            onSaved(pendingSavedRef.current)
+            setShowSuccess(false);
+            onSaved(pendingSavedRef.current);
           }}
         />
       )}
@@ -548,11 +698,13 @@ export default function CreateProductPage({ onCancel, onSaved }) {
       {showCancelConfirm && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCancelConfirm(false) }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setShowCancelConfirm(false);
+          }}
         >
           <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full border-4 border-yellow-400 flex items-center justify-center mb-4">
-              <AlertTriangle size={18} className="text-yellow-400" />
+            <div className="w-[68px] h-[68px] mx-auto rounded-full border-[3px] border-yellow-400 flex items-center justify-center mb-4">
+              <AlertTriangle size={42} className="text-yellow-400" />
             </div>
             <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
               Bạn có chắc muốn hủy biểu mẫu này?
@@ -575,5 +727,5 @@ export default function CreateProductPage({ onCancel, onSaved }) {
         </div>
       )}
     </div>
-  )
+  );
 }

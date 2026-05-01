@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.db.models import Q
 
 from api.models import Supplier, PurchaseOrder
 from api.serializers import (
@@ -26,6 +27,10 @@ def _has_purchase_access(user):
 
 # ─── Suppliers ────────────────────────────────────────────────────────────────
 
+def _serialize_supplier(obj, request):
+    return SupplierSerializer(obj, context={'request': request}).data
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def supplier_list(request):
@@ -35,16 +40,61 @@ def supplier_list(request):
 
     if request.method == 'GET':
         search = request.query_params.get('search', '').strip()
+        status_filter = request.query_params.get('status', '').strip()
         qs = Supplier.objects.all()
         if search:
-            qs = qs.filter(name__icontains=search)
-        return Response({'suppliers': SupplierSerializer(qs, many=True).data, 'total': qs.count()})
+            code_query = None
+            if search.upper().startswith('NCC'):
+                suffix = ''.join(ch for ch in search[3:] if ch.isdigit())
+                if suffix:
+                    code_query = int(suffix)
+            filters = Q(name__icontains=search) | Q(contact_name__icontains=search) | Q(phone__icontains=search)
+            if code_query:
+                filters |= Q(id=code_query)
+            qs = qs.filter(filters)
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        ordering = request.query_params.get('ordering', '').strip()
+        allowed = {'name', '-name', 'contact_name', '-contact_name', 'phone', '-phone', 'status', '-status', 'created_at', '-created_at'}
+        if ordering in allowed:
+            qs = qs.order_by(ordering)
+        return Response({'suppliers': SupplierSerializer(qs, many=True, context={'request': request}).data, 'total': qs.count()})
 
     serializer = SupplierSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(_serialize_supplier(serializer.instance, request), status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def supplier_detail(request, pk):
+    if not _has_purchase_access(request.user):
+        return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        supplier = Supplier.objects.get(pk=pk)
+    except Supplier.DoesNotExist:
+        return Response({'detail': 'Khong tim thay nha cung cap.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(_serialize_supplier(supplier, request))
+
+    if request.method in ('PUT', 'PATCH'):
+        serializer = SupplierSerializer(
+            supplier,
+            data=request.data,
+            partial=(request.method == 'PATCH'),
+            context={'request': request},
+        )
+        if serializer.is_valid():
+            updated = serializer.save()
+            return Response(_serialize_supplier(updated, request))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    supplier.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # ─── Purchase Orders ──────────────────────────────────────────────────────────

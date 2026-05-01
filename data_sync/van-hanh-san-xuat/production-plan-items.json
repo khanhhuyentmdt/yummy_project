@@ -1,0 +1,16 @@
+﻿{
+  "items": [
+    {
+      "code": "BTP001",
+      "name": "Cot tra sua truyen thong",
+      "quantity": 10,
+      "duration_minutes": 90
+    },
+    {
+      "ma_btp": "BTP002",
+      "ten_ban_thanh_pham": "Cot dao tra den",
+      "so_luong": 6,
+      "thoi_luong": 75
+    }
+  ]
+}

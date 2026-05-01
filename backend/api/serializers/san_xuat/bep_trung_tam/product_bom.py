@@ -4,11 +4,12 @@ from api.models import ProductBOM
 
 class ProductBOMReadSerializer(serializers.ModelSerializer):
     raw_material_id   = serializers.IntegerField(source='raw_material.id')
+    raw_material_code = serializers.CharField(source='raw_material.code')
     raw_material_name = serializers.CharField(source='raw_material.name')
 
     class Meta:
         model  = ProductBOM
-        fields = ['id', 'raw_material_id', 'raw_material_name', 'quantity', 'unit']
+        fields = ['id', 'raw_material_id', 'raw_material_code', 'raw_material_name', 'quantity', 'unit']
 
 
 class ProductBOMWriteSerializer(serializers.Serializer):

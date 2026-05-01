@@ -1,0 +1,30 @@
+﻿{
+  "order_requests": [
+    {
+      "code": "YCDH001",
+      "name": "Yeu cau dat hang cuoi tuan",
+      "request_date": "2026-05-01",
+      "expected_date": "2026-05-02",
+      "notes": "Uu tien ca 2 mat hang ban chay",
+      "status": "pending",
+      "items": [
+        {
+          "semi_finished_product_id": 1,
+          "code": "BTP001",
+          "name": "Cot tra sua truyen thong",
+          "unit": "binh",
+          "quantity": 12,
+          "notes": "Cho cum cua hang trung tam"
+        },
+        {
+          "semi_finished_product_id": 2,
+          "code": "BTP002",
+          "name": "Cot dao tra den",
+          "unit": "binh",
+          "quantity": 5,
+          "notes": "Tang san luong cuoi tuan"
+        }
+      ]
+    }
+  ]
+}

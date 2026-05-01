@@ -11,7 +11,14 @@ class Product(models.Model):
 
     code             = models.CharField(max_length=20, unique=True, verbose_name='Mã SP')
     name             = models.CharField(max_length=200, verbose_name='Tên sản phẩm')
-    group            = models.CharField(max_length=100, verbose_name='Nhóm SP')
+    group            = models.ForeignKey(
+        'ProductGroup',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='products',
+        verbose_name='Nhóm SP',
+    )
     unit             = models.CharField(max_length=50,  verbose_name='ĐVT')
     quantity         = models.IntegerField(default=0, verbose_name='Số lượng tồn kho')
     price            = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='Giá bán')

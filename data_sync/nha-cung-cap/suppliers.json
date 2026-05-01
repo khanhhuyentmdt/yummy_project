@@ -1,0 +1,42 @@
+﻿{
+  "suppliers": [
+    {
+      "id": 1,
+      "name": "Cong ty TNHH Nguyen Lieu Viet",
+      "contact_name": "Nguyen Van An",
+      "position": "Kinh doanh",
+      "phone": "0912345678",
+      "email": "kinhdoanh@nguyenlieuviet.vn",
+      "social_link": "https://nguyenlieuviet.vn",
+      "address": "12 Nguyen Trai",
+      "province_name": "Ha Noi",
+      "district_name": "Thanh Xuan",
+      "ward_name": "Thuong Dinh",
+      "tax_code": "0101234567",
+      "debt_limit": 50000000,
+      "bank_account": "123456789",
+      "bank_name": "VCB",
+      "notes": "Nha cung cap chinh cho nguyen lieu tra",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Cong ty Co phan Syrup Food",
+      "contact_name": "Tran Thi Binh",
+      "position": "Sale Admin",
+      "phone": "+84987654321",
+      "email": "sale@syrupfood.vn",
+      "social_link": "https://syrupfood.vn",
+      "address": "25 Le Hong Phong",
+      "province_name": "Da Nang",
+      "district_name": "Hai Chau",
+      "ward_name": "Thach Thang",
+      "tax_code": "0407654321-001",
+      "debt_limit": 30000000,
+      "bank_account": "987654321",
+      "bank_name": "ACB",
+      "notes": "Nha cung cap syrup trai cay",
+      "status": "active"
+    }
+  ]
+}

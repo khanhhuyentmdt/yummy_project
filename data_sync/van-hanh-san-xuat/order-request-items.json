@@ -1,0 +1,16 @@
+﻿{
+  "items": [
+    {
+      "code": "BTP001",
+      "name": "Cot tra sua truyen thong",
+      "quantity": 15,
+      "notes": "Phuc vu khung gio sang"
+    },
+    {
+      "ma_btp": "BTP002",
+      "ten_ban_thanh_pham": "Cot dao tra den",
+      "so_luong": 8,
+      "ghi_chu": "Tang cuong cuoi tuan"
+    }
+  ]
+}

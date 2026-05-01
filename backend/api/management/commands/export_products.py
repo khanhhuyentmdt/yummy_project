@@ -1,6 +1,6 @@
 """
 python manage.py export_products
-Xuat toan bo du lieu Product ra <project_root>/data_sync/products.json
+Xuat toan bo du lieu Product ra <project_root>/data_sync/san-pham/products.json
 """
 import json
 from pathlib import Path
@@ -12,12 +12,12 @@ from django.utils import timezone
 from api.models import Product
 
 # data_sync/ nam o thu muc goc cua project (ngang hang voi backend/)
-DATA_SYNC_DIR = Path(settings.BASE_DIR).parent / 'data_sync'
+DATA_SYNC_DIR = Path(settings.BASE_DIR).parent / 'data_sync' / 'san-pham'
 OUTPUT_FILE   = DATA_SYNC_DIR / 'products.json'
 
 
 class Command(BaseCommand):
-    help = 'Xuat Product ra data_sync/products.json'
+    help = 'Xuat Product ra data_sync/san-pham/products.json'
 
     def handle(self, *args, **options):
         DATA_SYNC_DIR.mkdir(parents=True, exist_ok=True)

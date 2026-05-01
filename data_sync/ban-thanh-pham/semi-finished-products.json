@@ -1,0 +1,62 @@
+﻿{
+  "semi_finished_products": [
+    {
+      "id": 1,
+      "code": "BTP001",
+      "name": "Cot tra sua truyen thong",
+      "group": "Tra sua",
+      "unit": "binh",
+      "quantity": 20,
+      "price": 180000,
+      "cost_price": 150000,
+      "compare_price": 190000,
+      "description": "Nen cot tra sua dung cho quan",
+      "production_notes": "Pha theo me 20 lit",
+      "notes": "Bao quan mat",
+      "status": "active",
+      "bom_items": [
+        {
+          "raw_material_id": 1,
+          "raw_material_name": "Tra den",
+          "quantity": 2.5,
+          "unit": "kg"
+        },
+        {
+          "raw_material_id": 2,
+          "raw_material_name": "Bot sua cream",
+          "quantity": 1.2,
+          "unit": "kg"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "code": "BTP002",
+      "name": "Cot dao tra den",
+      "group": "Tra trai cay",
+      "unit": "binh",
+      "quantity": 12,
+      "price": 165000,
+      "cost_price": 140000,
+      "compare_price": 175000,
+      "description": "Nen cot dao dung cho tra trai cay",
+      "production_notes": "Pha theo me 15 lit",
+      "notes": "Su dung trong 24 gio",
+      "status": "active",
+      "bom_items": [
+        {
+          "raw_material_id": 1,
+          "raw_material_name": "Tra den",
+          "quantity": 1.6,
+          "unit": "kg"
+        },
+        {
+          "raw_material_id": 3,
+          "raw_material_name": "Syrup dao",
+          "quantity": 3,
+          "unit": "chai"
+        }
+      ]
+    }
+  ]
+}

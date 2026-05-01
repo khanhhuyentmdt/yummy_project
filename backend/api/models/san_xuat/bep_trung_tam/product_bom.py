@@ -7,8 +7,8 @@ class ProductBOM(models.Model):
         verbose_name='Sản phẩm',
     )
     raw_material = models.ForeignKey(
-        'RawMaterial', on_delete=models.PROTECT, related_name='bom_items',
-        verbose_name='Nguyên liệu',
+        'Material', on_delete=models.PROTECT, related_name='product_bom_items',
+        verbose_name='Nguyên vật liệu',
     )
     quantity = models.DecimalField(max_digits=10, decimal_places=3, verbose_name='Định lượng')
     unit     = models.CharField(max_length=50, blank=True, verbose_name='ĐVT')

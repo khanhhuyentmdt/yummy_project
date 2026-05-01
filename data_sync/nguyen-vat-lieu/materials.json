@@ -1,0 +1,44 @@
+﻿{
+  "materials": [
+    {
+      "id": 1,
+      "code": "NVL001",
+      "name": "Tra den",
+      "group": "Tra nen",
+      "unit": "kg",
+      "notes": "Nguyen lieu pha cot tra den",
+      "batch_management": true,
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "code": "NVL002",
+      "name": "Bot sua cream",
+      "group": "Bot sua",
+      "unit": "kg",
+      "notes": "Dung trong nen tra sua",
+      "batch_management": true,
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "code": "NVL003",
+      "name": "Syrup dao",
+      "group": "Syrup",
+      "unit": "chai",
+      "notes": "Tao huong dao",
+      "batch_management": false,
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "code": "NVL004",
+      "name": "Ca phe hat xay",
+      "group": "Tra nen",
+      "unit": "kg",
+      "notes": "Nguyen lieu pha ca phe",
+      "batch_management": true,
+      "status": "active"
+    }
+  ]
+}

@@ -25,12 +25,16 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "../../../api/axios";
-import { useSort, SortableTh } from "../../../hooks/useSort";
 import vnSvgRaw from "../../../assets/vn.svg?raw";
 import CreateProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/san-pham/CreateProductPage";
 import EditProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/san-pham/EditProductPage";
 import MaterialsPage from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nguyen-vat-lieu/MaterialsPage";
 import CreateMaterialPage from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nguyen-vat-lieu/CreateMaterialPage";
+import EditMaterialPage from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nguyen-vat-lieu/EditMaterialPage";
+import MaterialGroupsView from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nhom-nguyen-vat-lieu/MaterialGroupsView";
+import MaterialGroupFormView from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguyen-vat-lieu/nhom-nguyen-vat-lieu/MaterialGroupFormView";
+import SuppliersPage from "../../san-xuat/nguyen-vat-lieu/nha-cung-cap/SuppliersPage";
+import SupplierFormPage from "../../san-xuat/nguyen-vat-lieu/nha-cung-cap/SupplierFormPage";
 import PurchaseOrdersPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-lieu/phieu-dat-hang/PurchaseOrdersPage";
 import LocationsPage from "../../cai-dat/thiet-lap-dia-diem/LocationsPage";
 import Sidebar from "../../common/Sidebar";
@@ -344,10 +348,26 @@ export default function HomePage({ user = {}, onLogout }) {
   const [editShiftId,    setEditShiftId]    = useState(null);
   const [stats, setStats] = useState(STATS_FALLBACK);
   const [products, setProducts] = useState(PRODUCTS_FALLBACK);
+  const [semiFinishedProducts, setSemiFinishedProducts] = useState([]);
+  const [productGroups, setProductGroups] = useState([]);
   const [headerSearch, setHeaderSearch] = useState("");
   const [apiConnected, setApiConnected] = useState(null);
   const [editProductId, setEditProductId] = useState(null);
+  const [editSemiFinishedProductId, setEditSemiFinishedProductId] =
+    useState(null);
+  const [editProductionPlanId, setEditProductionPlanId] = useState(null);
+  const [editProductionRequestId, setEditProductionRequestId] = useState(null);
+  const [editSupplierId, setEditSupplierId] = useState(null);
+  const [editMaterialId, setEditMaterialId] = useState(null);
+  const [editProductGroupId, setEditProductGroupId] = useState(null);
+  const [materialGroups, setMaterialGroups] = useState([]);
+  const [editMaterialGroupId, setEditMaterialGroupId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteSemiFinishedTarget, setDeleteSemiFinishedTarget] =
+    useState(null);
+  const [deleteGroupTarget, setDeleteGroupTarget] = useState(null);
+  const [deleteMaterialGroupTarget, setDeleteMaterialGroupTarget] =
+    useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [syncModal, setSyncModal] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
@@ -361,6 +381,7 @@ export default function HomePage({ user = {}, onLogout }) {
   const [importOutcome, setImportOutcome] = useState(null);
   const [exportOutcome, setExportOutcome] = useState(null);
   const [exportLastOptions, setExportLastOptions] = useState(null);
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
   const importInputRef = useRef(null);
 
   const loadDashboard = () =>
@@ -381,9 +402,32 @@ export default function HomePage({ user = {}, onLogout }) {
       .then((res) => setProducts(res.data.products))
       .catch(() => setProducts(PRODUCTS_FALLBACK));
 
+  const loadSemiFinishedProducts = () =>
+    api
+      .get("semi-finished-products/")
+      .then((res) =>
+        setSemiFinishedProducts(res.data.semi_finished_products || []),
+      )
+      .catch(() => setSemiFinishedProducts([]));
+
+  const loadProductGroups = () =>
+    api
+      .get("product-groups/")
+      .then((res) => setProductGroups(res.data.product_groups || []))
+      .catch(() => setProductGroups([]));
+
+  const loadMaterialGroups = () =>
+    api
+      .get("material-groups/")
+      .then((res) => setMaterialGroups(res.data.material_groups || []))
+      .catch(() => setMaterialGroups([]));
+
   useEffect(() => {
     loadDashboard();
     loadProducts();
+    loadSemiFinishedProducts();
+    loadProductGroups();
+    loadMaterialGroups();
   }, []);
 
   const handleDeleteConfirm = async () => {
@@ -393,7 +437,61 @@ export default function HomePage({ user = {}, onLogout }) {
       await api.delete(`products/${deleteTarget.id}/`);
       setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
       setDeleteTarget(null);
+      setDeleteSuccessMessage("Xóa sản phẩm thành công!");
       loadDashboard();
+    } catch {
+      // keep modal open on error
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteSemiFinishedConfirm = async () => {
+    if (!deleteSemiFinishedTarget) return;
+    setDeleteLoading(true);
+    try {
+      await api.delete(
+        `semi-finished-products/${deleteSemiFinishedTarget.id}/`,
+      );
+      setSemiFinishedProducts((prev) =>
+        prev.filter((p) => p.id !== deleteSemiFinishedTarget.id),
+      );
+      setDeleteSemiFinishedTarget(null);
+      setDeleteSuccessMessage("Xóa bán thành phẩm thành công!");
+    } catch {
+      // keep modal open on error
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteGroupConfirm = async () => {
+    if (!deleteGroupTarget) return;
+    setDeleteLoading(true);
+    try {
+      await api.delete(`product-groups/${deleteGroupTarget.id}/`);
+      setProductGroups((prev) =>
+        prev.filter((g) => g.id !== deleteGroupTarget.id),
+      );
+      setDeleteGroupTarget(null);
+      setDeleteSuccessMessage("Xóa nhóm sản phẩm thành công!");
+    } catch {
+      // keep modal open on error
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteMaterialGroupConfirm = async () => {
+    if (!deleteMaterialGroupTarget) return;
+    setDeleteLoading(true);
+    try {
+      await api.delete(`material-groups/${deleteMaterialGroupTarget.id}/`);
+      setMaterialGroups((prev) =>
+        prev.filter((g) => g.id !== deleteMaterialGroupTarget.id),
+      );
+      setDeleteMaterialGroupTarget(null);
+      setDeleteSuccessMessage("Xóa nhóm nguyên vật liệu thành công!");
     } catch {
       // keep modal open on error
     } finally {
@@ -763,6 +861,87 @@ export default function HomePage({ user = {}, onLogout }) {
     }
   };
 
+  const handleExportSemiFinishedProducts = async (options = {}) => {
+    const {
+      format = "xlsx",
+      onlyFiltered = false,
+      rows: sourceRows = null,
+    } = options;
+    try {
+      setExportLastOptions({ format, onlyFiltered, rows: sourceRows });
+      const list = Array.isArray(sourceRows)
+        ? sourceRows
+        : semiFinishedProducts;
+      if (!list.length) {
+        setExportOutcome({
+          ok: false,
+          message: onlyFiltered
+            ? "Không có dòng nào trong bộ lọc để xuất."
+            : "Không có dữ liệu bán thành phẩm để xuất.",
+        });
+        return;
+      }
+
+      const rows = list.map((p) => ({
+        "Mã BTP": normalizeVietnameseText(p.code || ""),
+        "Tên bán thành phẩm": normalizeVietnameseText(p.name || ""),
+        "Đơn vị tính": normalizeVietnameseText(p.unit || ""),
+        "Giá điều chuyển": p.price ?? 0,
+        "Số lượng": p.quantity ?? 0,
+        "Trạng thái": normalizeVietnameseText(
+          p.status === "active" ? "Đang hoạt động" : "Tạm ngưng",
+        ),
+        "Mô tả": normalizeVietnameseText(p.description || ""),
+        "Ghi chú sản xuất": normalizeVietnameseText(p.production_notes || ""),
+        "Ghi chú": normalizeVietnameseText(p.notes || ""),
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, "Danh sach ban thanh pham");
+      const date = new Date();
+      const stamp = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}_${String(date.getHours()).padStart(2, "0")}${String(date.getMinutes()).padStart(2, "0")}`;
+      if (format === "csv") {
+        XLSX.writeFile(wb, `danh_sach_ban_thanh_pham_${stamp}.csv`, {
+          bookType: "csv",
+          codepage: 65001,
+        });
+      } else if (format === "pdf") {
+        throw new Error(
+          "Định dạng PDF chưa được hỗ trợ. Vui lòng chọn Excel hoặc CSV.",
+        );
+      } else {
+        const xlsxBuffer = XLSX.write(wb, {
+          bookType: "xlsx",
+          type: "array",
+          bookSST: true,
+          compression: true,
+        });
+        const blob = new Blob([xlsxBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `danh_sach_ban_thanh_pham_${stamp}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      setExportOutcome({ ok: true });
+    } catch (err) {
+      const detail =
+        err?.response?.data?.detail ||
+        "Có lỗi xảy ra khi xuất danh sách bán thành phẩm.";
+      setExportOutcome({
+        ok: false,
+        message: detail,
+      });
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
@@ -897,13 +1076,137 @@ export default function HomePage({ user = {}, onLogout }) {
               }}
             />
           )}
+          {activeView === "semi-finished-products" && (
+            <SemiFinishedProductsView
+              semiFinishedProducts={semiFinishedProducts}
+              onCreateClick={() =>
+                setActiveView("create-semi-finished-product")
+              }
+              onEditClick={(p) => {
+                setEditSemiFinishedProductId(p.id);
+                setActiveView("edit-semi-finished-product");
+              }}
+              onDeleteClick={(p) => setDeleteSemiFinishedTarget(p)}
+              onExportClick={handleExportSemiFinishedProducts}
+              onBulkDeleted={(deletedIds) =>
+                setSemiFinishedProducts((prev) =>
+                  prev.filter((p) => !deletedIds.includes(p.id)),
+                )
+              }
+            />
+          )}
+          {activeView === "create-semi-finished-product" && (
+            <CreateSemiFinishedProductPage
+              onCancel={() => setActiveView("semi-finished-products")}
+              onSaved={(savedProduct) => {
+                setSemiFinishedProducts((prev) => [savedProduct, ...prev]);
+                setActiveView("semi-finished-products");
+              }}
+            />
+          )}
+          {activeView === "edit-semi-finished-product" &&
+            editSemiFinishedProductId && (
+              <EditSemiFinishedProductPage
+                semiFinishedProductId={editSemiFinishedProductId}
+                onCancel={() => setActiveView("semi-finished-products")}
+                onSaved={(savedProduct) => {
+                  setSemiFinishedProducts((prev) =>
+                    prev.map((p) =>
+                      p.id === savedProduct.id ? savedProduct : p,
+                    ),
+                  );
+                  setActiveView("semi-finished-products");
+                }}
+              />
+            )}
+          {activeView === "production-plans" && (
+            <ProductionPlansPage
+              onCreateClick={() => setActiveView("create-production-plan")}
+              onEditClick={(planId) => {
+                setEditProductionPlanId(planId);
+                setActiveView("edit-production-plan");
+              }}
+            />
+          )}
+          {activeView === "create-production-plan" && (
+            <ProductionPlanFormPage
+              mode="create"
+              onCancel={() => setActiveView("production-plans")}
+              onSaved={() => setActiveView("production-plans")}
+            />
+          )}
+          {activeView === "edit-production-plan" && editProductionPlanId && (
+            <ProductionPlanFormPage
+              mode="edit"
+              productionPlanId={editProductionPlanId}
+              onCancel={() => setActiveView("production-plans")}
+              onSaved={() => setActiveView("production-plans")}
+            />
+          )}
+          {activeView === "production-requests" && (
+            <ProductionRequestsPage
+              onCreateClick={() => setActiveView("create-production-request")}
+              onEditClick={(requestId) => {
+                setEditProductionRequestId(requestId);
+                setActiveView("edit-production-request");
+              }}
+            />
+          )}
+          {activeView === "create-production-request" && (
+            <ProductionRequestFormPage
+              mode="create"
+              onCancel={() => setActiveView("production-requests")}
+              onSaved={() => setActiveView("production-requests")}
+            />
+          )}
+          {activeView === "edit-production-request" &&
+            editProductionRequestId && (
+              <ProductionRequestFormPage
+                mode="edit"
+                productionRequestId={editProductionRequestId}
+                onCancel={() => setActiveView("production-requests")}
+                onSaved={() => setActiveView("production-requests")}
+              />
+            )}
           {activeView === "materials" && (
             <MaterialsPage
               onCreateClick={() => {
                 setActiveView("create-material");
                 setActiveMenuId("nguyen-lieu-item");
               }}
-              onEditClick={() => {}}
+              onEditClick={(material) => {
+                setEditMaterialId(material.id);
+                setActiveView("edit-material");
+                setActiveMenuId("nguyen-lieu-item");
+              }}
+            />
+          )}
+          {activeView === "suppliers" && (
+            <SuppliersPage
+              onCreateClick={() => {
+                setActiveView("create-supplier");
+                setActiveMenuId("nha-cung-cap");
+              }}
+              onEditClick={(supplierId) => {
+                setEditSupplierId(supplierId);
+                setActiveView("edit-supplier");
+                setActiveMenuId("nha-cung-cap");
+              }}
+            />
+          )}
+          {activeView === "create-supplier" && (
+            <SupplierFormPage
+              mode="create"
+              onCancel={() => setActiveView("suppliers")}
+              onSaved={() => setActiveView("suppliers")}
+            />
+          )}
+          {activeView === "edit-supplier" && editSupplierId && (
+            <SupplierFormPage
+              mode="edit"
+              supplierId={editSupplierId}
+              onCancel={() => setActiveView("suppliers")}
+              onSaved={() => setActiveView("suppliers")}
             />
           )}
           {activeView === "create-material" && (
@@ -912,25 +1215,89 @@ export default function HomePage({ user = {}, onLogout }) {
               onSaved={() => setActiveView("materials")}
             />
           )}
+          {activeView === "edit-material" && editMaterialId && (
+            <EditMaterialPage
+              materialId={editMaterialId}
+              onCancel={() => setActiveView("materials")}
+              onSaved={() => setActiveView("materials")}
+            />
+          )}
+          {activeView === "material-groups" && (
+            <MaterialGroupsView
+              materialGroups={materialGroups}
+              onCreateClick={(newGroup) => {
+                if (newGroup) setMaterialGroups((prev) => [newGroup, ...prev]);
+              }}
+              onEditClick={(g) => {
+                setEditMaterialGroupId(g.id);
+                setActiveMenuId("nhom-nvl");
+              }}
+              onDeleteClick={(g) => setDeleteMaterialGroupTarget(g)}
+              onBulkDeleted={(ids) =>
+                setMaterialGroups((prev) =>
+                  prev.filter((g) => !ids.includes(g.id)),
+                )
+              }
+            />
+          )}
+          {activeView === "create-material-group" && (
+            <MaterialGroupFormView
+              mode="create"
+              onCancel={() => setActiveView("material-groups")}
+              onSaved={(g) => {
+                setMaterialGroups((prev) => [g, ...prev]);
+              }}
+            />
+          )}
+          {activeView === "product-groups" && (
+            <ProductGroupsView
+              productGroups={productGroups}
+              onCreateClick={(newGroup) => {
+                if (newGroup) setProductGroups((prev) => [newGroup, ...prev]);
+              }}
+              onEditClick={(g) => {
+                setEditProductGroupId(g.id);
+              }}
+              onDeleteClick={(g) => setDeleteGroupTarget(g)}
+              onBulkDeleted={(ids) =>
+                setProductGroups((prev) =>
+                  prev.filter((g) => !ids.includes(g.id)),
+                )
+              }
+            />
+          )}
+          {activeView === "create-product-group" && (
+            <ProductGroupFormView
+              mode="create"
+              onCancel={() => setActiveView("product-groups")}
+              onSaved={(g) => {
+                setProductGroups((prev) => [g, ...prev]);
+                loadProducts();
+                setActiveView("product-groups");
+              }}
+            />
+          )}
           {activeView === "purchase-orders" && (
             <PurchaseOrdersPage onCreateClick={() => {}} />
           )}
-          {activeView === "locations" && (
-            <LocationsPage />
-          )}
-          {activeView === "shipping-units" && (
-            <ShippingUnitsPage />
-          )}
+          {activeView === "locations" && <LocationsPage />}
+          {activeView === "shipping-units" && <ShippingUnitsPage />}
           {activeView === "employees" && (
             <EmployeesPage
               onCreateClick={() => setActiveView("create-employee")}
-              onEditClick={(emp) => { setEditEmployeeId(emp.id); setActiveView("edit-employee") }}
+              onEditClick={(emp) => {
+                setEditEmployeeId(emp.id);
+                setActiveView("edit-employee");
+              }}
             />
           )}
           {activeView === "create-employee" && (
             <CreateEmployeePage
               onCancel={() => setActiveView("employees")}
-              onSaved={(emp) => { setEditEmployeeId(emp.id); setActiveView("edit-employee") }}
+              onSaved={(emp) => {
+                setEditEmployeeId(emp.id);
+                setActiveView("edit-employee");
+              }}
             />
           )}
           {activeView === "edit-employee" && editEmployeeId && (
@@ -972,8 +1339,27 @@ export default function HomePage({ user = {}, onLogout }) {
             "products",
             "create-product",
             "edit-product",
+            "semi-finished-products",
+            "create-semi-finished-product",
+            "edit-semi-finished-product",
+            "production-plans",
+            "create-production-plan",
+            "edit-production-plan",
+            "production-requests",
+            "create-production-request",
+            "edit-production-request",
+            "product-groups",
+            "create-product-group",
+            "edit-product-group",
             "materials",
+            "suppliers",
+            "create-supplier",
+            "edit-supplier",
             "create-material",
+            "edit-material",
+            "material-groups",
+            "create-material-group",
+            "edit-material-group",
             "purchase-orders",
             "locations",
             "shipping-units",
@@ -990,6 +1376,57 @@ export default function HomePage({ user = {}, onLogout }) {
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>
+
+      {activeView === "product-groups" && editProductGroupId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setEditProductGroupId(null);
+            }
+          }}
+        >
+          <div className="w-full max-w-[760px] max-h-[90vh] overflow-y-auto">
+            <ProductGroupFormView
+              mode="edit"
+              groupId={editProductGroupId}
+              onCancel={() => setEditProductGroupId(null)}
+              onSaved={(g) => {
+                setProductGroups((prev) =>
+                  prev.map((x) => (x.id === g.id ? g : x)),
+                );
+                loadProducts();
+                setEditProductGroupId(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {activeView === "material-groups" && editMaterialGroupId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setEditMaterialGroupId(null);
+            }
+          }}
+        >
+          <div className="w-full max-w-[760px] max-h-[90vh] overflow-y-auto">
+            <MaterialGroupFormView
+              mode="edit"
+              groupId={editMaterialGroupId}
+              onCancel={() => setEditMaterialGroupId(null)}
+              onSaved={(g) => {
+                setMaterialGroups((prev) =>
+                  prev.map((x) => (x.id === g.id ? g : x)),
+                );
+                setEditMaterialGroupId(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── Sync confirm dialog ─────────────────────────────────────── */}
       {syncModal && (
@@ -1021,7 +1458,7 @@ export default function HomePage({ user = {}, onLogout }) {
                 <p className="text-xs text-gray-400 mb-5">
                   File:{" "}
                   <code className="bg-gray-100 px-1 rounded">
-                    data_sync/products.json
+                    data_sync/san-pham/products.json
                   </code>
                 </p>
                 <div className="flex justify-end gap-2">
@@ -1141,6 +1578,145 @@ export default function HomePage({ user = {}, onLogout }) {
         </div>
       )}
 
+      {deleteSemiFinishedTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !deleteLoading) {
+              setDeleteSemiFinishedTarget(null);
+            }
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <h3 className="text-base font-bold text-gray-800 mb-2">
+              Xác nhận xóa
+            </h3>
+            <p className="text-sm text-gray-600 mb-5">
+              Bạn có chắc muốn xóa bán thành phẩm{" "}
+              <span className="font-semibold text-gray-800">
+                {deleteSemiFinishedTarget.name}
+              </span>
+              ? Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setDeleteSemiFinishedTarget(null)}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              >
+                Huỷ
+              </button>
+              <button
+                onClick={handleDeleteSemiFinishedConfirm}
+                disabled={deleteLoading}
+                className="flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {deleteLoading && (
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    />
+                  </svg>
+                )}
+                Xóa bán thành phẩm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete group confirm dialog ─────────────────────────────── */}
+      {deleteGroupTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !deleteLoading)
+              setDeleteGroupTarget(null);
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
+            <div className="w-[68px] h-[68px] mx-auto rounded-full border-[3px] border-yellow-400 flex items-center justify-center mb-4">
+              <AlertTriangle size={42} className="text-yellow-400" />
+            </div>
+            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
+              Bạn có chắc muốn xóa nhóm sản phẩm này?
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={handleDeleteGroupConfirm}
+                disabled={deleteLoading}
+                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
+              >
+                {deleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
+              </button>
+              <button
+                onClick={() => setDeleteGroupTarget(null)}
+                disabled={deleteLoading}
+                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
+              >
+                Không, quay lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteMaterialGroupTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !deleteLoading)
+              setDeleteMaterialGroupTarget(null);
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
+            <div className="w-[68px] h-[68px] mx-auto rounded-full border-[3px] border-yellow-400 flex items-center justify-center mb-4">
+              <AlertTriangle size={42} className="text-yellow-400" />
+            </div>
+            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
+              Bạn có chắc muốn xóa nhóm nguyên vật liệu này?
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={handleDeleteMaterialGroupConfirm}
+                disabled={deleteLoading}
+                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
+              >
+                {deleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
+              </button>
+              <button
+                onClick={() => setDeleteMaterialGroupTarget(null)}
+                disabled={deleteLoading}
+                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
+              >
+                Không, quay lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteSuccessMessage && (
+        <SuccessModal
+          message={deleteSuccessMessage}
+          onClose={() => setDeleteSuccessMessage("")}
+        />
+      )}
+
       {/* ── Import file dialog ─────────────────────────────────────── */}
       {importModal && (
         <div
@@ -1151,7 +1727,7 @@ export default function HomePage({ user = {}, onLogout }) {
             }
           }}
         >
-          <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-2xl p-4">
+          <div className="w-full max-w-[520px] bg-white rounded-2xl shadow-2xl p-4">
             <h3 className="text-base leading-tight font-semibold text-[#13162D] mb-2">
               Nhập file danh sách sản phẩm
             </h3>
@@ -1185,7 +1761,7 @@ export default function HomePage({ user = {}, onLogout }) {
                 className={`rounded-xl border border-dashed px-4 py-5 text-center cursor-pointer transition-colors ${
                   importDragOver
                     ? "border-orange-300 bg-orange-50/70"
-                    : "border-gray-200 bg-white"
+                    : "border-orange-200 bg-orange-50/30"
                 }`}
               >
                 <div className="w-14 h-14 rounded-full border-2 border-orange-500 mx-auto mb-3 flex items-center justify-center">
@@ -1799,686 +2375,6 @@ function DashboardView({ stats }) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ─── Products view ────────────────────────────────────────────────────────────
-
-function ProductsView({
-  products,
-  onCreateClick,
-  onEditClick,
-  onDeleteClick,
-  onSyncClick,
-  onImportClick,
-  onExportClick,
-  onBulkDeleted,
-}) {
-  const ITEMS_PER_PAGE = 5;
-
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [selected, setSelected] = useState(new Set());
-  const [confirmBulkOpen, setConfirmBulkOpen] = useState(false);
-  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
-  const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [exportFormat, setExportFormat] = useState("xlsx");
-  const [exportScope, setExportScope] = useState("all");
-  const { sortKey, sortDir, handleSort, applySort } = useSort();
-  const [bulkResult, setBulkResult] = useState({
-    open: false,
-    success: 0,
-    failed: 0,
-  });
-  const filterRef = useRef(null);
-
-  useEffect(() => {
-    setSelected((prev) => {
-      const existingIds = new Set(products.map((p) => p.id));
-      const next = new Set([...prev].filter((id) => existingIds.has(id)));
-      return next;
-    });
-  }, [products]);
-
-  // Close filter panel on outside click
-  useEffect(() => {
-    if (!filterOpen) return;
-    const handler = (e) => {
-      if (filterRef.current && !filterRef.current.contains(e.target)) {
-        setFilterOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [filterOpen]);
-
-  // Close action dropdown on outside click
-  useEffect(() => {
-    if (!openDropdownId) return;
-    const handler = () => setOpenDropdownId(null);
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [openDropdownId]);
-
-  const filtered = products.filter((p) => {
-    const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || p.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
-
-  const sorted = applySort(filtered);
-
-  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
-  const paged = sorted.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
-
-  const handleSearchChange = (v) => {
-    setSearch(v);
-    setCurrentPage(1);
-  };
-  const handleStatusFilter = (v) => {
-    setStatusFilter(v);
-    setCurrentPage(1);
-    setFilterOpen(false);
-  };
-  const allPageChecked =
-    paged.length > 0 && paged.every((p) => selected.has(p.id));
-  const toggleAll = () => {
-    if (allPageChecked) {
-      setSelected((prev) => {
-        const s = new Set(prev);
-        paged.forEach((p) => s.delete(p.id));
-        return s;
-      });
-    } else {
-      setSelected((prev) => {
-        const s = new Set(prev);
-        paged.forEach((p) => s.add(p.id));
-        return s;
-      });
-    }
-  };
-  const toggleOne = (id) =>
-    setSelected((prev) => {
-      const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
-      return s;
-    });
-
-  const selectedCount = selected.size;
-
-  const handleBulkDelete = async () => {
-    if (selectedCount === 0) return;
-    setBulkDeleteLoading(true);
-
-    const ids = [...selected];
-    const results = await Promise.allSettled(
-      ids.map((id) => api.delete(`products/${id}/`)),
-    );
-    const successIds = results
-      .map((res, idx) => (res.status === "fulfilled" ? ids[idx] : null))
-      .filter(Boolean);
-
-    const failedCount = ids.length - successIds.length;
-    if (successIds.length > 0) {
-      onBulkDeleted?.(successIds);
-    }
-
-    setSelected((prev) => {
-      const next = new Set(prev);
-      successIds.forEach((id) => next.delete(id));
-      return next;
-    });
-    setBulkDeleteLoading(false);
-    setConfirmBulkOpen(false);
-    setBulkResult({
-      open: true,
-      success: successIds.length,
-      failed: failedCount,
-    });
-  };
-
-  return (
-    <div>
-      {/* ── Page header ─── */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 tracking-wide">
-            SẢN PHẨM
-          </h1>
-          <div className="flex items-center gap-1 text-sm text-gray-400 mt-1 flex-wrap">
-            <span>Bếp trung tâm</span>
-            <ChevronRight size={13} />
-            <span>Quản lý danh mục</span>
-            <ChevronRight size={13} />
-            <span>Thông tin sản phẩm</span>
-            <ChevronRight size={13} />
-            <span className="text-orange-500 font-medium">
-              Danh sách sản phẩm
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-          <button
-            onClick={onImportClick}
-            className="flex items-center gap-1.5 px-4 py-2 bg-orange-50 border border-orange-200 text-orange-500 text-sm font-semibold rounded-lg hover:bg-orange-100 transition-colors"
-          >
-            <Upload size={15} />
-            Nhập
-          </button>
-          <button
-            onClick={() => setExportModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-orange-50 border border-orange-200 text-orange-500 text-sm font-semibold rounded-lg hover:bg-orange-100 transition-colors"
-          >
-            <Download size={15} />
-            Xuất
-          </button>
-        </div>
-      </div>
-
-      {exportModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setExportModalOpen(false);
-          }}
-        >
-          <div className="w-full max-w-[560px] bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center">
-                  <Download size={14} />
-                </div>
-                <h3 className="text-[18px] leading-tight font-semibold text-[#13162D]">
-                  Xuất danh sách sản phẩm
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setExportModalOpen(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="px-5 py-4">
-              <p className="text-[14px] text-gray-500 mb-3">
-                Vui lòng chọn định dạng file để xuất:
-              </p>
-              <div className="space-y-2 mb-5">
-                {[
-                  { value: "xlsx", label: "Excel (.xlsx)" },
-                  { value: "csv", label: "CSV (.csv)" },
-                  { value: "pdf", label: "PDF (.pdf)" },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setExportFormat(opt.value)}
-                    className="flex items-center gap-3 text-left"
-                  >
-                    <span
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        exportFormat === opt.value
-                          ? "border-orange-500"
-                          : "border-orange-400"
-                      }`}
-                    >
-                      <span
-                        className={`w-3 h-3 rounded-full ${
-                          exportFormat === opt.value
-                            ? "bg-orange-500"
-                            : "bg-transparent"
-                        }`}
-                      />
-                    </span>
-                    <span className="text-[16px] font-medium text-[#13162D]">
-                      {opt.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="space-y-2 mb-5">
-                <button
-                  type="button"
-                  onClick={() => setExportScope("filtered")}
-                  className="flex items-center gap-3 text-left"
-                >
-                  <span
-                    className={`w-6 h-6 rounded-md border-2 flex items-center justify-center ${
-                      exportScope === "filtered"
-                        ? "border-orange-500 bg-orange-500 text-white"
-                        : "border-orange-400 bg-white text-transparent"
-                    }`}
-                  >
-                    <Check size={14} />
-                  </span>
-                  <span className="text-[16px] font-medium text-[#13162D]">
-                    Chỉ xuất các dòng đang lọc
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExportScope("all")}
-                  className="flex items-center gap-3 text-left"
-                >
-                  <span
-                    className={`w-6 h-6 rounded-md border-2 flex items-center justify-center ${
-                      exportScope === "all"
-                        ? "border-orange-500 bg-orange-500 text-white"
-                        : "border-orange-400 bg-white text-transparent"
-                    }`}
-                  >
-                    <Check size={14} />
-                  </span>
-                  <span className="text-[16px] font-medium text-[#13162D]">
-                    Xuất toàn bộ dữ liệu
-                  </span>
-                </button>
-              </div>
-
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={() => setExportModalOpen(false)}
-                  className="h-10 min-w-[110px] rounded-xl bg-white shadow text-gray-500 px-4"
-                >
-                  <span className="text-[16px] font-semibold">Hủy</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const selectedRows =
-                      exportScope === "filtered" ? sorted : products;
-                    setExportModalOpen(false);
-                    onExportClick?.({
-                      format: exportFormat,
-                      onlyFiltered: exportScope === "filtered",
-                      rows: selectedRows,
-                    });
-                  }}
-                  className="h-10 min-w-[130px] rounded-xl bg-[#F58232] hover:bg-[#E6772B] text-white text-[18px] font-semibold transition-colors"
-                >
-                  Xuất file
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Table card ─── */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        {/* Toolbar */}
-        <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 flex-wrap">
-          {/* Search */}
-          <div className="relative w-72">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={14}
-            />
-            <input
-              type="text"
-              placeholder="Tìm kiếm thông tin sản phẩm"
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
-            />
-          </div>
-
-          {/* Filter button + dropdown */}
-          <div className="relative" ref={filterRef}>
-            <button
-              onClick={() => setFilterOpen((v) => !v)}
-              className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${
-                statusFilter !== "all"
-                  ? "bg-orange-50 border-orange-300 text-orange-600"
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              <Filter size={14} />
-              Bộ lọc
-              {statusFilter !== "all" && (
-                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-              )}
-            </button>
-
-            {filterOpen && (
-              <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-20 p-4">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
-                  Trạng thái
-                </p>
-                <div className="space-y-1">
-                  {[
-                    { value: "all", label: "Tất cả" },
-                    { value: "active", label: "Đang hoạt động" },
-                    { value: "inactive", label: "Tạm ngưng" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleStatusFilter(opt.value)}
-                      className={`w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        statusFilter === opt.value
-                          ? "bg-orange-50 text-orange-600 font-semibold"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      <span
-                        className={`w-3 h-3 rounded-full border-2 flex-shrink-0 transition-colors ${
-                          statusFilter === opt.value
-                            ? "border-orange-500 bg-orange-500"
-                            : "border-gray-300 bg-white"
-                        }`}
-                      />
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                {statusFilter !== "all" && (
-                  <button
-                    onClick={() => handleStatusFilter("all")}
-                    className="mt-3 w-full text-center text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    Đặt lại bộ lọc
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            {selectedCount > 0 && (
-              <span className="text-sm font-semibold text-gray-600">
-                {selectedCount} được chọn
-              </span>
-            )}
-            {selectedCount > 0 && (
-              <button
-                onClick={() => setConfirmBulkOpen(true)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors"
-              >
-                Xóa đã chọn
-              </button>
-            )}
-            {selectedCount === 0 && (
-              <>
-                {/* Sync icon-only button */}
-                <button
-                  onClick={onSyncClick}
-                  title="Đồng bộ từ file JSON"
-                  className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
-                >
-                  <RefreshCw size={15} />
-                </button>
-                {/* Add product */}
-                <button
-                  onClick={onCreateClick}
-                  className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-                >
-                  <Plus size={15} />
-                  Thêm sản phẩm
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[860px]">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="px-5 py-3.5 w-10">
-                  <input
-                    type="checkbox"
-                    checked={allPageChecked}
-                    onChange={toggleAll}
-                    className="cursor-pointer"
-                  />
-                </th>
-                <SortableTh columnKey="code"   label="Mã SP"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="name"   label="Tên Sản Phẩm"  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" colSpan={2} />
-                <SortableTh columnKey="group"  label="Nhóm Sản Phẩm" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="unit"   label="Đơn Vị Tính"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="price"  label="Giá Bán"        sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-right" />
-                <SortableTh columnKey="status" label="Trạng Thái"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Hành Động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {paged.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-5 py-10 text-center text-gray-400 text-sm"
-                  >
-                    Không tìm thấy sản phẩm nào.
-                  </td>
-                </tr>
-              ) : (
-                paged.map((p) => (
-                  <tr
-                    key={p.id}
-                    className={`hover:bg-gray-50/60 transition-colors ${selected.has(p.id) ? "bg-orange-50/40" : ""}`}
-                  >
-                    <td className="px-5 py-3.5">
-                      <input
-                        type="checkbox"
-                        checked={selected.has(p.id)}
-                        onChange={() => toggleOne(p.id)}
-                        className="cursor-pointer"
-                      />
-                    </td>
-                    <td className="px-4 py-3.5 font-mono text-xs text-gray-600 font-semibold">
-                      {p.code}
-                    </td>
-                    {/* Image thumbnail */}
-                    <td className="px-2 py-2.5 w-14">
-                      {p.image ? (
-                        <img
-                          src={p.image}
-                          alt={p.name}
-                          className="w-12 h-12 object-cover rounded-lg border border-gray-100"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-100 flex items-center justify-center">
-                          <Package size={18} className="text-gray-300" />
-                        </div>
-                      )}
-                    </td>
-                    {/* Product name */}
-                    <td className="px-4 py-3.5 text-gray-800 font-semibold">
-                      {p.name}
-                    </td>
-                    <td className="px-4 py-3.5 text-gray-500 text-sm">
-                      {p.group}
-                    </td>
-                    <td className="px-4 py-3.5 text-gray-500 text-sm">
-                      {p.unit}
-                    </td>
-                    <td className="px-4 py-3.5 text-right font-bold text-gray-700">
-                      {formatCurrency(p.price)}
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <span
-                        className={`inline-flex items-center rounded-[7px] py-[9px] px-[20px] text-xs font-semibold ${
-                          p.status === "active"
-                            ? "bg-blue-50 text-blue-600"
-                            : "bg-red-50 text-red-500"
-                        }`}
-                      >
-                        {p.status === "active" ? "Đang hoạt động" : "Tạm ngưng"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <div
-                        className="relative inline-block"
-                        onMouseDown={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={() =>
-                            setOpenDropdownId(
-                              openDropdownId === p.id ? null : p.id,
-                            )
-                          }
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          Hành động
-                          <ChevronDown size={13} className="text-gray-400" />
-                        </button>
-                        {openDropdownId === p.id && (
-                          <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
-                            <button
-                              onClick={() => {
-                                onEditClick(p);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                            >
-                              Chỉnh sửa
-                            </button>
-                            <button
-                              onClick={() => {
-                                onDeleteClick(p);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                            >
-                              Xóa
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-5 py-3.5 flex items-center justify-between border-t border-gray-100 flex-wrap gap-3">
-          <p className="text-xs text-gray-500">
-            Hiển thị{" "}
-            <span className="font-bold text-gray-700">{paged.length}</span> trên
-            tổng số{" "}
-            <span className="font-bold text-orange-500">
-              {sorted.length}
-            </span>
-          </p>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft size={15} />
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-semibold transition-colors ${
-                  currentPage === page
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronRight size={15} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Bulk delete confirm ───────────────────────────────────── */}
-      {confirmBulkOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !bulkDeleteLoading)
-              setConfirmBulkOpen(false);
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full border-4 border-yellow-400 flex items-center justify-center mb-4">
-              <AlertTriangle size={18} className="text-yellow-400" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
-              Bạn có chắc muốn xóa ({selectedCount}) sản phẩm đã chọn không?
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleBulkDelete}
-                disabled={bulkDeleteLoading}
-                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                {bulkDeleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
-              </button>
-              <button
-                onClick={() => setConfirmBulkOpen(false)}
-                disabled={bulkDeleteLoading}
-                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                Không, quay lại
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Bulk delete success ───────────────────────────────────── */}
-      {bulkResult.open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget)
-              setBulkResult({ open: false, success: 0, failed: 0 });
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center mb-4">
-              <CheckCircle size={18} className="text-green-500" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-4">
-              Đã xóa ({bulkResult.success}) sản phẩm thành công!
-            </h3>
-            {bulkResult.failed > 0 && (
-              <p className="text-xs text-red-500 mb-4">
-                Có {bulkResult.failed} sản phẩm xóa thất bại. Vui lòng thử lại.
-              </p>
-            )}
-            <button
-              onClick={() =>
-                setBulkResult({ open: false, success: 0, failed: 0 })
-              }
-              className="h-10 min-w-24 px-6 rounded-lg bg-[#F58232] hover:bg-[#E6772B] text-white text-[14px] font-bold transition-colors"
-            >
-              Xong
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
