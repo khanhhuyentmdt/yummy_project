@@ -1087,6 +1087,7 @@ export default function HomePage({ user = {}, onLogout }) {
                 setActiveView("edit-semi-finished-product");
               }}
               onDeleteClick={(p) => setDeleteSemiFinishedTarget(p)}
+              onImportClick={() => console.log("Import clicked")}
               onExportClick={handleExportSemiFinishedProducts}
               onBulkDeleted={(deletedIds) =>
                 setSemiFinishedProducts((prev) =>
