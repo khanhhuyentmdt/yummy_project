@@ -107,7 +107,7 @@ class Bonus(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-bonus_date', '-id']
+        ordering = ['-id']
         verbose_name = 'Bonus'
         verbose_name_plural = 'Bonuses'
     

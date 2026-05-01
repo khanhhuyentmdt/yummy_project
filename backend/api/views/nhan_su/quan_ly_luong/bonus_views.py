@@ -49,8 +49,9 @@ def bonus_list(request):
             qs = qs.filter(employees__id=employee_id)
         
         # Ordering
-        ordering = request.query_params.get('ordering', '').strip()
+        ordering = request.query_params.get('ordering', '-id').strip()
         ALLOWED = {
+            'id', '-id',
             'code', '-code',
             'bonus_date', '-bonus_date',
             'total_amount', '-total_amount',

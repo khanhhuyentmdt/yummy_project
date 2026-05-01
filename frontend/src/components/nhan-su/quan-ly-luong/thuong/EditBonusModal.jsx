@@ -9,7 +9,7 @@ const inp = (err) =>
   }`
 
 const sel = (err) =>
-  `w-full px-3 py-2.5 border rounded-[7px] text-sm focus:outline-none focus:ring-2 bg-white transition-colors ${
+  `w-full pl-3 pr-9 py-2.5 border rounded-[7px] text-sm focus:outline-none focus:ring-2 bg-white transition-colors appearance-none ${
     err ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 focus:ring-orange-200'
   }`
 
@@ -229,20 +229,27 @@ export default function EditBonusModal({ bonus: initialBonus, onClose, onSaved }
 
                     {/* Nhân viên được thưởng */}
                     <Field label="Nhân viên được thưởng" required error={errors.employee_ids}>
-                      <select
-                        value={form.recipient_type}
-                        onChange={e => {
-                          setField('recipient_type', e.target.value)
-                          if (e.target.value === 'all') {
-                            setSelectedEmployees([])
-                            setField('employee_ids', [])
-                          }
-                        }}
-                        className={sel(errors.recipient_type)}
-                      >
-                        <option value="all">Tất cả nhân viên</option>
-                        <option value="selected">Tùy chọn</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={form.recipient_type}
+                          onChange={e => {
+                            setField('recipient_type', e.target.value)
+                            if (e.target.value === 'all') {
+                              setSelectedEmployees([])
+                              setField('employee_ids', [])
+                            }
+                          }}
+                          className={sel(errors.recipient_type)}
+                        >
+                          <option value="all">Tất cả nhân viên</option>
+                          <option value="selected">Tùy chọn</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
                     </Field>
 
                     {/* Employee selection */}
@@ -308,27 +315,41 @@ export default function EditBonusModal({ bonus: initialBonus, onClose, onSaved }
 
                     {/* Hình thức thưởng */}
                     <Field label="Hình thức thưởng" required error={errors.bonus_type}>
-                      <select
-                        value={form.bonus_type}
-                        onChange={e => setField('bonus_type', e.target.value)}
-                        className={sel(errors.bonus_type)}
-                      >
-                        <option value="direct">Thưởng trực tiếp</option>
-                        <option value="salary">Thưởng vào lương</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={form.bonus_type}
+                          onChange={e => setField('bonus_type', e.target.value)}
+                          className={sel(errors.bonus_type)}
+                        >
+                          <option value="direct">Thưởng trực tiếp</option>
+                          <option value="salary">Thưởng vào lương</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
                     </Field>
 
                     {/* Trạng thái */}
                     <Field label="Trạng thái" error={errors.status}>
-                      <select
-                        value={form.status}
-                        onChange={e => setField('status', e.target.value)}
-                        className={sel(errors.status)}
-                      >
-                        <option value="pending">Chưa thanh toán</option>
-                        <option value="paid">Đã thanh toán</option>
-                        <option value="cancelled">Đã hủy</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={form.status}
+                          onChange={e => setField('status', e.target.value)}
+                          className={sel(errors.status)}
+                        >
+                          <option value="pending">Chưa thanh toán</option>
+                          <option value="paid">Đã thanh toán</option>
+                          <option value="cancelled">Đã hủy</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
                     </Field>
 
                     {/* Summary info */}

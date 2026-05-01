@@ -1,68 +1,85 @@
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import api from '../../../../api/axios'
 
-export default function DeleteBonusModal({ bonus, ids, onDeleted, onClose }) {
+export default function DeleteBonusModal({ bonus, ids, onClose, onDeleted }) {
+  const isBulk = Boolean(ids && ids.length > 0)
   const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState('')
+  const [error, setError] = useState(null)
 
-  const isBulk = !bonus && ids && ids.length > 0
-
-  async function handleConfirm() {
+  const handleConfirm = async () => {
     setLoading(true)
-    setError('')
+    setError(null)
     try {
       if (isBulk) {
-        await api.post('/bonuses/bulk-delete/', { ids })
+        // Bulk delete
+        await Promise.all(ids.map(id => api.delete(`bonuses/${id}/`)))
         onDeleted(ids)
       } else {
-        await api.delete(`/bonuses/${bonus.id}/`)
+        // Single delete
+        await api.delete(`bonuses/${bonus.id}/`)
         onDeleted([bonus.id])
       }
     } catch {
-      setError('Xoa that bai. Vui long thu lai.')
+      setError(isBulk
+        ? 'Không thể xóa các thưởng đã chọn. Vui lòng thử lại.'
+        : 'Không thể xóa thưởng. Vui lòng thử lại.'
+      )
+    } finally {
       setLoading(false)
     }
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={() => { if (!loading) onClose() }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      onMouseDown={(e) => { if (e.target === e.currentTarget && !loading) onClose() }}
+      style={{ fontFamily: 'Nunito Sans, sans-serif' }}
     >
-      <div
-        className="bg-white rounded-[14px] shadow-xl w-[420px] p-8 flex flex-col items-center gap-4"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Warning icon */}
-        <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
-          <span className="text-yellow-500 text-3xl font-bold">!</span>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 px-8 py-10 flex flex-col items-center">
+        <div className="w-20 h-20 rounded-full border-4 border-yellow-400 flex items-center justify-center mb-7">
+          <span className="text-yellow-400 font-extrabold" style={{ fontSize: '2.25rem', lineHeight: 1 }}>!</span>
         </div>
 
-        <p className="text-center text-gray-700 italic text-[15px]">
-          {isBulk
-            ? <>Ban co chac muon xoa <strong>{ids.length}</strong> thuong da chon khong?</>
-            : <>Ban co chac muon xoa thuong <strong className="text-orange-500">"{bonus?.code}"</strong> khong?</>
-          }
-        </p>
+        {isBulk ? (
+          <>
+            <p className="text-base font-semibold text-gray-800 italic text-center leading-relaxed">
+              Bạn có chắc muốn xóa
+            </p>
+            <p className="text-base font-semibold text-gray-800 italic text-center mb-8 leading-relaxed">
+              <span className="not-italic font-bold">{ids.length}</span> thưởng đã chọn không?
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-base font-semibold text-gray-800 italic text-center leading-relaxed">
+              Bạn có chắc muốn xóa thưởng
+            </p>
+            <p className="text-base font-semibold text-gray-800 italic text-center mb-8 leading-relaxed">
+              "{bonus.code}" không?
+            </p>
+          </>
+        )}
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-xs text-red-500 mb-4 text-center">{error}</p>}
 
-        <div className="flex gap-3 w-full mt-2">
+        <div className="flex gap-3 w-full">
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-[7px] text-white font-semibold text-sm"
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold text-white rounded-[7px] hover:opacity-90 active:opacity-80 disabled:opacity-60 transition-opacity"
             style={{ backgroundColor: '#E67E22' }}
           >
-            {loading ? 'Dang xoa...' : 'Vang, xoa di'}
+            {loading && <Loader2 size={14} className="animate-spin" />}
+            Vâng, xóa đi
           </button>
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-[7px] font-semibold text-sm border border-orange-200 text-orange-600"
+            className="flex-1 py-3 text-sm font-bold text-orange-500 rounded-[7px] hover:opacity-90 transition-opacity disabled:opacity-50"
             style={{ backgroundColor: '#FFF0E6' }}
           >
-            Khong, quay lai
+            Không, quay lại
           </button>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, Plus, Download, Filter, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Search, Plus, Download, Filter, ChevronDown, ChevronRight, ChevronLeft, Trash2 } from 'lucide-react'
 import api from '../../../../api/axios'
 import { useSort, SortableTh } from '../../../../hooks/useSort'
+import DeleteBonusModal from './DeleteBonusModal'
+import SuccessModal from '../../../common/SuccessModal'
 
 const STATUS_LABEL = {
   paid: 'Đã thanh toán',
@@ -10,9 +12,9 @@ const STATUS_LABEL = {
 }
 
 const STATUS_COLOR = {
-  paid: 'bg-green-100 text-green-700',
-  cancelled: 'bg-gray-100 text-gray-500',
-  pending: 'bg-yellow-100 text-yellow-700',
+  paid: 'bg-green-50 text-green-600',
+  cancelled: 'bg-red-50 text-red-500',
+  pending: 'bg-yellow-50 text-yellow-600',
 }
 
 const formatCurrency = (val) => {
@@ -28,6 +30,9 @@ const formatDate = (dateStr) => {
 
 const ITEMS_PER_PAGE = 10
 
+const CB = 'cursor-pointer w-4 h-4 rounded'
+const cbStyle = { accentColor: '#E67E22' }
+
 export default function BonusListPage({ onAdd, onEdit }) {
   const [bonuses, setBonuses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,7 +43,8 @@ export default function BonusListPage({ onAdd, onEdit }) {
   const [openDropdownId, setOpenDropdownId] = useState(null)
   const [selected, setSelected] = useState(new Set())
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [successMsg, setSuccessMsg] = useState(null)
   const filterRef = useRef(null)
   const { sortKey, sortDir, handleSort, applySort } = useSort()
 
@@ -100,19 +106,14 @@ export default function BonusListPage({ onAdd, onEdit }) {
     return s
   })
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return
-    setDeleteLoading(true)
-    try {
-      await api.delete(`bonuses/${deleteTarget.id}/`)
-      setBonuses(prev => prev.filter(b => b.id !== deleteTarget.id))
-      setSelected(prev => { const s = new Set(prev); s.delete(deleteTarget.id); return s })
-      setDeleteTarget(null)
-    } catch {
-      // keep modal open on error
-    } finally {
-      setDeleteLoading(false)
-    }
+  const handleDeleteDone = (deletedIds) => {
+    const idSet = new Set(deletedIds)
+    setBonuses(prev => prev.filter(b => !idSet.has(b.id)))
+    setSelected(new Set())
+    setDeleteTarget(null)
+    setBulkDeleteOpen(false)
+    const n = idSet.size
+    setSuccessMsg(n === 1 ? 'Thưởng đã được xóa thành công!' : `${n} thưởng đã được xóa thành công!`)
   }
 
   const handleExport = () => {
@@ -229,16 +230,29 @@ export default function BonusListPage({ onAdd, onEdit }) {
             )}
           </div>
 
-          {/* Add button */}
-          <div className="ml-auto">
-            <button
-              onClick={onAdd}
-              className="flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors hover:opacity-90 active:opacity-80"
-              style={{ backgroundColor: '#E67E22' }}
-            >
-              <Plus size={15} />
-              Thêm thưởng
-            </button>
+          {/* Action zone */}
+          <div className="ml-auto flex items-center gap-3">
+            {selected.size > 0 ? (
+              <>
+                <span className="text-sm text-gray-600 font-medium">{selected.size} được chọn</span>
+                <button
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors"
+                >
+                  <Trash2 size={14} />
+                  Xóa đã chọn
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onAdd}
+                className="flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-[7px] transition-colors hover:opacity-90 active:opacity-80"
+                style={{ backgroundColor: '#E67E22' }}
+              >
+                <Plus size={15} />
+                Thêm thưởng
+              </button>
+            )}
           </div>
         </div>
 
@@ -252,16 +266,17 @@ export default function BonusListPage({ onAdd, onEdit }) {
                     type="checkbox"
                     checked={allPageChecked}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                    className={CB}
+                    style={cbStyle}
                   />
                 </th>
-                <SortableTh columnKey="code"           label="Mã Thưởng"                    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="reason"         label="Lý Do Thưởng"                 sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="employee_count" label="Số Lượng NV Được Thưởng"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
-                <SortableTh columnKey="total_amount"   label="Tổng Tiền"                    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-right" />
-                <SortableTh columnKey="bonus_date"     label="Ngày Thưởng"                  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
-                <SortableTh columnKey="status"         label="Trạng Thái"                   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
-                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Hành Động</th>
+                <SortableTh columnKey="code"           label="MÃ THƯỞNG"                    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="reason"         label="LÝ DO THƯỞNG"                 sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="employee_count" label="SỐ LƯỢNG NV ĐƯỢC THƯỞNG"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
+                <SortableTh columnKey="total_amount"   label="TỔNG TIỀN"                    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-right" />
+                <SortableTh columnKey="bonus_date"     label="NGÀY THƯỞNG"                  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-left" />
+                <SortableTh columnKey="status"         label="TRẠNG THÁI"                   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="text-center" />
+                <th className="text-center px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">HÀNH ĐỘNG</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -290,7 +305,8 @@ export default function BonusListPage({ onAdd, onEdit }) {
                       type="checkbox"
                       checked={selected.has(bonus.id)}
                       onChange={() => toggleOne(bonus.id)}
-                      className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-orange-500"
+                      className={CB}
+                      style={cbStyle}
                     />
                   </td>
                   <td className="px-4 py-3.5 font-mono text-xs text-gray-600 font-semibold">{bonus.code}</td>
@@ -301,7 +317,10 @@ export default function BonusListPage({ onAdd, onEdit }) {
                   <td className="px-4 py-3.5 text-right font-semibold text-orange-600">{formatCurrency(bonus.total_amount || 0)}</td>
                   <td className="px-4 py-3.5 text-gray-600">{formatDate(bonus.bonus_date)}</td>
                   <td className="px-4 py-3.5 text-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[bonus.status] || 'bg-gray-100 text-gray-500'}`}>
+                    <span 
+                      className={`inline-flex items-center rounded-[7px] py-[9px] px-[20px] text-xs font-semibold ${STATUS_COLOR[bonus.status] || 'bg-gray-50 text-gray-500'}`}
+                      style={{ fontFamily: 'Nunito Sans, sans-serif' }}
+                    >
                       {STATUS_LABEL[bonus.status] || bonus.status}
                     </span>
                   </td>
@@ -381,43 +400,13 @@ export default function BonusListPage({ onAdd, onEdit }) {
         </div>
       </div>
 
-      {/* Delete confirm dialog */}
+      {successMsg && <SuccessModal message={successMsg} onClose={() => setSuccessMsg(null)} />}
+
       {deleteTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => { if (e.target === e.currentTarget && !deleteLoading) setDeleteTarget(null) }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-2">Xác nhận xóa</h3>
-            <p className="text-sm text-gray-600 mb-5">
-              Bạn có chắc muốn xóa thưởng{' '}
-              <span className="font-semibold text-gray-800">{deleteTarget.code}</span>?
-              Hành động này không thể hoàn tác.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                disabled={deleteLoading}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-              >
-                Huỷ
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={deleteLoading}
-                className="flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {deleteLoading && (
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                )}
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteBonusModal bonus={deleteTarget} onClose={() => setDeleteTarget(null)} onDeleted={handleDeleteDone} />
+      )}
+      {bulkDeleteOpen && (
+        <DeleteBonusModal ids={Array.from(selected)} onClose={() => setBulkDeleteOpen(false)} onDeleted={handleDeleteDone} />
       )}
     </div>
   )

@@ -966,6 +966,7 @@ export default function HomePage({ user = {}, onLogout }) {
             "edit-employee",
             "work-shifts",
             "edit-shift",
+            "bonuses",
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>
