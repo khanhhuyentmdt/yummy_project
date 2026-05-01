@@ -9,13 +9,13 @@ import {
   Filter,
   Upload,
   Download,
-  AlertTriangle,
   Check,
   X,
-  CheckCircle,
 } from "lucide-react";
 import api from "../../../../../../api/axios";
 import { useSort, SortableTh } from "../../../../../../hooks/useSort";
+import SuccessModal from "../../../../../common/SuccessModal";
+import DeleteConfirmModal from "../../../../../common/DeleteConfirmModal";
 
 const formatCurrency = (amount) =>
   new Intl.NumberFormat("vi-VN").format(amount) + "đ";
@@ -38,16 +38,11 @@ export default function SemiFinishedProductsView({
   const [filterOpen, setFilterOpen] = useState(false);
   const [selected, setSelected] = useState(new Set());
   const [confirmBulkOpen, setConfirmBulkOpen] = useState(false);
-  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState("xlsx");
   const [exportScope, setExportScope] = useState("all");
+  const [successMsg, setSuccessMsg] = useState(null);
   const { sortKey, sortDir, handleSort, applySort } = useSort();
-  const [bulkResult, setBulkResult] = useState({
-    open: false,
-    success: 0,
-    failed: 0,
-  });
   const filterRef = useRef(null);
 
   useEffect(() => {
@@ -132,8 +127,6 @@ export default function SemiFinishedProductsView({
   const selectedCount = selected.size;
 
   const handleBulkDelete = async () => {
-    if (selectedCount === 0) return;
-    setBulkDeleteLoading(true);
     const ids = [...selected];
     const results = await Promise.allSettled(
       ids.map((id) => api.delete(`semi-finished-products/${id}/`)),
@@ -141,7 +134,6 @@ export default function SemiFinishedProductsView({
     const successIds = results
       .map((result, idx) => (result.status === "fulfilled" ? ids[idx] : null))
       .filter(Boolean);
-    const failedCount = ids.length - successIds.length;
 
     if (successIds.length > 0) {
       onBulkDeleted?.(successIds);
@@ -152,13 +144,10 @@ export default function SemiFinishedProductsView({
       successIds.forEach((id) => next.delete(id));
       return next;
     });
-    setBulkDeleteLoading(false);
     setConfirmBulkOpen(false);
-    setBulkResult({
-      open: true,
-      success: successIds.length,
-      failed: failedCount,
-    });
+    
+    const n = successIds.length;
+    setSuccessMsg(n === 1 ? 'Bán thành phẩm đã được xóa thành công!' : `${n} bán thành phẩm đã được xóa thành công!`);
   };
 
   return (
@@ -645,75 +634,15 @@ export default function SemiFinishedProductsView({
       </div>
 
       {confirmBulkOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !bulkDeleteLoading) {
-              setConfirmBulkOpen(false);
-            }
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full border-4 border-yellow-400 flex items-center justify-center mb-4">
-              <AlertTriangle size={18} className="text-yellow-400" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
-              Bạn có chắc muốn xóa ({selectedCount}) bán thành phẩm đã chọn
-              không?
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleBulkDelete}
-                disabled={bulkDeleteLoading}
-                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                {bulkDeleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
-              </button>
-              <button
-                onClick={() => setConfirmBulkOpen(false)}
-                disabled={bulkDeleteLoading}
-                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                Không, quay lại
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmModal
+          title="bán thành phẩm"
+          count={selectedCount}
+          onConfirm={handleBulkDelete}
+          onClose={() => setConfirmBulkOpen(false)}
+        />
       )}
 
-      {bulkResult.open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
-              setBulkResult({ open: false, success: 0, failed: 0 });
-            }
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center mb-4">
-              <CheckCircle size={18} className="text-green-500" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-4">
-              Đã xóa ({bulkResult.success}) bán thành phẩm thành công!
-            </h3>
-            {bulkResult.failed > 0 && (
-              <p className="text-xs text-red-500 mb-4">
-                Có {bulkResult.failed} bán thành phẩm xóa thất bại. Vui lòng thử
-                lại.
-              </p>
-            )}
-            <button
-              onClick={() =>
-                setBulkResult({ open: false, success: 0, failed: 0 })
-              }
-              className="h-10 min-w-24 px-6 rounded-lg bg-[#F58232] hover:bg-[#E6772B] text-white text-[14px] font-bold transition-colors"
-            >
-              Xong
-            </button>
-          </div>
-        </div>
-      )}
+      {successMsg && <SuccessModal message={successMsg} onClose={() => setSuccessMsg(null)} />}
     </div>
   );
 }

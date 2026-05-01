@@ -49,6 +49,18 @@ import AttendancePage from "../../nhan-su/quan-ly-cham-cong/cham-cong/Attendance
 import BonusPage from "../../nhan-su/quan-ly-luong/thuong/BonusPage";
 import WelfarePage from "../../nhan-su/quan-ly-luong/phucloi/WelfarePage";
 import PayrollPage from "../../nhan-su/quan-ly-luong/bang-luong/PayrollPage";
+import ProductsView from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/san-pham/ProductsView";
+import ProductGroupsView from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/nhom-san-pham/ProductGroupsView";
+import ProductGroupFormView from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-san-pham/nhom-san-pham/ProductGroupFormView";
+import SemiFinishedProductsView from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-ban-thanh-pham/ban-thanh-pham/SemiFinishedProductsView";
+import CreateSemiFinishedProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-ban-thanh-pham/ban-thanh-pham/CreateSemiFinishedProductPage";
+import EditSemiFinishedProductPage from "../../san-xuat/bep-trung-tam/quan-ly-danh-muc/thong-tin-ban-thanh-pham/ban-thanh-pham/EditSemiFinishedProductPage";
+import ProductionPlansPage from "../../san-xuat/bep-trung-tam/van-hanh-san-xuat/ke-hoach-san-xuat/ProductionPlansPage";
+import ProductionPlanFormPage from "../../san-xuat/bep-trung-tam/van-hanh-san-xuat/ke-hoach-san-xuat/ProductionPlanFormPage";
+import ProductionRequestsPage from "../../san-xuat/bep-trung-tam/van-hanh-san-xuat/yeu-cau-san-xuat/ProductionRequestsPage";
+import ProductionRequestFormPage from "../../san-xuat/bep-trung-tam/van-hanh-san-xuat/yeu-cau-san-xuat/ProductionRequestFormPage";
+import SuccessModal from "../../common/SuccessModal";
+import DeleteConfirmModal from "../../common/DeleteConfirmModal";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -1520,195 +1532,67 @@ export default function HomePage({ user = {}, onLogout }) {
 
       {/* ── Delete confirm dialog ───────────────────────────────────── */}
       {deleteTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !deleteLoading)
-              setDeleteTarget(null);
+        <DeleteConfirmModal
+          title="sản phẩm"
+          itemName={deleteTarget.code}
+          onConfirm={async () => {
+            await api.delete(`products/${deleteTarget.id}/`);
+            setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+            setDeleteTarget(null);
+            setDeleteSuccessMessage("Xóa sản phẩm thành công!");
+            loadDashboard();
           }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-2">
-              Xác nhận xóa
-            </h3>
-            <p className="text-sm text-gray-600 mb-5">
-              Bạn có chắc muốn xóa sản phẩm{" "}
-              <span className="font-semibold text-gray-800">
-                {deleteTarget.name}
-              </span>
-              ? Hành động này không thể hoàn tác.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                disabled={deleteLoading}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-              >
-                Huỷ
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={deleteLoading}
-                className="flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {deleteLoading && (
-                  <svg
-                    className="animate-spin h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    />
-                  </svg>
-                )}
-                Xóa sản phẩm
-              </button>
-            </div>
-          </div>
-        </div>
+          onClose={() => setDeleteTarget(null)}
+        />
       )}
 
       {deleteSemiFinishedTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !deleteLoading) {
-              setDeleteSemiFinishedTarget(null);
-            }
+        <DeleteConfirmModal
+          title="bán thành phẩm"
+          itemName={deleteSemiFinishedTarget.code}
+          onConfirm={async () => {
+            await api.delete(`semi-finished-products/${deleteSemiFinishedTarget.id}/`);
+            setSemiFinishedProducts((prev) =>
+              prev.filter((p) => p.id !== deleteSemiFinishedTarget.id),
+            );
+            setDeleteSemiFinishedTarget(null);
+            setDeleteSuccessMessage("Xóa bán thành phẩm thành công!");
           }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-2">
-              Xác nhận xóa
-            </h3>
-            <p className="text-sm text-gray-600 mb-5">
-              Bạn có chắc muốn xóa bán thành phẩm{" "}
-              <span className="font-semibold text-gray-800">
-                {deleteSemiFinishedTarget.name}
-              </span>
-              ? Hành động này không thể hoàn tác.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setDeleteSemiFinishedTarget(null)}
-                disabled={deleteLoading}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-              >
-                Huỷ
-              </button>
-              <button
-                onClick={handleDeleteSemiFinishedConfirm}
-                disabled={deleteLoading}
-                className="flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {deleteLoading && (
-                  <svg
-                    className="animate-spin h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    />
-                  </svg>
-                )}
-                Xóa bán thành phẩm
-              </button>
-            </div>
-          </div>
-        </div>
+          onClose={() => setDeleteSemiFinishedTarget(null)}
+        />
       )}
 
       {/* ── Delete group confirm dialog ─────────────────────────────── */}
       {deleteGroupTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !deleteLoading)
-              setDeleteGroupTarget(null);
+        <DeleteConfirmModal
+          title="nhóm sản phẩm"
+          itemName={deleteGroupTarget.name}
+          onConfirm={async () => {
+            await api.delete(`product-groups/${deleteGroupTarget.id}/`);
+            setProductGroups((prev) =>
+              prev.filter((g) => g.id !== deleteGroupTarget.id),
+            );
+            setDeleteGroupTarget(null);
+            setDeleteSuccessMessage("Xóa nhóm sản phẩm thành công!");
           }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-[68px] h-[68px] mx-auto rounded-full border-[3px] border-yellow-400 flex items-center justify-center mb-4">
-              <AlertTriangle size={42} className="text-yellow-400" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
-              Bạn có chắc muốn xóa nhóm sản phẩm này?
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleDeleteGroupConfirm}
-                disabled={deleteLoading}
-                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                {deleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
-              </button>
-              <button
-                onClick={() => setDeleteGroupTarget(null)}
-                disabled={deleteLoading}
-                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                Không, quay lại
-              </button>
-            </div>
-          </div>
-        </div>
+          onClose={() => setDeleteGroupTarget(null)}
+        />
       )}
 
       {deleteMaterialGroupTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !deleteLoading)
-              setDeleteMaterialGroupTarget(null);
+        <DeleteConfirmModal
+          title="nhóm nguyên vật liệu"
+          itemName={deleteMaterialGroupTarget.name}
+          onConfirm={async () => {
+            await api.delete(`material-groups/${deleteMaterialGroupTarget.id}/`);
+            setMaterialGroups((prev) =>
+              prev.filter((g) => g.id !== deleteMaterialGroupTarget.id),
+            );
+            setDeleteMaterialGroupTarget(null);
+            setDeleteSuccessMessage("Xóa nhóm nguyên vật liệu thành công!");
           }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-[68px] h-[68px] mx-auto rounded-full border-[3px] border-yellow-400 flex items-center justify-center mb-4">
-              <AlertTriangle size={42} className="text-yellow-400" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
-              Bạn có chắc muốn xóa nhóm nguyên vật liệu này?
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleDeleteMaterialGroupConfirm}
-                disabled={deleteLoading}
-                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                {deleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
-              </button>
-              <button
-                onClick={() => setDeleteMaterialGroupTarget(null)}
-                disabled={deleteLoading}
-                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                Không, quay lại
-              </button>
-            </div>
-          </div>
-        </div>
+          onClose={() => setDeleteMaterialGroupTarget(null)}
+        />
       )}
 
       {deleteSuccessMessage && (

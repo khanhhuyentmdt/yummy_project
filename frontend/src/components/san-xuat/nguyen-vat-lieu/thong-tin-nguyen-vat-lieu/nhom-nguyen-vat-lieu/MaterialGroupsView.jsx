@@ -8,15 +8,15 @@ import {
   Filter,
   Download,
   RefreshCw,
-  AlertTriangle,
   Check,
   X,
   XCircle,
-  CheckCircle,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "../../../../../api/axios";
 import { useSort, SortableTh } from "../../../../../hooks/useSort";
+import SuccessModal from "../../../../common/SuccessModal";
+import DeleteConfirmModal from "../../../../common/DeleteConfirmModal";
 
 export default function MaterialGroupsView({
   materialGroups,
@@ -34,9 +34,8 @@ export default function MaterialGroupsView({
   const [filterOpen, setFilterOpen] = useState(false);
   const [selected, setSelected] = useState(new Set());
   const [confirmBulkOpen, setConfirmBulkOpen] = useState(false);
-  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(null);
   const { sortKey, sortDir, handleSort, applySort } = useSort();
-  const [bulkResult, setBulkResult] = useState({ open: false, success: 0, failed: 0 });
   const filterRef = useRef(null);
 
   // Add modal state
@@ -133,9 +132,6 @@ export default function MaterialGroupsView({
   const selectedCount = selected.size;
 
   const handleBulkDelete = async () => {
-    if (selectedCount === 0) return;
-    setBulkDeleteLoading(true);
-
     const ids = [...selected];
     const results = await Promise.allSettled(
       ids.map((id) => api.delete(`material-groups/${id}/`)),
@@ -144,7 +140,6 @@ export default function MaterialGroupsView({
       .map((res, idx) => (res.status === "fulfilled" ? ids[idx] : null))
       .filter(Boolean);
 
-    const failedCount = ids.length - successIds.length;
     if (successIds.length > 0) {
       onBulkDeleted?.(successIds);
     }
@@ -154,13 +149,10 @@ export default function MaterialGroupsView({
       successIds.forEach((id) => next.delete(id));
       return next;
     });
-    setBulkDeleteLoading(false);
     setConfirmBulkOpen(false);
-    setBulkResult({
-      open: true,
-      success: successIds.length,
-      failed: failedCount,
-    });
+    
+    const n = successIds.length;
+    setSuccessMsg(n === 1 ? 'Nhóm nguyên vật liệu đã được xóa thành công!' : `${n} nhóm nguyên vật liệu đã được xóa thành công!`);
   };
 
   const handleAddSubmit = async () => {
@@ -637,74 +629,18 @@ export default function MaterialGroupsView({
           </div>
         </div>
       )}
-      {/* ── Bulk delete confirm ───────────────────────────────────── */}
+      {/* ── Delete confirmation modal ───────────────────────────────────── */}
       {confirmBulkOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !bulkDeleteLoading)
-              setConfirmBulkOpen(false);
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-[68px] h-[68px] mx-auto rounded-full border-[3px] border-yellow-400 flex items-center justify-center mb-4">
-              <AlertTriangle size={42} className="text-yellow-400" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-6">
-              Bạn có chắc muốn xóa ({selectedCount}) nhóm nguyên vật liệu đã chọn không?
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleBulkDelete}
-                disabled={bulkDeleteLoading}
-                className="h-10 rounded-lg bg-[#F58232] hover:bg-[#E6772B] disabled:opacity-60 text-white text-[14px] font-bold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                {bulkDeleteLoading ? "Đang xóa..." : "Vâng, xóa đi"}
-              </button>
-              <button
-                onClick={() => setConfirmBulkOpen(false)}
-                disabled={bulkDeleteLoading}
-                className="h-10 rounded-lg bg-[#FDF0E6] hover:bg-[#FBE5D4] text-[#F58232] text-[14px] font-semibold leading-none whitespace-nowrap px-3 transition-colors"
-              >
-                Không, quay lại
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmModal
+          title="nhóm nguyên vật liệu"
+          count={selectedCount}
+          onConfirm={handleBulkDelete}
+          onClose={() => setConfirmBulkOpen(false)}
+        />
       )}
 
-      {/* ── Bulk delete success ───────────────────────────────────── */}
-      {bulkResult.open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget)
-              setBulkResult({ open: false, success: 0, failed: 0 });
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-[370px] max-w-[calc(100vw-2rem)] mx-4 px-5 pt-5 pb-5 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center mb-4">
-              <CheckCircle size={18} className="text-green-500" />
-            </div>
-            <h3 className="text-[20px] leading-tight font-semibold italic text-gray-900 mb-4">
-              Đã xóa ({bulkResult.success}) nhóm nguyên vật liệu thành công!
-            </h3>
-            {bulkResult.failed > 0 && (
-              <p className="text-xs text-red-500 mb-4">
-                Có {bulkResult.failed} nhóm nguyên vật liệu xóa thất bại. Vui lòng thử lại.
-              </p>
-            )}
-            <button
-              onClick={() =>
-                setBulkResult({ open: false, success: 0, failed: 0 })
-              }
-              className="h-10 min-w-24 px-6 rounded-lg bg-[#F58232] hover:bg-[#E6772B] text-white text-[14px] font-bold transition-colors"
-            >
-              Xong
-            </button>
-          </div>
-        </div>
-      )}
+      {/* ── Success notification ───────────────────────────────────── */}
+      {successMsg && <SuccessModal message={successMsg} onClose={() => setSuccessMsg(null)} />}
     </div>
   );
 }
