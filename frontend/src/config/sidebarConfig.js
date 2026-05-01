@@ -11,7 +11,8 @@ import {
 // ─── Permission helpers ───────────────────────────────────────────────────────
 
 export function checkPermission(itemRoles, userRole) {
-  if (userRole === "Admin") return true;
+  // Không phân biệt chữ hoa thường cho Admin
+  if (userRole && userRole.toLowerCase() === "admin") return true;
   if (!itemRoles || itemRoles.length === 0) return true;
   if (!userRole) return true;
   return itemRoles.includes(userRole);
@@ -70,7 +71,7 @@ const SIDEBAR_CONFIG = [
                 id: "nhom-nvl",
                 label: "Nhóm nguyên vật liệu",
                 roles: null,
-                view: "coming-soon",
+                view: "material-groups",
               },
               {
                 id: "nguyen-lieu-item",
@@ -84,7 +85,7 @@ const SIDEBAR_CONFIG = [
             id: "nha-cung-cap",
             label: "Nhà cung cấp",
             roles: ["Nhân viên thu mua"],
-            view: "coming-soon",
+            view: "suppliers",
           },
           {
             id: "kho-nvl",
@@ -139,7 +140,7 @@ const SIDEBAR_CONFIG = [
                 id: "thong-tin-btp",
                 label: "Thông tin bán thành phẩm",
                 roles: ["Trợ lý sản xuất"],
-                view: "coming-soon",
+                view: "semi-finished-products",
               },
               {
                 id: "thong-tin-san-pham",
@@ -150,7 +151,7 @@ const SIDEBAR_CONFIG = [
                     id: "nhom-san-pham",
                     label: "Nhóm sản phẩm",
                     roles: ["Trợ lý sản xuất"],
-                    view: "coming-soon",
+                    view: "product-groups",
                   },
                   {
                     id: "san-pham",
@@ -171,13 +172,13 @@ const SIDEBAR_CONFIG = [
                 id: "yc-dat-hang-sx",
                 label: "Thông tin YC đặt hàng",
                 roles: ["Trợ lý sản xuất"],
-                view: "coming-soon",
+                view: "production-requests",
               },
               {
                 id: "ke-hoach-sx",
                 label: "Kế hoạch sản xuất",
                 roles: ["Trợ lý sản xuất"],
-                view: "coming-soon",
+                view: "production-plans",
               },
               {
                 id: "lenh-sx",
@@ -474,7 +475,7 @@ const SIDEBAR_CONFIG = [
         id: "thiet-lap-vchuyen",
         label: "Đối tác vận chuyển",
         roles: null,
-        view: "shipping-units",  // ← ĐÃ ĐỔI
+        view: "shipping-units", // ← ĐÃ ĐỔI
       },
     ],
   },

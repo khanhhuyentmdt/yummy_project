@@ -7,12 +7,24 @@ from .auth import PhoneLoginSerializer
 from .san_xuat import (
     # Nguyên vật liệu
     MaterialSerializer, MaterialWriteSerializer,
+    MaterialGroupSerializer, MaterialGroupWriteSerializer,
     SupplierSerializer,
     PurchaseOrderSerializer, PurchaseOrderWriteSerializer,
     # Bếp trung tâm
     ProductSerializer, ProductCreateSerializer,
+    ProductGroupSerializer, ProductGroupCreateSerializer,
     RawMaterialSerializer,
     ProductBOMReadSerializer, ProductBOMWriteSerializer,
+    SemiFinishedProductSerializer, SemiFinishedProductWriteSerializer,
+    SemiFinishedProductBOMReadSerializer, SemiFinishedProductBOMWriteSerializer,
+    OrderRequestSerializer, OrderRequestWriteSerializer,
+    OrderRequestItemReadSerializer, OrderRequestItemWriteSerializer,
+    ProductionPlanSerializer, ProductionPlanWriteSerializer,
+    ProductionPlanItemReadSerializer, ProductionPlanItemWriteSerializer,
+    ProductionOrderSerializer, ProductionOrderWriteSerializer,
+    ProductionOrderItemReadSerializer, ProductionOrderItemWriteSerializer,
+    ProductionAcceptanceSerializer, ProductionAcceptanceWriteSerializer,
+    ProductionAcceptanceItemReadSerializer, ProductionAcceptanceItemWriteSerializer,
 )
 
 # Bán hàng
@@ -44,6 +56,8 @@ __all__ = [
     # Sản xuất - Nguyên vật liệu
     'MaterialSerializer',
     'MaterialWriteSerializer',
+    'MaterialGroupSerializer',
+    'MaterialGroupWriteSerializer',
     'SupplierSerializer',
     'PurchaseOrderSerializer',
     'PurchaseOrderWriteSerializer',
@@ -51,9 +65,31 @@ __all__ = [
     # Sản xuất - Bếp trung tâm
     'ProductSerializer',
     'ProductCreateSerializer',
+    'ProductGroupSerializer',
+    'ProductGroupCreateSerializer',
     'RawMaterialSerializer',
     'ProductBOMReadSerializer',
     'ProductBOMWriteSerializer',
+    'SemiFinishedProductSerializer',
+    'SemiFinishedProductWriteSerializer',
+    'SemiFinishedProductBOMReadSerializer',
+    'SemiFinishedProductBOMWriteSerializer',
+    'OrderRequestSerializer',
+    'OrderRequestWriteSerializer',
+    'OrderRequestItemReadSerializer',
+    'OrderRequestItemWriteSerializer',
+    'ProductionPlanSerializer',
+    'ProductionPlanWriteSerializer',
+    'ProductionPlanItemReadSerializer',
+    'ProductionPlanItemWriteSerializer',
+    'ProductionOrderSerializer',
+    'ProductionOrderWriteSerializer',
+    'ProductionOrderItemReadSerializer',
+    'ProductionOrderItemWriteSerializer',
+    'ProductionAcceptanceSerializer',
+    'ProductionAcceptanceWriteSerializer',
+    'ProductionAcceptanceItemReadSerializer',
+    'ProductionAcceptanceItemWriteSerializer',
 
     # Bán hàng
     'CustomerSerializer',

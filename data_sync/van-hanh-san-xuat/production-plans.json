@@ -1,0 +1,32 @@
+﻿{
+  "production_plans": [
+    {
+      "code": "KHSX001",
+      "name": "Ke hoach san xuat ngay 02-05",
+      "order_request_id": 1,
+      "order_request_code": "YCDH001",
+      "start_date": "2026-05-02",
+      "end_date": "2026-05-02",
+      "notes": "San xuat trong ca sang",
+      "status": "pending",
+      "items": [
+        {
+          "semi_finished_product_id": 1,
+          "code": "BTP001",
+          "name": "Cot tra sua truyen thong",
+          "unit": "binh",
+          "quantity": 12,
+          "duration_minutes": 90
+        },
+        {
+          "semi_finished_product_id": 2,
+          "code": "BTP002",
+          "name": "Cot dao tra den",
+          "unit": "binh",
+          "quantity": 5,
+          "duration_minutes": 75
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Cấu trúc Components
+    # Cấu trúc Components
 
 Cấu trúc folder được tổ chức theo đúng menu sidebar của ứng dụng, giúp dễ dàng tìm kiếm và quản lý code.
 
@@ -110,6 +110,7 @@ components/
 ## 🔄 Cập nhật import paths
 
 Khi tạo component mới, hãy chú ý đường dẫn import:
+
 - API: `import api from '../../../api/axios'` (số lượng `../` tùy thuộc vào độ sâu folder)
 - Common components: `import SuccessModal from '../../common/SuccessModal'`
 - Assets: `import logo from '../../../assets/logo.jpg'`

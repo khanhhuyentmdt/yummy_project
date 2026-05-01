@@ -1,0 +1,39 @@
+﻿{
+  "exported_at": "2026-05-01T10:00:00+07:00",
+  "total": 3,
+  "products": [
+    {
+      "id": 101,
+      "code": "SP001",
+      "name": "Tra sua truyen thong",
+      "group": "Tra sua",
+      "group_code": "NSP001",
+      "unit": "ly",
+      "quantity": 0,
+      "price": 32000,
+      "status": "active"
+    },
+    {
+      "id": 102,
+      "code": "SP002",
+      "name": "Tra dao cam sa",
+      "group": "Tra trai cay",
+      "group_code": "NSP002",
+      "unit": "ly",
+      "quantity": 0,
+      "price": 34000,
+      "status": "active"
+    },
+    {
+      "id": 103,
+      "code": "SP003",
+      "name": "Ca phe muoi",
+      "group": "Ca phe",
+      "group_code": "NSP003",
+      "unit": "ly",
+      "quantity": 0,
+      "price": 39000,
+      "status": "inactive"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+﻿{
+  "product_groups": [
+    {
+      "id": 1,
+      "code": "NSP001",
+      "name": "Tra sua",
+      "description": "Nhom do uong nen sua",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "code": "NSP002",
+      "name": "Tra trai cay",
+      "description": "Nhom do uong nen tra va trai cay",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "code": "NSP003",
+      "name": "Ca phe",
+      "description": "Nhom do uong nen ca phe",
+      "status": "active"
+    }
+  ]
+}

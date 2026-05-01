@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Material
+from api.models import Material, MaterialGroup
 
 
 class MaterialSerializer(serializers.ModelSerializer):
@@ -32,14 +32,45 @@ class MaterialWriteSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def validate_group(self, value):
+        value = (value or '').strip()
+        if not value:
+            raise serializers.ValidationError('Nhóm nguyên vật liệu không được để trống.')
+        if not MaterialGroup.objects.filter(name__iexact=value).exists():
+            raise serializers.ValidationError('Nhóm nguyên vật liệu không tồn tại.')
+        return value
+
+    def validate_name(self, value):
+        value = (value or '').strip()
+        if not value:
+            raise serializers.ValidationError('Tên nguyên vật liệu không được để trống.')
+
+        instance_id = self.instance.id if self.instance else None
+        existing = Material.objects.filter(name__iexact=value)
+        if instance_id:
+            existing = existing.exclude(id=instance_id)
+
+        if existing.exists():
+            raise serializers.ValidationError(
+                f'Tên nguyên vật liệu "{value}" đã tồn tại. Vui lòng chọn tên khác.'
+            )
+        return value
+
+    def _generate_next_code(self):
+        materials = Material.objects.filter(code__regex=r'^NVL\d+$').order_by('-code')
+        if not materials.exists():
+            return 'NVL001'
+
+        highest_code = materials.first().code
+        try:
+            number = int(highest_code[3:])
+            return f'NVL{number + 1:03d}'
+        except (ValueError, IndexError):
+            return 'NVL001'
+
     def create(self, validated_data):
         if not validated_data.get('code'):
-            import time
-            suffix = int(time.time() * 1000) % 1000000
-            validated_data['code'] = f'NVL{suffix:06d}'
-            while Material.objects.filter(code=validated_data['code']).exists():
-                suffix = (suffix + 1) % 1000000
-                validated_data['code'] = f'NVL{suffix:06d}'
+            validated_data['code'] = self._generate_next_code()
         return Material.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

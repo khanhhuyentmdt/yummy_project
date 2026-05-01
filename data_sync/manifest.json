@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "generated_for": "san_xuat",
+  "files": [
+    {
+      "file": "san-pham/product-groups.json",
+      "key": "product_groups",
+      "purpose": "Danh muc nhom san pham"
+    },
+    {
+      "file": "nguyen-vat-lieu/material-groups.json",
+      "key": "material_groups",
+      "purpose": "Danh muc nhom nguyen vat lieu"
+    },
+    {
+      "file": "nguyen-vat-lieu/materials.json",
+      "key": "materials",
+      "purpose": "Danh muc nguyen vat lieu"
+    },
+    {
+      "file": "nha-cung-cap/suppliers.json",
+      "key": "suppliers",
+      "purpose": "Du lieu nha cung cap mau"
+    },
+    {
+      "file": "ban-thanh-pham/semi-finished-products.json",
+      "key": "semi_finished_products",
+      "purpose": "Danh muc ban thanh pham mau"
+    },
+    {
+      "file": "san-pham/products.sync.json",
+      "key": "products",
+      "purpose": "File mau cho luong dong bo san pham"
+    },
+    {
+      "file": "van-hanh-san-xuat/order-request-items.json",
+      "key": "items",
+      "purpose": "File mau import ban thanh pham vao yeu cau dat hang"
+    },
+    {
+      "file": "van-hanh-san-xuat/production-plan-items.json",
+      "key": "items",
+      "purpose": "File mau import ban thanh pham vao ke hoach san xuat"
+    },
+    {
+      "file": "van-hanh-san-xuat/order-requests.json",
+      "key": "order_requests",
+      "purpose": "Payload mau yeu cau dat hang"
+    },
+    {
+      "file": "van-hanh-san-xuat/production-plans.json",
+      "key": "production_plans",
+      "purpose": "Payload mau ke hoach san xuat"
+    }
+  ]
+}
