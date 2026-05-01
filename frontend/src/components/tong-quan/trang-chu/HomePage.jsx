@@ -40,8 +40,11 @@ import CreateEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vie
 import EditEmployeePage from "../../nhan-su/thiet-lap-nhan-vien/ho-so-nhan-vien/EditEmployeePage";
 import WorkShiftsPage from "../../nhan-su/quan-ly-cham-cong/ca-lam-viec/WorkShiftsPage";
 import EditShiftPage from "../../nhan-su/quan-ly-cham-cong/ca-lam-viec/EditShiftPage";
+import WorkSchedulePage from "../../nhan-su/quan-ly-cham-cong/lich-lam-viec/WorkSchedulePage";
+import AttendancePage from "../../nhan-su/quan-ly-cham-cong/cham-cong/AttendancePage";
 import BonusPage from "../../nhan-su/quan-ly-luong/thuong/BonusPage";
 import WelfarePage from "../../nhan-su/quan-ly-luong/phucloi/WelfarePage";
+import PayrollPage from "../../nhan-su/quan-ly-luong/bang-luong/PayrollPage";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -949,11 +952,20 @@ export default function HomePage({ user = {}, onLogout }) {
               onSaved={() => {}}
             />
           )}
+          {activeView === "lich-lam-viec" && (
+            <WorkSchedulePage />
+          )}
+          {activeView === "cham-cong" && (
+            <AttendancePage />
+          )}
           {activeView === "bonuses" && (
             <BonusPage />
           )}
           {activeView === "phuc-loi" && (
             <WelfarePage />
+          )}
+          {activeView === "bang-luong" && (
+            <PayrollPage />
           )}
           {![
             "dashboard",
@@ -970,8 +982,11 @@ export default function HomePage({ user = {}, onLogout }) {
             "edit-employee",
             "work-shifts",
             "edit-shift",
+            "lich-lam-viec",
+            "cham-cong",
             "bonuses",
             "phuc-loi",
+            "bang-luong",
           ].includes(activeView) && <ComingSoonView />}
         </main>
       </div>

@@ -70,7 +70,11 @@ from .nhan_su import (
     shift_detail,
     shift_bulk_delete,
     schedule_list,
+    schedule_detail,
+    schedule_bulk_delete,
     attendance_list,
+    attendance_detail,
+    attendance_bulk_delete,
     # Quản lý lương
     bonus_list,
     bonus_detail,
@@ -79,6 +83,8 @@ from .nhan_su import (
     benefit_detail,
     benefit_bulk_delete,
     payroll_list,
+    payroll_detail,
+    payroll_bulk_delete,
 )
 
 # Tài chính
@@ -148,7 +154,11 @@ __all__ = [
     'shift_detail',
     'shift_bulk_delete',
     'schedule_list',
+    'schedule_detail',
+    'schedule_bulk_delete',
     'attendance_list',
+    'attendance_detail',
+    'attendance_bulk_delete',
     # Nhân sự - Quản lý lương
     'bonus_list',
     'bonus_detail',
@@ -157,6 +167,8 @@ __all__ = [
     'benefit_detail',
     'benefit_bulk_delete',
     'payroll_list',
+    'payroll_detail',
+    'payroll_bulk_delete',
     # Tài chính
     'fund_source_list',
     'cash_book_list',

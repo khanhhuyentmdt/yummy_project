@@ -25,6 +25,8 @@ from .nhan_su import (
     SalaryTypeSerializer, BenefitsPolicySerializer,
     WorkShiftSerializer, WorkShiftWriteSerializer,
     WorkShiftBreakSerializer, WorkShiftHistorySerializer,
+    WorkScheduleSerializer, WorkScheduleWriteSerializer, WorkScheduleHistorySerializer,
+    AttendanceSerializer, AttendanceWriteSerializer, AttendanceHistorySerializer,
     BonusSerializer, BonusWriteSerializer, BonusHistorySerializer,
 )
 
@@ -75,6 +77,12 @@ __all__ = [
     'WorkShiftWriteSerializer',
     'WorkShiftBreakSerializer',
     'WorkShiftHistorySerializer',
+    'WorkScheduleSerializer',
+    'WorkScheduleWriteSerializer',
+    'WorkScheduleHistorySerializer',
+    'AttendanceSerializer',
+    'AttendanceWriteSerializer',
+    'AttendanceHistorySerializer',
     'BonusSerializer',
     'BonusWriteSerializer',
     'BonusHistorySerializer',

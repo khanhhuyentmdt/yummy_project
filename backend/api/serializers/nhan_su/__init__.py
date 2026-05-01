@@ -6,6 +6,8 @@ from .thiet_lap_nhan_vien import (
 from .quan_ly_cham_cong import (
     WorkShiftSerializer, WorkShiftWriteSerializer,
     WorkShiftBreakSerializer, WorkShiftHistorySerializer,
+    WorkScheduleSerializer, WorkScheduleWriteSerializer, WorkScheduleHistorySerializer,
+    AttendanceSerializer, AttendanceWriteSerializer, AttendanceHistorySerializer,
 )
 from .quan_ly_luong import BonusSerializer, BonusWriteSerializer, BonusHistorySerializer
 
@@ -22,6 +24,12 @@ __all__ = [
     'WorkShiftWriteSerializer',
     'WorkShiftBreakSerializer',
     'WorkShiftHistorySerializer',
+    'WorkScheduleSerializer',
+    'WorkScheduleWriteSerializer',
+    'WorkScheduleHistorySerializer',
+    'AttendanceSerializer',
+    'AttendanceWriteSerializer',
+    'AttendanceHistorySerializer',
     'BonusSerializer',
     'BonusWriteSerializer',
     'BonusHistorySerializer',

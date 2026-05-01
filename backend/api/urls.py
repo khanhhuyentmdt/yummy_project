@@ -44,7 +44,11 @@ from .views import (
     shift_detail,
     shift_bulk_delete,
     schedule_list,
+    schedule_detail,
+    schedule_bulk_delete,
     attendance_list,
+    attendance_detail,
+    attendance_bulk_delete,
     bonus_list,
     bonus_detail,
     bonus_bulk_delete,
@@ -52,6 +56,8 @@ from .views import (
     benefit_detail,
     benefit_bulk_delete,
     payroll_list,
+    payroll_detail,
+    payroll_bulk_delete,
     # Tài chính
     fund_source_list,
     cash_book_list,
@@ -125,8 +131,12 @@ urlpatterns = [
     path('shifts/',               shift_list,         name='shift-list'),
     path('shifts/bulk-delete/',   shift_bulk_delete,  name='shift-bulk-delete'),
     path('shifts/<int:pk>/',      shift_detail,       name='shift-detail'),
-    path('schedules/',            schedule_list,      name='schedule-list'),
-    path('attendances/',          attendance_list,    name='attendance-list'),
+    path('schedules/',                schedule_list,          name='schedule-list'),
+    path('schedules/bulk-delete/',    schedule_bulk_delete,   name='schedule-bulk-delete'),
+    path('schedules/<int:pk>/',       schedule_detail,        name='schedule-detail'),
+    path('attendances/',              attendance_list,        name='attendance-list'),
+    path('attendances/bulk-delete/',  attendance_bulk_delete, name='attendance-bulk-delete'),
+    path('attendances/<int:pk>/',     attendance_detail,      name='attendance-detail'),
 
     # ─── Nhân sự > Quản lý lương ──────────────────────────────────────────────
     path('bonuses/',               bonus_list,         name='bonus-list'),
@@ -135,7 +145,9 @@ urlpatterns = [
     path('benefits/',               benefit_list,        name='benefit-list'),
     path('benefits/bulk-delete/',   benefit_bulk_delete, name='benefit-bulk-delete'),
     path('benefits/<int:pk>/',      benefit_detail,      name='benefit-detail'),
-    path('payrolls/',              payroll_list,       name='payroll-list'),
+    path('payrolls/',               payroll_list,         name='payroll-list'),
+    path('payrolls/bulk-delete/',   payroll_bulk_delete,  name='payroll-bulk-delete'),
+    path('payrolls/<int:pk>/',      payroll_detail,       name='payroll-detail'),
 
     # ─── Tài chính ────────────────────────────────────────────────────────────
     path('fund-sources/', fund_source_list, name='fund-source-list'),

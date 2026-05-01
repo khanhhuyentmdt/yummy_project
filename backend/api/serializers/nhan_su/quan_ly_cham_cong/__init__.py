@@ -1,7 +1,12 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from api.models import WorkShift, WorkShiftBreak, WorkShiftHistory
+from api.models import (
+    WorkShift, WorkShiftBreak, WorkShiftHistory,
+    WorkSchedule, WorkScheduleHistory,
+    Attendance, AttendanceHistory,
+    Employee,
+)
 
 
 class WorkShiftBreakSerializer(serializers.ModelSerializer):
@@ -162,9 +167,313 @@ class WorkShiftWriteSerializer(serializers.Serializer):
         return instance
 
 
+# ─── WorkSchedule Serializers ────────────────────────────────────────────────
+
+class WorkScheduleHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = WorkScheduleHistory
+        fields = ['id', 'timestamp', 'actor_name', 'action', 'field_name', 'old_value', 'new_value']
+
+
+class WorkScheduleSerializer(serializers.ModelSerializer):
+    employee_name  = serializers.SerializerMethodField()
+    employee_code  = serializers.SerializerMethodField()
+    shift_name     = serializers.SerializerMethodField()
+    shift_code     = serializers.SerializerMethodField()
+    history        = WorkScheduleHistorySerializer(many=True, read_only=True)
+
+    def get_employee_name(self, obj):
+        return obj.employee.full_name if obj.employee_id else ''
+
+    def get_employee_code(self, obj):
+        return obj.employee.code if obj.employee_id else ''
+
+    def get_shift_name(self, obj):
+        return obj.work_shift.name if obj.work_shift_id else ''
+
+    def get_shift_code(self, obj):
+        return obj.work_shift.code if obj.work_shift_id else ''
+
+    class Meta:
+        model  = WorkSchedule
+        fields = [
+            'id', 'code', 'employee', 'employee_name', 'employee_code',
+            'work_shift', 'shift_name', 'shift_code',
+            'start_date', 'end_date', 'repeat_type', 'days_of_week',
+            'notes', 'status', 'created_by_name', 'created_at', 'updated_at',
+            'history',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class WorkScheduleWriteSerializer(serializers.Serializer):
+    code        = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+    employee    = serializers.IntegerField()
+    work_shift  = serializers.IntegerField(required=False, allow_null=True, default=None)
+    start_date  = serializers.DateField()
+    end_date    = serializers.DateField(required=False, allow_null=True, default=None)
+    repeat_type = serializers.ChoiceField(choices=['once', 'weekly', 'monthly'], default='once')
+    days_of_week = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+    notes       = serializers.CharField(required=False, allow_blank=True, default='')
+    status      = serializers.ChoiceField(choices=['active', 'inactive'], default='active')
+
+    def _auto_code(self):
+        latest = WorkSchedule.objects.filter(code__startswith='LLV').order_by('-code').first()
+        if not latest:
+            return 'LLV001'
+        try:
+            return f'LLV{int(latest.code[3:]) + 1:03d}'
+        except (ValueError, IndexError):
+            return 'LLV001'
+
+    def _track_changes(self, instance, old_data, new_data, actor_name):
+        labels = {
+            'employee':    'Nhân viên',
+            'work_shift':  'Ca làm việc',
+            'start_date':  'Ngày bắt đầu',
+            'end_date':    'Ngày kết thúc',
+            'repeat_type': 'Kiểu lặp',
+            'days_of_week':'Ngày trong tuần',
+            'status':      'Trạng thái',
+        }
+        for field, label in labels.items():
+            old_val = str(old_data.get(field, ''))
+            new_val = str(new_data.get(field, ''))
+            if old_val != new_val:
+                WorkScheduleHistory.objects.create(
+                    schedule=instance, actor_name=actor_name,
+                    action=f'Cập nhật {label}', field_name=field,
+                    old_value=old_val, new_value=new_val,
+                )
+
+    def create(self, validated_data):
+        code       = validated_data.pop('code', '').strip()
+        actor_name = validated_data.pop('actor_name', '')
+        emp_id     = validated_data.pop('employee')
+        shift_id   = validated_data.pop('work_shift', None)
+
+        employee   = Employee.objects.get(pk=emp_id)
+        work_shift = WorkShift.objects.get(pk=shift_id) if shift_id else None
+
+        schedule = WorkSchedule.objects.create(
+            code=code or self._auto_code(),
+            employee=employee,
+            work_shift=work_shift,
+            created_by_name=actor_name,
+            **validated_data,
+        )
+        WorkScheduleHistory.objects.create(
+            schedule=schedule, actor_name=actor_name,
+            action=f'Tạo mới lịch làm việc {schedule.code}',
+        )
+        return schedule
+
+    def update(self, instance, validated_data):
+        actor_name = validated_data.pop('actor_name', '')
+        validated_data.pop('code', None)
+        emp_id   = validated_data.pop('employee', None)
+        shift_id = validated_data.pop('work_shift', None)
+
+        old_data = {
+            'employee':    str(instance.employee_id),
+            'work_shift':  str(instance.work_shift_id),
+            'start_date':  str(instance.start_date),
+            'end_date':    str(instance.end_date),
+            'repeat_type': instance.repeat_type,
+            'days_of_week':instance.days_of_week,
+            'status':      instance.status,
+        }
+
+        if emp_id is not None:
+            instance.employee = Employee.objects.get(pk=emp_id)
+        if shift_id is not None:
+            instance.work_shift = WorkShift.objects.get(pk=shift_id)
+        elif 'work_shift' in self.initial_data and self.initial_data['work_shift'] in (None, '', 'null'):
+            instance.work_shift = None
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        new_data = {
+            'employee':    str(instance.employee_id),
+            'work_shift':  str(instance.work_shift_id),
+            'start_date':  str(instance.start_date),
+            'end_date':    str(instance.end_date),
+            'repeat_type': instance.repeat_type,
+            'days_of_week':instance.days_of_week,
+            'status':      instance.status,
+        }
+        self._track_changes(instance, old_data, new_data, actor_name)
+        return instance
+
+
+# ─── Attendance Serializers ───────────────────────────────────────────────────
+
+class AttendanceHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = AttendanceHistory
+        fields = ['id', 'timestamp', 'actor_name', 'action', 'field_name', 'old_value', 'new_value']
+
+
+class AttendanceSerializer(serializers.ModelSerializer):
+    employee_name = serializers.SerializerMethodField()
+    employee_code = serializers.SerializerMethodField()
+    shift_name    = serializers.SerializerMethodField()
+    shift_code    = serializers.SerializerMethodField()
+    history       = AttendanceHistorySerializer(many=True, read_only=True)
+
+    def get_employee_name(self, obj):
+        return obj.employee.full_name if obj.employee_id else ''
+
+    def get_employee_code(self, obj):
+        return obj.employee.code if obj.employee_id else ''
+
+    def get_shift_name(self, obj):
+        return obj.work_shift.name if obj.work_shift_id else ''
+
+    def get_shift_code(self, obj):
+        return obj.work_shift.code if obj.work_shift_id else ''
+
+    class Meta:
+        model  = Attendance
+        fields = [
+            'id', 'code', 'employee', 'employee_name', 'employee_code',
+            'work_shift', 'shift_name', 'shift_code',
+            'attendance_date', 'check_in_time', 'check_out_time',
+            'status', 'overtime_minutes', 'notes',
+            'created_by_name', 'created_at', 'updated_at',
+            'history',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AttendanceWriteSerializer(serializers.Serializer):
+    code             = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+    employee         = serializers.IntegerField()
+    work_shift       = serializers.IntegerField(required=False, allow_null=True, default=None)
+    attendance_date  = serializers.DateField()
+    check_in_time    = serializers.TimeField(required=False, allow_null=True, default=None)
+    check_out_time   = serializers.TimeField(required=False, allow_null=True, default=None)
+    status           = serializers.ChoiceField(
+        choices=['present', 'absent', 'late', 'early_leave', 'leave'], default='present',
+    )
+    overtime_minutes = serializers.IntegerField(required=False, default=0, min_value=0)
+    notes            = serializers.CharField(required=False, allow_blank=True, default='')
+
+    def validate(self, data):
+        emp_id = data.get('employee')
+        date   = data.get('attendance_date')
+        if emp_id and date:
+            qs = Attendance.objects.filter(employee_id=emp_id, attendance_date=date)
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError(
+                    {'attendance_date': 'Nhân viên này đã có bản ghi chấm công cho ngày đó.'}
+                )
+        return data
+
+    def _auto_code(self):
+        latest = Attendance.objects.filter(code__startswith='CC').order_by('-code').first()
+        if not latest:
+            return 'CC001'
+        try:
+            return f'CC{int(latest.code[2:]) + 1:03d}'
+        except (ValueError, IndexError):
+            return 'CC001'
+
+    def _track_changes(self, instance, old_data, new_data, actor_name):
+        labels = {
+            'employee':        'Nhân viên',
+            'work_shift':      'Ca làm việc',
+            'attendance_date': 'Ngày chấm công',
+            'check_in_time':   'Giờ vào',
+            'check_out_time':  'Giờ ra',
+            'status':          'Trạng thái',
+            'overtime_minutes':'Tăng ca (phút)',
+        }
+        for field, label in labels.items():
+            old_val = str(old_data.get(field, ''))
+            new_val = str(new_data.get(field, ''))
+            if old_val != new_val:
+                AttendanceHistory.objects.create(
+                    attendance=instance, actor_name=actor_name,
+                    action=f'Cập nhật {label}', field_name=field,
+                    old_value=old_val, new_value=new_val,
+                )
+
+    def create(self, validated_data):
+        code       = validated_data.pop('code', '').strip()
+        actor_name = validated_data.pop('actor_name', '')
+        emp_id     = validated_data.pop('employee')
+        shift_id   = validated_data.pop('work_shift', None)
+
+        employee   = Employee.objects.get(pk=emp_id)
+        work_shift = WorkShift.objects.get(pk=shift_id) if shift_id else None
+
+        attendance = Attendance.objects.create(
+            code=code or self._auto_code(),
+            employee=employee,
+            work_shift=work_shift,
+            created_by_name=actor_name,
+            **validated_data,
+        )
+        AttendanceHistory.objects.create(
+            attendance=attendance, actor_name=actor_name,
+            action=f'Tạo mới bản ghi chấm công {attendance.code}',
+        )
+        return attendance
+
+    def update(self, instance, validated_data):
+        actor_name = validated_data.pop('actor_name', '')
+        validated_data.pop('code', None)
+        emp_id   = validated_data.pop('employee', None)
+        shift_id = validated_data.pop('work_shift', None)
+
+        old_data = {
+            'employee':        str(instance.employee_id),
+            'work_shift':      str(instance.work_shift_id),
+            'attendance_date': str(instance.attendance_date),
+            'check_in_time':   str(instance.check_in_time),
+            'check_out_time':  str(instance.check_out_time),
+            'status':          instance.status,
+            'overtime_minutes':str(instance.overtime_minutes),
+        }
+
+        if emp_id is not None:
+            instance.employee = Employee.objects.get(pk=emp_id)
+        if shift_id is not None:
+            instance.work_shift = WorkShift.objects.get(pk=shift_id)
+        elif 'work_shift' in self.initial_data and self.initial_data['work_shift'] in (None, '', 'null'):
+            instance.work_shift = None
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        new_data = {
+            'employee':        str(instance.employee_id),
+            'work_shift':      str(instance.work_shift_id),
+            'attendance_date': str(instance.attendance_date),
+            'check_in_time':   str(instance.check_in_time),
+            'check_out_time':  str(instance.check_out_time),
+            'status':          instance.status,
+            'overtime_minutes':str(instance.overtime_minutes),
+        }
+        self._track_changes(instance, old_data, new_data, actor_name)
+        return instance
+
+
 __all__ = [
     'WorkShiftBreakSerializer',
     'WorkShiftHistorySerializer',
     'WorkShiftSerializer',
     'WorkShiftWriteSerializer',
+    'WorkScheduleHistorySerializer',
+    'WorkScheduleSerializer',
+    'WorkScheduleWriteSerializer',
+    'AttendanceHistorySerializer',
+    'AttendanceSerializer',
+    'AttendanceWriteSerializer',
 ]

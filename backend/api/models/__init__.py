@@ -20,8 +20,11 @@ from .nhan_su import (
     SalaryType, BenefitsPolicy,
     Province, District, Ward,
     WorkShift, WorkShiftBreak, WorkShiftHistory,
+    WorkSchedule, WorkScheduleHistory,
+    Attendance, AttendanceHistory,
     Bonus, BonusHistory,
     Benefit, BenefitHistory,
+    Payroll, PayrollEmployee, PayrollHistory,
 )
 
 # Tài chính
@@ -63,10 +66,17 @@ __all__ = [
     'WorkShift',
     'WorkShiftBreak',
     'WorkShiftHistory',
+    'WorkSchedule',
+    'WorkScheduleHistory',
+    'Attendance',
+    'AttendanceHistory',
     'Bonus',
     'BonusHistory',
     'Benefit',
     'BenefitHistory',
+    'Payroll',
+    'PayrollEmployee',
+    'PayrollHistory',
 
     # Cài đặt
     'Location',

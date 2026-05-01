@@ -18,7 +18,11 @@ from .quan_ly_cham_cong import (
     shift_detail,
     shift_bulk_delete,
     schedule_list,
+    schedule_detail,
+    schedule_bulk_delete,
     attendance_list,
+    attendance_detail,
+    attendance_bulk_delete,
 )
 from .quan_ly_luong import (
     bonus_list,
@@ -28,6 +32,8 @@ from .quan_ly_luong import (
     benefit_detail,
     benefit_bulk_delete,
     payroll_list,
+    payroll_detail,
+    payroll_bulk_delete,
 )
 
 __all__ = [
@@ -47,7 +53,11 @@ __all__ = [
     'shift_detail',
     'shift_bulk_delete',
     'schedule_list',
+    'schedule_detail',
+    'schedule_bulk_delete',
     'attendance_list',
+    'attendance_detail',
+    'attendance_bulk_delete',
     # Quản lý lương
     'bonus_list',
     'bonus_detail',
@@ -56,4 +66,6 @@ __all__ = [
     'benefit_detail',
     'benefit_bulk_delete',
     'payroll_list',
+    'payroll_detail',
+    'payroll_bulk_delete',
 ]

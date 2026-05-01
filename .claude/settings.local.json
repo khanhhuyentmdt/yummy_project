@@ -52,7 +52,12 @@
       "PowerShell(Get-ChildItem \"D:\\\\project_yummy\" -Recurse -File | Where-Object { $_.Extension -eq \".py\" -and $_.Name -match \"seed\" } | Select-Object -First 5 FullName)",
       "PowerShell(cmd /c \"dir D:\\\\project_yummy\\\\backend /s /b | findstr seed\")",
       "PowerShell(cmd /c \"dir D:\\\\project_yummy\\\\frontend\\\\src\\\\components\\\\common /b 2>nul || echo EMPTY\")",
-      "PowerShell(cd D:\\\\project_yummy\\\\backend; $env:PYTHONIOENCODING='utf-8'; D:\\\\project_yummy\\\\.venv\\\\python.exe manage.py shell -c \"from api.models import Benefit; from django.db.models import Count; dupes = list\\(Benefit.objects.values\\('name'\\).annotate\\(c=Count\\('id'\\)\\).filter\\(c__gt=1\\)\\); print\\('Dupes count:', len\\(dupes\\)\\); print\\('Total:', Benefit.objects.count\\(\\)\\)\" 2>&1)"
+      "PowerShell(cd D:\\\\project_yummy\\\\backend; $env:PYTHONIOENCODING='utf-8'; D:\\\\project_yummy\\\\.venv\\\\python.exe manage.py shell -c \"from api.models import Benefit; from django.db.models import Count; dupes = list\\(Benefit.objects.values\\('name'\\).annotate\\(c=Count\\('id'\\)\\).filter\\(c__gt=1\\)\\); print\\('Dupes count:', len\\(dupes\\)\\); print\\('Total:', Benefit.objects.count\\(\\)\\)\" 2>&1)",
+      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py makemigrations api --name add_schedule_attendance_models)",
+      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py migrate)",
+      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py check)",
+      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py seed_schedules)",
+      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py seed_attendances)"
     ]
   }
 }

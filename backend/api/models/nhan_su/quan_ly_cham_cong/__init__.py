@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from django.db import models
 
 
@@ -132,4 +131,110 @@ class WorkShiftHistory(models.Model):
         return f'{self.shift.code} — {self.action}'
 
 
-__all__ = ['WorkShift', 'WorkShiftBreak', 'WorkShiftHistory', 'time_to_minutes', 'minutes_to_hours_display', 'minutes_to_decimal_hours']
+class WorkSchedule(models.Model):
+    REPEAT_CHOICES = [
+        ('once',    'Mot lan'),
+        ('weekly',  'Hang tuan'),
+        ('monthly', 'Hang thang'),
+    ]
+    STATUS_CHOICES = [
+        ('active',   'Dang hoat dong'),
+        ('inactive', 'Ngung hoat dong'),
+    ]
+
+    code         = models.CharField(max_length=20, unique=True)
+    employee     = models.ForeignKey(
+        'Employee', on_delete=models.CASCADE, related_name='schedules',
+    )
+    work_shift   = models.ForeignKey(
+        'WorkShift', on_delete=models.SET_NULL, null=True, blank=True, related_name='schedules',
+    )
+    start_date   = models.DateField()
+    end_date     = models.DateField(null=True, blank=True)
+    repeat_type  = models.CharField(max_length=20, choices=REPEAT_CHOICES, default='once')
+    days_of_week = models.CharField(max_length=20, blank=True)  # e.g. "1,2,3,4,5"
+    notes        = models.TextField(blank=True)
+    status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    created_by_name = models.CharField(max_length=200, blank=True)
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return f'{self.code}'
+
+
+class WorkScheduleHistory(models.Model):
+    schedule   = models.ForeignKey(WorkSchedule, on_delete=models.CASCADE, related_name='history')
+    timestamp  = models.DateTimeField(auto_now_add=True)
+    actor_name = models.CharField(max_length=200, blank=True)
+    action     = models.CharField(max_length=300)
+    field_name = models.CharField(max_length=100, blank=True)
+    old_value  = models.TextField(blank=True)
+    new_value  = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'{self.schedule.code} — {self.action}'
+
+
+class Attendance(models.Model):
+    STATUS_CHOICES = [
+        ('present',     'Co mat'),
+        ('absent',      'Vang mat'),
+        ('late',        'Di tre'),
+        ('early_leave', 'Ve som'),
+        ('leave',       'Nghi phep'),
+    ]
+
+    code           = models.CharField(max_length=20, unique=True)
+    employee       = models.ForeignKey(
+        'Employee', on_delete=models.CASCADE, related_name='attendances',
+    )
+    work_shift     = models.ForeignKey(
+        'WorkShift', on_delete=models.SET_NULL, null=True, blank=True, related_name='attendances',
+    )
+    attendance_date = models.DateField()
+    check_in_time   = models.TimeField(null=True, blank=True)
+    check_out_time  = models.TimeField(null=True, blank=True)
+    status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='present')
+    overtime_minutes = models.IntegerField(default=0)
+    notes           = models.TextField(blank=True)
+    created_by_name = models.CharField(max_length=200, blank=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering        = ['-id']
+        unique_together = [('employee', 'attendance_date')]
+
+    def __str__(self):
+        return f'{self.code}'
+
+
+class AttendanceHistory(models.Model):
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE, related_name='history')
+    timestamp  = models.DateTimeField(auto_now_add=True)
+    actor_name = models.CharField(max_length=200, blank=True)
+    action     = models.CharField(max_length=300)
+    field_name = models.CharField(max_length=100, blank=True)
+    old_value  = models.TextField(blank=True)
+    new_value  = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'{self.attendance.code} — {self.action}'
+
+
+__all__ = [
+    'WorkShift', 'WorkShiftBreak', 'WorkShiftHistory',
+    'time_to_minutes', 'minutes_to_hours_display', 'minutes_to_decimal_hours',
+    'WorkSchedule', 'WorkScheduleHistory',
+    'Attendance', 'AttendanceHistory',
+]

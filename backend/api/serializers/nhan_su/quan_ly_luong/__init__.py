@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Bonus, BonusHistory, Employee, Benefit, BenefitHistory
+from api.models import Bonus, BonusHistory, Employee, Benefit, BenefitHistory, Payroll, PayrollEmployee, PayrollHistory
 
 
 # ─── Bonus History Serializer ────────────────────────────────────────────────
@@ -381,6 +381,239 @@ class BenefitWriteSerializer(serializers.Serializer):
         return instance
 
 
+# ─── Payroll History Serializer ──────────────────────────────────────────────
+
+class PayrollHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayrollHistory
+        fields = ['id', 'timestamp', 'actor_name', 'action', 'field_name', 'old_value', 'new_value']
+
+
+# ─── PayrollEmployee Read Serializer ─────────────────────────────────────────
+
+class PayrollEmployeeSerializer(serializers.ModelSerializer):
+    employee_id = serializers.IntegerField(source='employee.id', read_only=True)
+    employee_code = serializers.CharField(source='employee.code', read_only=True)
+    employee_name = serializers.CharField(source='employee.full_name', read_only=True)
+    employee_phone = serializers.CharField(source='employee.phone', read_only=True)
+    employee_role = serializers.CharField(source='employee.role', read_only=True)
+    employee_work_area = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
+
+    def get_employee_work_area(self, obj):
+        return obj.employee.work_area.name if obj.employee.work_area else ''
+
+    def get_avatar_url(self, obj):
+        request = self.context.get('request')
+        if obj.employee.avatar:
+            if request:
+                return request.build_absolute_uri(obj.employee.avatar.url)
+            return obj.employee.avatar.url
+        return ''
+
+    class Meta:
+        model = PayrollEmployee
+        fields = [
+            'id', 'employee_id', 'employee_code', 'employee_name',
+            'employee_phone', 'employee_role', 'employee_work_area', 'avatar_url',
+            'base_salary', 'work_days', 'bonus_amount', 'benefit_amount',
+            'net_salary', 'payment_status',
+        ]
+
+
+# ─── Payroll Read Serializer ──────────────────────────────────────────────────
+
+class PayrollSerializer(serializers.ModelSerializer):
+    employee_entries = PayrollEmployeeSerializer(many=True, read_only=True)
+    history = PayrollHistorySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Payroll
+        fields = [
+            'id', 'code', 'name', 'period', 'scope', 'notes', 'status',
+            'total_amount', 'paid_amount',
+            'employee_entries', 'history',
+            'created_by_name', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+# ─── Payroll Write Serializer ─────────────────────────────────────────────────
+
+class PayrollWriteSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=500)
+    period = serializers.CharField(max_length=7)
+    scope = serializers.ChoiceField(choices=['all', 'selected'], default='selected')
+    notes = serializers.CharField(required=False, allow_blank=True, default='')
+    status = serializers.ChoiceField(
+        choices=['draft', 'paying', 'paid', 'cancelled'], required=False, default='draft'
+    )
+    employee_ids = serializers.ListField(
+        child=serializers.IntegerField(), required=False, default=list, allow_empty=True,
+    )
+    employee_data = serializers.ListField(
+        child=serializers.DictField(), required=False, default=list, allow_empty=True,
+    )
+
+    def validate_name(self, value):
+        qs = Payroll.objects.filter(name__iexact=value.strip())
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('Ten bang luong nay da duoc su dung.')
+        return value.strip()
+
+    def _auto_code(self):
+        latest = Payroll.objects.filter(
+            code__startswith='MBL', code__regex=r'^MBL\d{3,}$'
+        ).order_by('-code').first()
+        if not latest:
+            return 'MBL001'
+        try:
+            last_num = int(latest.code[3:])
+            return f'MBL{last_num + 1:03d}'
+        except (ValueError, IndexError):
+            count = Payroll.objects.filter(code__startswith='MBL').count()
+            return f'MBL{count + 1:03d}'
+
+    def _get_employees(self, scope, employee_ids):
+        if scope == 'all':
+            return list(Employee.objects.filter(status='working').order_by('id'))
+        return list(Employee.objects.filter(id__in=employee_ids).order_by('id'))
+
+    def _build_emp_data_map(self, employee_data_list):
+        return {int(item.get('employee_id', 0)): item for item in employee_data_list if item.get('employee_id')}
+
+    def create(self, validated_data):
+        employee_ids = validated_data.pop('employee_ids', [])
+        employee_data_list = validated_data.pop('employee_data', [])
+        actor_name = validated_data.pop('created_by_name', '')
+
+        payroll = Payroll.objects.create(
+            code=self._auto_code(),
+            created_by_name=actor_name,
+            **validated_data,
+        )
+
+        employees = self._get_employees(payroll.scope, employee_ids)
+        emp_data_map = self._build_emp_data_map(employee_data_list)
+
+        total = 0
+        for emp in employees:
+            edata = emp_data_map.get(emp.id, {})
+            base_salary = int(edata.get('base_salary', emp.salary_amount or 0))
+            work_days = int(edata.get('work_days', 26))
+            bonus_amount = int(edata.get('bonus_amount', 0))
+            benefit_amount = int(edata.get('benefit_amount', emp.salary_allowance or 0))
+            net_salary = base_salary + bonus_amount + benefit_amount
+
+            PayrollEmployee.objects.create(
+                payroll=payroll,
+                employee=emp,
+                base_salary=base_salary,
+                work_days=work_days,
+                bonus_amount=bonus_amount,
+                benefit_amount=benefit_amount,
+                net_salary=net_salary,
+                payment_status='unpaid',
+            )
+            total += net_salary
+
+        payroll.total_amount = total
+        payroll.save()
+
+        PayrollHistory.objects.create(
+            payroll=payroll,
+            actor_name=actor_name,
+            action=f'Tao moi bang luong {payroll.code}',
+        )
+
+        return payroll
+
+    def update(self, instance, validated_data):
+        employee_ids = validated_data.pop('employee_ids', None)
+        employee_data_list = validated_data.pop('employee_data', [])
+        actor_name = validated_data.pop('created_by_name', '')
+
+        old_status = instance.status
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if employee_ids is not None:
+            scope = validated_data.get('scope', instance.scope)
+            if scope == 'all':
+                employees = self._get_employees('all', [])
+                new_emp_ids = {e.id for e in employees}
+            else:
+                employees = self._get_employees('selected', employee_ids)
+                new_emp_ids = {e.id for e in employees}
+
+            existing = {pe.employee_id: pe for pe in instance.employee_entries.all()}
+
+            # Remove employees no longer in the list
+            for emp_id, pe in existing.items():
+                if emp_id not in new_emp_ids:
+                    pe.delete()
+
+            # Add new employees
+            for emp in employees:
+                if emp.id not in existing:
+                    PayrollEmployee.objects.create(
+                        payroll=instance,
+                        employee=emp,
+                        base_salary=int(emp.salary_amount or 0),
+                        work_days=26,
+                        bonus_amount=0,
+                        benefit_amount=int(emp.salary_allowance or 0),
+                        net_salary=int(emp.salary_amount or 0) + int(emp.salary_allowance or 0),
+                        payment_status='unpaid',
+                    )
+
+        # Update individual employee data (payment_status, salary overrides)
+        if employee_data_list:
+            emp_data_map = self._build_emp_data_map(employee_data_list)
+            for pe in instance.employee_entries.all():
+                edata = emp_data_map.get(pe.employee_id, {})
+                if not edata:
+                    continue
+                if 'payment_status' in edata:
+                    pe.payment_status = edata['payment_status']
+                if 'base_salary' in edata:
+                    pe.base_salary = int(edata['base_salary'])
+                if 'bonus_amount' in edata:
+                    pe.bonus_amount = int(edata['bonus_amount'])
+                if 'benefit_amount' in edata:
+                    pe.benefit_amount = int(edata['benefit_amount'])
+                pe.net_salary = int(pe.base_salary) + int(pe.bonus_amount) + int(pe.benefit_amount)
+                pe.save()
+
+        # Recalculate totals
+        all_entries = list(instance.employee_entries.all())
+        instance.total_amount = sum(pe.net_salary for pe in all_entries)
+        instance.paid_amount = sum(pe.net_salary for pe in all_entries if pe.payment_status == 'paid')
+        instance.save()
+
+        # Audit trail
+        if old_status != instance.status:
+            PayrollHistory.objects.create(
+                payroll=instance,
+                actor_name=actor_name,
+                action=f'Cap nhat trang thai thanh {instance.get_status_display()}',
+                field_name='status',
+                old_value=old_status,
+                new_value=instance.status,
+            )
+        else:
+            PayrollHistory.objects.create(
+                payroll=instance,
+                actor_name=actor_name,
+                action='Cap nhat thong tin bang luong',
+            )
+
+        return instance
+
+
 __all__ = [
     'BonusSerializer',
     'BonusWriteSerializer',
@@ -388,4 +621,8 @@ __all__ = [
     'BenefitSerializer',
     'BenefitWriteSerializer',
     'BenefitHistorySerializer',
+    'PayrollSerializer',
+    'PayrollWriteSerializer',
+    'PayrollHistorySerializer',
+    'PayrollEmployeeSerializer',
 ]
