@@ -65,7 +65,7 @@ const SIDEBAR_CONFIG = [
           {
             id: "thong-tin-nvl-group",
             label: "Thông tin nguyên vật liệu",
-            roles: ["Nhân viên thu mua"],
+            roles: ["Nhân viên thu mua", "Admin"],
             children: [
               {
                 id: "nhom-nvl",
@@ -84,7 +84,7 @@ const SIDEBAR_CONFIG = [
           {
             id: "nha-cung-cap",
             label: "Nhà cung cấp",
-            roles: ["Nhân viên thu mua"],
+            roles: ["Nhân viên thu mua", "Admin"],
             view: "suppliers",
           },
           {
@@ -95,7 +95,7 @@ const SIDEBAR_CONFIG = [
               {
                 id: "phieu-dat-hang",
                 label: "Phiếu đặt hàng",
-                roles: ["Nhân viên kho", "Nhân viên thu mua"],
+                roles: ["Nhân viên kho", "Nhân viên thu mua", "Admin"],
                 view: "purchase-orders",
               },
               {
@@ -139,24 +139,24 @@ const SIDEBAR_CONFIG = [
               {
                 id: "thong-tin-btp",
                 label: "Thông tin bán thành phẩm",
-                roles: ["Trợ lý sản xuất"],
+                roles: ["Trợ lý sản xuất", "Admin"],
                 view: "semi-finished-products",
               },
               {
                 id: "thong-tin-san-pham",
                 label: "Thông tin sản phẩm",
-                roles: ["Trợ lý sản xuất"],
+                roles: ["Trợ lý sản xuất", "Admin"],
                 children: [
                   {
                     id: "nhom-san-pham",
                     label: "Nhóm sản phẩm",
-                    roles: ["Trợ lý sản xuất"],
+                    roles: ["Trợ lý sản xuất", "Admin"],
                     view: "product-groups",
                   },
                   {
                     id: "san-pham",
                     label: "Sản phẩm",
-                    roles: ["Trợ lý sản xuất"],
+                    roles: ["Trợ lý sản xuất", "Admin"],
                     view: "products",
                   },
                 ],
@@ -171,25 +171,25 @@ const SIDEBAR_CONFIG = [
               {
                 id: "yc-dat-hang-sx",
                 label: "Thông tin YC đặt hàng",
-                roles: ["Trợ lý sản xuất"],
+                roles: ["Trợ lý sản xuất", "Admin"],
                 view: "production-requests",
               },
               {
                 id: "ke-hoach-sx",
                 label: "Kế hoạch sản xuất",
-                roles: ["Trợ lý sản xuất"],
+                roles: ["Trợ lý sản xuất", "Admin"],
                 view: "production-plans",
               },
               {
                 id: "lenh-sx",
                 label: "Lệnh sản xuất",
-                roles: ["Trợ lý sản xuất"],
+                roles: ["Trợ lý sản xuất", "Admin"],
                 view: "coming-soon",
               },
               {
                 id: "nghiem-thu-sx",
                 label: "Phiếu nghiệm thu sản xuất",
-                roles: ["Bếp trưởng"],
+                roles: ["Bếp trưởng", "Admin"],
                 view: "coming-soon",
               },
             ],
