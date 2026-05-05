@@ -57,7 +57,13 @@
       "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py migrate)",
       "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py check)",
       "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py seed_schedules)",
-      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py seed_attendances)"
+      "Bash(\"D:/project_yummy/.venv/python.exe\" manage.py seed_attendances)",
+      "Bash(Get-ChildItem \"D:\\\\project_yummy\\\\backend\\\\api\\\\migrations\")",
+      "Bash(Sort-Object Name)",
+      "Bash(Select-Object -Last 5)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "PowerShell($env:Path = $env:Path; Set-Location \"D:\\\\project_yummy\\\\backend\"; & \"D:\\\\project_yummy\\\\.venv\\\\python.exe\" manage.py migrate 2>&1 | Select-Object -Last 15)",
+      "PowerShell(New-Item *)"
     ]
   }
 }

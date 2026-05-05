@@ -53,6 +53,12 @@ from .san_xuat import (
     semi_finished_issue,
     packaging_handover,
     packaging_record,
+    # Kho nguyên vật liệu
+    warehouse_receipt_list,
+    warehouse_receipt_detail,
+    warehouse_receipt_bulk_delete,
+    material_inventory_list,
+    material_inventory_detail,
 )
 
 # Bán hàng
@@ -158,6 +164,12 @@ __all__ = [
     'semi_finished_issue',
     'packaging_handover',
     'packaging_record',
+    # Sản xuất - Kho nguyên vật liệu
+    'warehouse_receipt_list',
+    'warehouse_receipt_detail',
+    'warehouse_receipt_bulk_delete',
+    'material_inventory_list',
+    'material_inventory_detail',
     # Bán hàng
     'customer_group_list',
     'customer_group_detail',

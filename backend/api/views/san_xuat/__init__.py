@@ -37,6 +37,13 @@ from .khu_vuc_btp import (
     packaging_handover,
     packaging_record,
 )
+from .kho import (
+    warehouse_receipt_list,
+    warehouse_receipt_detail,
+    warehouse_receipt_bulk_delete,
+    material_inventory_list,
+    material_inventory_detail,
+)
 
 __all__ = [
     'production_defaults_bootstrap',
@@ -72,4 +79,10 @@ __all__ = [
     'semi_finished_issue',
     'packaging_handover',
     'packaging_record',
+    # Kho nguyên vật liệu
+    'warehouse_receipt_list',
+    'warehouse_receipt_detail',
+    'warehouse_receipt_bulk_delete',
+    'material_inventory_list',
+    'material_inventory_detail',
 ]

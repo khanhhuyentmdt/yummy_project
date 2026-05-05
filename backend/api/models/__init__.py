@@ -8,6 +8,8 @@ from .bootstrap_state import BootstrapState
 from .san_xuat import (
     # Nguyên vật liệu
     Material, MaterialGroup, Supplier, PurchaseOrder, PurchaseOrderItem,
+    # Kho nguyên vật liệu
+    WarehouseReceipt, WarehouseReceiptItem, WarehouseReceiptHistory, MaterialInventory,
     # Bếp trung tâm
     Product, RawMaterial, ProductBOM, ProductGroup,
     SemiFinishedProduct, SemiFinishedProductBOM,
@@ -54,6 +56,12 @@ __all__ = [
     'Supplier',
     'PurchaseOrder',
     'PurchaseOrderItem',
+
+    # Sản xuất - Kho nguyên vật liệu
+    'WarehouseReceipt',
+    'WarehouseReceiptItem',
+    'WarehouseReceiptHistory',
+    'MaterialInventory',
 
     # Sản xuất - Bếp trung tâm
     'Product',

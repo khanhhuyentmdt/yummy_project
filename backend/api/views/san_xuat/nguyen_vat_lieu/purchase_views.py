@@ -1,6 +1,8 @@
 """
 Purchase views - Sản xuất > Nguyên vật liệu > Nhà cung cấp & Phiếu đặt hàng
 """
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -147,15 +149,23 @@ def purchase_order_list(request):
 def purchase_order_detail(request, pk):
     """GET/PUT/PATCH/DELETE /api/purchase-orders/{pk}/"""
     if not _has_purchase_access(request.user):
-        return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'detail': 'Không có quyền truy cập.'}, status=status.HTTP_403_FORBIDDEN)
 
     try:
         po = PurchaseOrder.objects.select_related('supplier').prefetch_related('items__material').get(pk=pk)
     except PurchaseOrder.DoesNotExist:
-        return Response({'detail': 'Khong tim thay phieu dat hang.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Không tìm thấy phiếu đặt hàng.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         return Response(PurchaseOrderSerializer(po).data)
+
+    # Kiểm tra quyền chỉnh sửa/xóa: chỉ cho phép với trạng thái 'draft'
+    if request.method in ('PUT', 'PATCH', 'DELETE'):
+        if po.status != PurchaseOrder.STATUS_DRAFT:
+            return Response(
+                {'detail': 'Chỉ có thể chỉnh sửa hoặc xóa phiếu đặt hàng ở trạng thái Nháp.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
     if request.method in ('PUT', 'PATCH'):
         partial = (request.method == 'PATCH')
@@ -167,3 +177,46 @@ def purchase_order_detail(request, pk):
 
     po.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def purchase_order_cancel(request, pk):
+    """POST /api/purchase-orders/{pk}/cancel/ - Hủy phiếu đặt hàng"""
+    if not _has_purchase_access(request.user):
+        return Response({'detail': 'Không có quyền truy cập.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        po = PurchaseOrder.objects.get(pk=pk)
+    except PurchaseOrder.DoesNotExist:
+        return Response({'detail': 'Không tìm thấy phiếu đặt hàng.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Kiểm tra điều kiện hủy
+    if po.status == PurchaseOrder.STATUS_DRAFT:
+        return Response(
+            {'detail': 'Phiếu ở trạng thái Nháp không cần hủy, có thể xóa trực tiếp.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if po.status == PurchaseOrder.STATUS_CANCELLED:
+        return Response(
+            {'detail': 'Phiếu đã được hủy trước đó.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Kiểm tra thời gian: chỉ cho phép hủy trong vòng 24 giờ
+    time_diff = timezone.now() - po.created_at
+    if time_diff > timedelta(hours=24):
+        return Response(
+            {'detail': 'Chỉ có thể hủy phiếu trong vòng 24 giờ kể từ lúc tạo.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # Thực hiện hủy
+    po.status = PurchaseOrder.STATUS_CANCELLED
+    po.save(update_fields=['status', 'updated_at'])
+
+    return Response(
+        PurchaseOrderSerializer(po).data,
+        status=status.HTTP_200_OK
+    )

@@ -102,7 +102,7 @@ const SIDEBAR_CONFIG = [
                 id: "nhap-kho-nvl",
                 label: "Phiếu nhập kho",
                 roles: ["Nhân viên kho"],
-                view: "coming-soon",
+                view: "warehouse-receipts",
               },
               {
                 id: "xuat-kho-nvl",
@@ -120,7 +120,7 @@ const SIDEBAR_CONFIG = [
                 id: "ton-kho-nvl",
                 label: "Tồn kho nguyên vật liệu",
                 roles: ["Nhân viên kho", "Nhân viên thu mua"],
-                view: "coming-soon",
+                view: "material-inventory",
               },
             ],
           },

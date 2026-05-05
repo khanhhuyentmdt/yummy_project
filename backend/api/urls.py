@@ -31,12 +31,19 @@ from .views import (
     supplier_detail,
     purchase_order_list,
     purchase_order_detail,
+    purchase_order_cancel,
     # Sản xuất - Khu vực BTP
     semi_finished_inventory,
     semi_finished_receipt,
     semi_finished_issue,
     packaging_handover,
     packaging_record,
+    # Sản xuất - Kho nguyên vật liệu
+    warehouse_receipt_list,
+    warehouse_receipt_detail,
+    warehouse_receipt_bulk_delete,
+    material_inventory_list,
+    material_inventory_detail,
     # Bán hàng
     customer_group_list,
     customer_group_detail,
@@ -124,6 +131,16 @@ urlpatterns = [
     path('suppliers/<int:pk>/', supplier_detail, name='supplier-detail'),
     path('purchase-orders/',          purchase_order_list,   name='purchase-order-list'),
     path('purchase-orders/<int:pk>/', purchase_order_detail, name='purchase-order-detail'),
+    path('purchase-orders/<int:pk>/cancel/', purchase_order_cancel, name='purchase-order-cancel'),
+
+    # ─── Sản xuất > Kho nguyên vật liệu > Phiếu nhập kho ─────────────────────
+    path('warehouse-receipts/',                  warehouse_receipt_list,        name='warehouse-receipt-list'),
+    path('warehouse-receipts/bulk-delete/',      warehouse_receipt_bulk_delete, name='warehouse-receipt-bulk-delete'),
+    path('warehouse-receipts/<int:pk>/',         warehouse_receipt_detail,      name='warehouse-receipt-detail'),
+
+    # ─── Sản xuất > Kho nguyên vật liệu > Tồn kho NVL ────────────────────────
+    path('material-inventory/',          material_inventory_list,   name='material-inventory-list'),
+    path('material-inventory/<int:pk>/', material_inventory_detail, name='material-inventory-detail'),
 
     # ─── Sản xuất > Khu vực BTP ───────────────────────────────────────────────
     path('semi-finished/inventory/', semi_finished_inventory, name='semi-finished-inventory'),

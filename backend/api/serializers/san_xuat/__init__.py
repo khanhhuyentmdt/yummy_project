@@ -7,6 +7,14 @@ from .nguyen_vat_lieu import (
     PurchaseOrderItemReadSerializer, PurchaseOrderItemWriteSerializer,
 )
 
+# ─── Kho nguyên vật liệu ──────────────────────────────────────────────────────
+from .kho import (
+    WarehouseReceiptSerializer, WarehouseReceiptWriteSerializer,
+    WarehouseReceiptItemReadSerializer, WarehouseReceiptItemWriteSerializer,
+    WarehouseReceiptHistorySerializer,
+    MaterialInventorySerializer,
+)
+
 # ─── Bếp trung tâm ────────────────────────────────────────────────────────────
 from .bep_trung_tam import (
     ProductSerializer, ProductCreateSerializer,
@@ -40,7 +48,15 @@ __all__ = [
     'PurchaseOrderWriteSerializer',
     'PurchaseOrderItemReadSerializer',
     'PurchaseOrderItemWriteSerializer',
-    
+
+    # Kho nguyên vật liệu
+    'WarehouseReceiptSerializer',
+    'WarehouseReceiptWriteSerializer',
+    'WarehouseReceiptItemReadSerializer',
+    'WarehouseReceiptItemWriteSerializer',
+    'WarehouseReceiptHistorySerializer',
+    'MaterialInventorySerializer',
+
     # Bếp trung tâm
     'ProductSerializer',
     'ProductCreateSerializer',

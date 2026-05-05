@@ -64,6 +64,8 @@ import ProductionRequestsPage from "../../san-xuat/bep-trung-tam/van-hanh-san-xu
 import ProductionRequestFormPage from "../../san-xuat/bep-trung-tam/van-hanh-san-xuat/yeu-cau-san-xuat/ProductionRequestFormPage";
 import SuccessModal from "../../common/SuccessModal";
 import DeleteConfirmModal from "../../common/DeleteConfirmModal";
+import WarehouseReceiptPage from "../../san-xuat/kho-nguyen-vat-lieu/phieu-nhap-kho/WarehouseReceiptPage";
+import MaterialInventoryPage from "../../san-xuat/kho-nguyen-vat-lieu/ton-kho/MaterialInventoryPage";
 
 // ─── Static fallback data ─────────────────────────────────────────────────────
 
@@ -1443,6 +1445,8 @@ export default function HomePage({ user = {}, onLogout }) {
               }}
             />
           )}
+          {activeView === "warehouse-receipts" && <WarehouseReceiptPage />}
+          {activeView === "material-inventory" && <MaterialInventoryPage />}
           {activeView === "locations" && <LocationsPage />}
           {activeView === "shipping-units" && <ShippingUnitsPage />}
           {activeView === "employees" && (
@@ -1527,6 +1531,8 @@ export default function HomePage({ user = {}, onLogout }) {
             "create-purchase-order",
             "edit-purchase-order",
             "purchase-order-detail",
+            "warehouse-receipts",
+            "material-inventory",
             "locations",
             "shipping-units",
             "employees",

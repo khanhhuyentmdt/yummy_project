@@ -11,6 +11,11 @@ from .san_xuat import (
     SupplierSerializer,
     PurchaseOrderSerializer, PurchaseOrderWriteSerializer,
     PurchaseOrderItemReadSerializer, PurchaseOrderItemWriteSerializer,
+    # Kho nguyên vật liệu
+    WarehouseReceiptSerializer, WarehouseReceiptWriteSerializer,
+    WarehouseReceiptItemReadSerializer, WarehouseReceiptItemWriteSerializer,
+    WarehouseReceiptHistorySerializer,
+    MaterialInventorySerializer,
     # Bếp trung tâm
     ProductSerializer, ProductCreateSerializer,
     ProductGroupSerializer, ProductGroupCreateSerializer,
@@ -69,6 +74,14 @@ __all__ = [
     'PurchaseOrderWriteSerializer',
     'PurchaseOrderItemReadSerializer',
     'PurchaseOrderItemWriteSerializer',
+
+    # Sản xuất - Kho nguyên vật liệu
+    'WarehouseReceiptSerializer',
+    'WarehouseReceiptWriteSerializer',
+    'WarehouseReceiptItemReadSerializer',
+    'WarehouseReceiptItemWriteSerializer',
+    'WarehouseReceiptHistorySerializer',
+    'MaterialInventorySerializer',
 
     # Sản xuất - Bếp trung tâm
     'ProductSerializer',
