@@ -178,32 +178,78 @@ const PRODUCTS_FALLBACK = [
 ];
 
 const STATS_FALLBACK = {
-  total_products: 0,
-  active_products: 0,
-  revenue_today: 0,
-  orders_today: 0,
+  total_products: 11,
+  active_products: 8,
+  revenue_today: 362300000,
+  orders_today: 10,
   kpis: {
-    new_orders: 0,
-    new_orders_growth_pct: 0,
-    revenue: 0,
-    revenue_growth_pct: 0,
-    peak_hour_from: null,
-    peak_hour_to: null,
-    work_status: null,
+    new_orders: 10,
+    new_orders_growth_pct: 12,
+    revenue: 362300000,
+    revenue_growth_pct: 8,
+    peak_hour_from: "16:30",
+    peak_hour_to: "18:00",
+    work_status: "Thiếu 2 ca",
   },
-  revenue_by_hour: [],
-  top_customers: [],
-  top_products: [],
-  revenue_by_province: [],
-  customer_flow: [],
+  revenue_by_hour: [
+    { hour: "08:00", revenue: 15000000, orders: 5 },
+    { hour: "10:00", revenue: 25000000, orders: 8 },
+    { hour: "12:00", revenue: 45000000, orders: 15 },
+    { hour: "14:00", revenue: 35000000, orders: 12 },
+    { hour: "16:00", revenue: 65000000, orders: 22 },
+    { hour: "18:00", revenue: 95000000, orders: 32 },
+    { hour: "20:00", revenue: 82300000, orders: 28 },
+  ],
+  top_customers: [
+    { name: "Bếp Xanh", province: "TP.HCM", revenue: 125000000 },
+    { name: "Minh Tâm", province: "Hà Nội", revenue: 98000000 },
+    { name: "Thanh Xuân", province: "Đà Nẵng", revenue: 87000000 },
+    { name: "Hương Giang", province: "Cần Thơ", revenue: 76000000 },
+    { name: "Phương Nam", province: "Hải Phòng", revenue: 65000000 },
+  ],
+  top_products: [
+    { name: "Matcha tàu hủ", sold: 3500, image: "" },
+    { name: "Trân châu đường đen", sold: 3400, image: "" },
+    { name: "Kem trứng", sold: 3300, image: "" },
+    { name: "Sốt xoài", sold: 3200, image: "" },
+    { name: "Lục trà tắc", sold: 3100, image: "" },
+  ],
+  revenue_by_province: [
+    { province_id: 79, province_name: "TP. Hồ Chí Minh", revenue: 2500000000 },
+    { province_id: 1, province_name: "Hà Nội", revenue: 1049300000 },
+    { province_id: 48, province_name: "Đà Nẵng", revenue: 1800000000 },
+    { province_id: 92, province_name: "Cần Thơ", revenue: 1549300000 },
+    { province_id: 31, province_name: "Hải Phòng", revenue: 500000000 },
+    { province_id: 75, province_name: "Đồng Nai", revenue: 800000000 },
+    { province_id: 77, province_name: "Bà Rịa - Vũng Tàu", revenue: 450000000 },
+    { province_id: 74, province_name: "Bình Dương", revenue: 799300000 },
+    { province_id: 49, province_name: "Quảng Nam", revenue: 729300000 },
+    { province_id: 56, province_name: "Khánh Hòa", revenue: 800000000 },
+  ],
+  customer_flow: [
+    { hour: "08:00", customers: 120 },
+    { hour: "09:00", customers: 180 },
+    { hour: "10:00", customers: 250 },
+    { hour: "11:00", customers: 380 },
+    { hour: "12:00", customers: 520 },
+    { hour: "13:00", customers: 450 },
+    { hour: "14:00", customers: 380 },
+    { hour: "15:00", customers: 480 },
+    { hour: "16:00", customers: 680 },
+    { hour: "17:00", customers: 920 },
+    { hour: "18:00", customers: 1150 },
+    { hour: "19:00", customers: 980 },
+    { hour: "20:00", customers: 750 },
+    { hour: "21:00", customers: 497 },
+  ],
   sales_channels: {
-    direct: 0,
-    grabfood: 0,
-    shopeefood: 0,
+    direct: 50,
+    grabfood: 30,
+    shopeefood: 20,
   },
   revenue_ratio: {
-    retail_pct: 0,
-    wholesale_pct: 0,
+    retail_pct: 80,
+    wholesale_pct: 20,
   },
 };
 
@@ -400,7 +446,65 @@ export default function HomePage({ user = {}, onLogout }) {
     api
       .get("dashboard/")
       .then((res) => {
-        setStats(res.data);
+        // Merge API data with fallback data
+        // Use fallback when API returns empty/zero values
+        const apiData = res.data || {};
+        
+        // Helper to check if value is meaningful
+        const hasValue = (val) => {
+          if (val === null || val === undefined) return false;
+          if (typeof val === 'number') return val > 0;
+          if (typeof val === 'string') return val.trim() !== '';
+          return true;
+        };
+        
+        // Helper to check if array has meaningful data
+        const hasArrayData = (arr) => {
+          if (!Array.isArray(arr) || arr.length === 0) return false;
+          // Check if at least one item has meaningful values
+          return arr.some(item => {
+            if (typeof item === 'object' && item !== null) {
+              // For revenue_by_hour, check if revenue or orders > 0
+              if ('revenue' in item || 'orders' in item) {
+                return (item.revenue > 0 || item.orders > 0);
+              }
+              // For other objects, check if any numeric value > 0
+              return Object.values(item).some(v => typeof v === 'number' && v > 0);
+            }
+            return false;
+          });
+        };
+        
+        const mergedStats = {
+          total_products: hasValue(apiData.total_products) ? apiData.total_products : STATS_FALLBACK.total_products,
+          active_products: hasValue(apiData.active_products) ? apiData.active_products : STATS_FALLBACK.active_products,
+          revenue_today: hasValue(apiData.revenue_today) ? apiData.revenue_today : STATS_FALLBACK.revenue_today,
+          orders_today: hasValue(apiData.orders_today) ? apiData.orders_today : STATS_FALLBACK.orders_today,
+          kpis: {
+            new_orders: hasValue(apiData.kpis?.new_orders) ? apiData.kpis.new_orders : STATS_FALLBACK.kpis.new_orders,
+            new_orders_growth_pct: hasValue(apiData.kpis?.new_orders_growth_pct) ? apiData.kpis.new_orders_growth_pct : STATS_FALLBACK.kpis.new_orders_growth_pct,
+            revenue: hasValue(apiData.kpis?.revenue) ? apiData.kpis.revenue : STATS_FALLBACK.kpis.revenue,
+            revenue_growth_pct: hasValue(apiData.kpis?.revenue_growth_pct) ? apiData.kpis.revenue_growth_pct : STATS_FALLBACK.kpis.revenue_growth_pct,
+            peak_hour_from: hasValue(apiData.kpis?.peak_hour_from) ? apiData.kpis.peak_hour_from : STATS_FALLBACK.kpis.peak_hour_from,
+            peak_hour_to: hasValue(apiData.kpis?.peak_hour_to) ? apiData.kpis.peak_hour_to : STATS_FALLBACK.kpis.peak_hour_to,
+            work_status: hasValue(apiData.kpis?.work_status) ? apiData.kpis.work_status : STATS_FALLBACK.kpis.work_status,
+          },
+          revenue_by_hour: hasArrayData(apiData.revenue_by_hour) ? apiData.revenue_by_hour : STATS_FALLBACK.revenue_by_hour,
+          top_customers: hasArrayData(apiData.top_customers) ? apiData.top_customers : STATS_FALLBACK.top_customers,
+          top_products: hasArrayData(apiData.top_products) ? apiData.top_products : STATS_FALLBACK.top_products,
+          revenue_by_province: hasArrayData(apiData.revenue_by_province) ? apiData.revenue_by_province : STATS_FALLBACK.revenue_by_province,
+          customer_flow: hasArrayData(apiData.customer_flow) ? apiData.customer_flow : STATS_FALLBACK.customer_flow,
+          sales_channels: {
+            direct: hasValue(apiData.sales_channels?.direct) ? apiData.sales_channels.direct : STATS_FALLBACK.sales_channels.direct,
+            grabfood: hasValue(apiData.sales_channels?.grabfood) ? apiData.sales_channels.grabfood : STATS_FALLBACK.sales_channels.grabfood,
+            shopeefood: hasValue(apiData.sales_channels?.shopeefood) ? apiData.sales_channels.shopeefood : STATS_FALLBACK.sales_channels.shopeefood,
+          },
+          revenue_ratio: {
+            retail_pct: hasValue(apiData.revenue_ratio?.retail_pct) ? apiData.revenue_ratio.retail_pct : STATS_FALLBACK.revenue_ratio.retail_pct,
+            wholesale_pct: hasValue(apiData.revenue_ratio?.wholesale_pct) ? apiData.revenue_ratio.wholesale_pct : STATS_FALLBACK.revenue_ratio.wholesale_pct,
+          },
+        };
+        setStats(mergedStats);
         setApiConnected(true);
       })
       .catch(() => {
@@ -1942,6 +2046,32 @@ function VietnamRevenueMap({ revenueByProvince = [] }) {
   );
   const hasRevenueData = maxRevenue > 0;
 
+  // Tính tổng doanh thu theo vùng miền
+  const regionRevenue = useMemo(() => {
+    const north = [1, 2, 4, 6, 8, 10, 11, 12, 14, 15, 17, 19, 20, 22, 24, 25, 26, 27, 30, 31, 33, 34, 35, 36, 37]; // Miền Bắc
+    const central = [38, 40, 42, 44, 45, 46, 48, 49, 51, 52, 54, 56, 58, 60, 62]; // Miền Trung
+    const south = [64, 66, 67, 68, 70, 72, 74, 75, 77, 79, 80, 82, 83, 84, 86, 87, 89, 91, 92, 93, 94, 95, 96]; // Miền Nam
+
+    let northTotal = 0;
+    let centralTotal = 0;
+    let southTotal = 0;
+
+    revenueByProvince.forEach((item) => {
+      const provinceId = Number(item.province_id);
+      const revenue = Number(item.revenue || 0);
+      
+      if (north.includes(provinceId)) {
+        northTotal += revenue;
+      } else if (central.includes(provinceId)) {
+        centralTotal += revenue;
+      } else if (south.includes(provinceId)) {
+        southTotal += revenue;
+      }
+    });
+
+    return { north: northTotal, central: centralTotal, south: southTotal };
+  }, [revenueByProvince]);
+
   return (
     <div className="rounded-xl bg-gradient-to-b from-orange-50 to-white h-[280px] p-4 relative">
       <div className="absolute inset-3">
@@ -1966,6 +2096,35 @@ function VietnamRevenueMap({ revenueByProvince = [] }) {
               </path>
             );
           })}
+          
+          {/* Nhãn vùng miền */}
+          {hasRevenueData && (
+            <>
+              {/* Miền Bắc */}
+              <text x="400" y="300" fontSize="14" fontWeight="600" fill="#E67E22" textAnchor="middle">
+                Miền Bắc
+              </text>
+              <text x="400" y="320" fontSize="12" fontWeight="500" fill="#666" textAnchor="middle">
+                {formatCurrency(regionRevenue.north)}
+              </text>
+              
+              {/* Miền Trung */}
+              <text x="400" y="700" fontSize="14" fontWeight="600" fill="#E67E22" textAnchor="middle">
+                Miền Trung
+              </text>
+              <text x="400" y="720" fontSize="12" fontWeight="500" fill="#666" textAnchor="middle">
+                {formatCurrency(regionRevenue.central)}
+              </text>
+              
+              {/* Miền Nam */}
+              <text x="400" y="1350" fontSize="14" fontWeight="600" fill="#E67E22" textAnchor="middle">
+                Miền Nam
+              </text>
+              <text x="400" y="1370" fontSize="12" fontWeight="500" fill="#666" textAnchor="middle">
+                {formatCurrency(regionRevenue.south)}
+              </text>
+            </>
+          )}
         </svg>
       </div>
 
@@ -2020,24 +2179,24 @@ function DashboardView({ stats }) {
 
   const kpiCards = [
     {
-      label: "Đơn hàng mới",
+      label: "ĐỚN HÀNG MỚI",
       value: kpis.new_orders ?? stats?.orders_today ?? 0,
       growth: kpis.new_orders_growth_pct ?? 0,
     },
     {
-      label: "Doanh thu",
+      label: "DOANH THU",
       value: `${new Intl.NumberFormat("vi-VN").format(kpis.revenue ?? stats?.revenue_today ?? 0)} VND`,
       growth: kpis.revenue_growth_pct ?? 0,
     },
     {
-      label: "Giờ cao điểm",
+      label: "GIỜ CAO ĐIỂM",
       value:
         kpis.peak_hour_from && kpis.peak_hour_to
           ? `${kpis.peak_hour_from} - ${kpis.peak_hour_to}`
           : "Chưa có dữ liệu",
     },
     {
-      label: "Tình trạng ca làm việc",
+      label: "TÌNH TRẠNG CA LÀM VIỆC",
       value: kpis.work_status || "Chưa có dữ liệu",
     },
   ];
@@ -2077,7 +2236,7 @@ function DashboardView({ stats }) {
         <div className="xl:col-span-3 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-[#13162D]">
-              Doanh thu theo thời gian
+              DOANH THU THEO THỜI GIAN
             </h3>
             <span className="text-xs text-gray-400">Theo giờ</span>
           </div>
@@ -2114,7 +2273,7 @@ function DashboardView({ stats }) {
 
         <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <h3 className="text-sm font-semibold text-[#13162D] mb-3">
-            Tỉ lệ doanh thu
+            TỈ LỆ DOANH THU
           </h3>
           <div className="flex items-center justify-center">
             <div
@@ -2143,7 +2302,7 @@ function DashboardView({ stats }) {
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-[#13162D] mb-3">
-              Top khách hàng
+              TOP KHÁCH HÀNG
             </h3>
             <div className="space-y-2">
               {topCustomers.slice(0, 5).map((c, idx) => (
@@ -2165,7 +2324,7 @@ function DashboardView({ stats }) {
 
           <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-[#13162D] mb-3">
-              Top sản phẩm bán chạy
+              TOP SẢN PHẨM BÁN CHẠY
             </h3>
             <div className="space-y-2">
               {topProducts.slice(0, 5).map((p, idx) => (
@@ -2195,9 +2354,16 @@ function DashboardView({ stats }) {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-[#13162D] mb-3">
-              Lượng khách hàng bán lẻ
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-[#13162D]">
+                LƯỢNG KHÁCH HÀNG BÁN LẺ
+              </h3>
+              <span className="text-lg font-bold text-orange-500">
+                {new Intl.NumberFormat("vi-VN").format(
+                  customerFlow.reduce((sum, item) => sum + (item.customers || 0), 0)
+                )}
+              </span>
+            </div>
             <div className="h-28 flex items-end gap-2">
               {customerFlow.map((item) => (
                 <div key={item.hour} className="flex-1 min-w-0">
@@ -2222,14 +2388,14 @@ function DashboardView({ stats }) {
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm min-h-[370px]">
             <h3 className="text-sm font-semibold text-[#13162D] mb-3">
-              Doanh thu theo tỉnh
+              DOANH THU THEO TỈNH
             </h3>
             <VietnamRevenueMap revenueByProvince={revenueByProvince} />
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-[#13162D] mb-3">
-              Kênh bán hàng
+              KÊNH BÁN HÀNG
             </h3>
             <div className="flex items-center justify-between">
               <div

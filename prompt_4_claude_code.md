@@ -1156,3 +1156,46 @@ UX Flow: Thêm thành công -> SuccessModal -> Bấm OK mở ngay trang Chỉnh 
 Audit Trail: Trang Chỉnh sửa (trang riêng) phải có trường 'Trạng thái' và khối 'Lịch sử' lưu vết ở cuối trang.
 
 Hãy thực hiện đồng bộ Backend và Frontend. Đảm bảo giao diện giống hệt ảnh mẫu về khoảng cách, màu sắc và font Nunito Sans.
+
+# Cập nhật thông tin dashboard
+Claude, hãy thực hiện cập nhật Dữ liệu mẫu (Mock Data) cho trang Dashboard (Tổng quan) của ứng dụng erp_yummy dựa trên thông tin trong các hình ảnh screenshot/dashboard-1 of 3.png, screenshot/dashboard-2 of 3.png, screenshot/dashboard-3 of 3.png.
+
+1. Vị trí tệp tin:
+
+Hãy tìm tệp tin Dashboard chính (thường nằm ở frontend/src/components/tong-quan/ hoặc trang chủ của dự án).
+
+2. Dữ liệu KPI & Trạng thái (screenshot/dashboard-1 of 3.png):
+
+Đơn hàng mới: 10 (+12%).
+
+Doanh thu: 362.300.000 VND (+8%).
+
+Giờ cao điểm: 16:30 - 18:00.
+
+Tình trạng ca làm việc: Thiếu 2 ca.
+
+3. Dữ liệu Biểu đồ (Sử dụng dữ liệu tĩnh để Demo):
+
+Doanh thu theo thời gian (screenshot/dashboard-1 of 3.png): Cập nhật các cột dữ liệu theo các mốc 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00. Đảm bảo tỷ lệ cột khớp với hình ảnh.
+
+Tỉ lệ doanh thu: Bán lẻ (80%), Bán sỉ (20%).
+
+Lượng khách lẻ (screenshot/dashboard-1 of 3.png): 7.205 lượt khách. Vẽ biểu đồ đường có xu hướng tăng mạnh vào buổi chiều.
+
+Kênh bán hàng: Trực tiếp (50%), Grabfood (30%), Shopeefood (20%).
+
+4. Danh sách Top & Bản đồ (screenshot/dashboard-2 of 3.png):
+
+Top khách hàng: Hiển thị 5 khách hàng hàng đầu (Bếp Xanh, Minh Tâm, Thanh Xuân, v.v.) kèm số tiền tương ứng.
+
+Top sản phẩm bán chạy: 1. Matcha tàu hũ (3500), 2. Trân châu đường đen (3400), 3. Kem trứng (3300), 4. Sốt xoài (3200), 5. Lục trà tắc (3100).
+
+Doanh thu theo tỉnh: Hiển thị nhãn trên bản đồ Việt Nam: Miền Nam (6.049.300.000đ), Miền Trung (3.329.300.000đ), Miền Bắc (1.049.300.000đ).
+
+5. Quy chuẩn UI:
+
+Giữ nguyên font Nunito Sans và màu cam chủ đạo #E67E22.
+
+Đảm bảo các tiêu đề trong Dashboard được viết IN HOA theo quy chuẩn hệ thống.
+
+Hãy thay thế các dữ liệu trống hiện tại bằng các hằng số này để trang Dashboard sẵn sàng cho việc quay demo ngay lập tức.
