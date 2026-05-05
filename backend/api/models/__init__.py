@@ -7,7 +7,7 @@ from .bootstrap_state import BootstrapState
 # Sản xuất
 from .san_xuat import (
     # Nguyên vật liệu
-    Material, MaterialGroup, Supplier, PurchaseOrder,
+    Material, MaterialGroup, Supplier, PurchaseOrder, PurchaseOrderItem,
     # Bếp trung tâm
     Product, RawMaterial, ProductBOM, ProductGroup,
     SemiFinishedProduct, SemiFinishedProductBOM,
@@ -47,6 +47,7 @@ __all__ = [
     'MaterialGroup',
     'Supplier',
     'PurchaseOrder',
+    'PurchaseOrderItem',
 
     # Sản xuất - Bếp trung tâm
     'Product',

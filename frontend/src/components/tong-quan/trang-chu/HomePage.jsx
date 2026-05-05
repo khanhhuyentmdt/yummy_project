@@ -36,6 +36,9 @@ import MaterialGroupFormView from "../../san-xuat/nguyen-vat-lieu/thong-tin-nguy
 import SuppliersPage from "../../san-xuat/nguyen-vat-lieu/nha-cung-cap/SuppliersPage";
 import SupplierFormPage from "../../san-xuat/nguyen-vat-lieu/nha-cung-cap/SupplierFormPage";
 import PurchaseOrdersPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-lieu/phieu-dat-hang/PurchaseOrdersPage";
+import CreatePurchaseOrderPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-lieu/phieu-dat-hang/CreatePurchaseOrderPage";
+import EditPurchaseOrderPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-lieu/phieu-dat-hang/EditPurchaseOrderPage";
+import PurchaseOrderDetailPage from "../../san-xuat/nguyen-vat-lieu/kho-nguyen-vat-lieu/phieu-dat-hang/PurchaseOrderDetailPage";
 import LocationsPage from "../../cai-dat/thiet-lap-dia-diem/LocationsPage";
 import Sidebar from "../../common/Sidebar";
 import ShippingUnitsPage from "../../cai-dat/thiet-lap-don-vi-van-chuyen/ShippingUnitsPage";
@@ -361,6 +364,8 @@ export default function HomePage({ user = {}, onLogout }) {
   const [editProductionPlanId, setEditProductionPlanId] = useState(null);
   const [editProductionRequestId, setEditProductionRequestId] = useState(null);
   const [editSupplierId, setEditSupplierId] = useState(null);
+  const [editPurchaseOrderId, setEditPurchaseOrderId] = useState(null);
+  const [detailPurchaseOrderId, setDetailPurchaseOrderId] = useState(null);
   const [editMaterialId, setEditMaterialId] = useState(null);
   const [editProductGroupId, setEditProductGroupId] = useState(null);
   const [materialGroups, setMaterialGroups] = useState([]);
@@ -1281,7 +1286,48 @@ export default function HomePage({ user = {}, onLogout }) {
             />
           )}
           {activeView === "purchase-orders" && (
-            <PurchaseOrdersPage onCreateClick={() => {}} />
+            <PurchaseOrdersPage
+              onCreateClick={() => {
+                setActiveView("create-purchase-order");
+                setActiveMenuId("phieu-dat-hang");
+              }}
+              onViewClick={(purchaseOrderId) => {
+                setDetailPurchaseOrderId(purchaseOrderId);
+                setActiveView("purchase-order-detail");
+                setActiveMenuId("phieu-dat-hang");
+              }}
+              onEditClick={(purchaseOrderId) => {
+                setEditPurchaseOrderId(purchaseOrderId);
+                setActiveView("edit-purchase-order");
+                setActiveMenuId("phieu-dat-hang");
+              }}
+            />
+          )}
+          {activeView === "create-purchase-order" && (
+            <CreatePurchaseOrderPage
+              onCancel={() => setActiveView("purchase-orders")}
+              onSaved={() => {
+                setActiveView("purchase-orders");
+              }}
+            />
+          )}
+          {activeView === "edit-purchase-order" && editPurchaseOrderId && (
+            <EditPurchaseOrderPage
+              purchaseOrderId={editPurchaseOrderId}
+              onCancel={() => setActiveView("purchase-orders")}
+              onSaved={() => {
+                setActiveView("purchase-orders");
+              }}
+            />
+          )}
+          {activeView === "purchase-order-detail" && detailPurchaseOrderId && (
+            <PurchaseOrderDetailPage
+              purchaseOrderId={detailPurchaseOrderId}
+              onBack={() => setActiveView("purchase-orders")}
+              onCancelled={() => {
+                setActiveView("purchase-orders");
+              }}
+            />
           )}
           {activeView === "locations" && <LocationsPage />}
           {activeView === "shipping-units" && <ShippingUnitsPage />}
@@ -1337,6 +1383,9 @@ export default function HomePage({ user = {}, onLogout }) {
             "create-material-group",
             "edit-material-group",
             "purchase-orders",
+            "create-purchase-order",
+            "edit-purchase-order",
+            "purchase-order-detail",
             "locations",
             "shipping-units",
             "employees",
@@ -2002,7 +2051,7 @@ export default function HomePage({ user = {}, onLogout }) {
 
 // ─── Dashboard view ───────────────────────────────────────────────────────────
 
-function VietnamRevenueMap({ revenueByProvince = [] }) {
+function VietnamRevenueMap({ revenueByProvince = [], topProvinces = [] }) {
   const { viewBox, paths } = useMemo(() => parseVietnamSvg(vnSvgRaw), []);
   const provinceRevenueMap = useMemo(() => {
     const map = new Map();
@@ -2025,49 +2074,144 @@ function VietnamRevenueMap({ revenueByProvince = [] }) {
     [revenueByProvince],
   );
   const hasRevenueData = maxRevenue > 0;
+  const activeProvinceCount = useMemo(
+    () => revenueByProvince.filter((item) => Number(item.revenue || 0) > 0).length,
+    [revenueByProvince],
+  );
+  const displayTopProvinces = useMemo(() => {
+    if (topProvinces.length > 0) return topProvinces.slice(0, 5);
+    return [...revenueByProvince]
+      .filter((item) => Number(item.revenue || 0) > 0)
+      .sort((a, b) => Number(b.revenue || 0) - Number(a.revenue || 0))
+      .slice(0, 5);
+  }, [revenueByProvince, topProvinces]);
 
   return (
-    <div className="rounded-xl bg-gradient-to-b from-orange-50 to-white h-[280px] p-4 relative">
-      <div className="absolute inset-3">
-        <svg viewBox={viewBox} className="h-full w-full" role="img">
-          {paths.map((province) => {
-            const provinceData = provinceRevenueMap.get(province.id);
-            const revenue = provinceData?.revenue || 0;
-            const provinceName =
-              provinceData?.province_name || `Tỉnh #${province.id}`;
-            return (
-              <path
-                key={province.id}
-                d={province.d}
-                fill={getHeatColor(revenue, maxRevenue)}
-                stroke="#fff"
-                strokeWidth="1.5"
-                className="transition-all duration-200 hover:opacity-80 cursor-pointer"
-              >
-                <title>
-                  {provinceName}: {formatCurrency(revenue)}
-                </title>
-              </path>
-            );
-          })}
-        </svg>
+    <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-[#FFF9F4] via-white to-[#FFF4EA] p-4">
+      <div className="flex flex-col gap-4 lg:flex-row">
+        <div className="lg:w-[68%]">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[13px] font-semibold text-[#13162D]">
+                Bản đồ phân bổ doanh thu
+              </p>
+              <p className="text-[12px] text-gray-500">
+                {hasRevenueData
+                  ? `${activeProvinceCount}/${revenueByProvince.length || 63} tỉnh đang có doanh thu`
+                  : "Chưa có dữ liệu doanh thu theo tỉnh"}
+              </p>
+            </div>
+            {hasRevenueData && (
+              <div className="rounded-full bg-white/90 px-3 py-1.5 text-[12px] font-medium text-gray-600 shadow-sm border border-orange-100">
+                Cao nhất: {formatCurrency(maxRevenue)}
+              </div>
+            )}
+          </div>
+
+          <div className="relative rounded-2xl bg-[#FFF7F0] h-[320px] overflow-hidden">
+            <div className="absolute inset-[10px] bottom-12">
+              <svg viewBox={viewBox} className="h-full w-full" role="img">
+                {paths.map((province) => {
+                  const provinceData = provinceRevenueMap.get(province.id);
+                  const revenue = provinceData?.revenue || 0;
+                  const provinceName =
+                    provinceData?.province_name || `Tỉnh #${province.id}`;
+                  return (
+                    <path
+                      key={province.id}
+                      d={province.d}
+                      fill={getHeatColor(revenue, maxRevenue)}
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                      className="transition-all duration-200 hover:opacity-80 cursor-pointer"
+                    >
+                      <title>
+                        {provinceName}: {formatCurrency(revenue)}
+                      </title>
+                    </path>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {hasRevenueData && (
+              <div className="absolute left-4 right-4 bottom-4 rounded-xl bg-white/90 px-4 py-3 shadow-sm border border-orange-100">
+                <div className="flex items-center gap-3">
+                  <span className="w-10 text-[11px] font-medium text-gray-500">
+                    Thấp
+                  </span>
+                  <div className="h-2 flex-1 rounded-full bg-gradient-to-r from-[#FDE4D2] via-[#F6A96C] to-[#EA580C]" />
+                  <span className="w-10 text-right text-[11px] font-medium text-gray-500">
+                    Cao
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {!hasRevenueData && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-sm text-gray-400">
+                  Chưa có dữ liệu doanh thu theo tỉnh
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="lg:w-[32%]">
+          <div className="h-full rounded-2xl bg-white border border-orange-100 p-4">
+            <div className="mb-4">
+              <p className="text-[13px] font-semibold text-[#13162D]">
+                Top tỉnh doanh thu
+              </p>
+              <p className="text-[12px] text-gray-500">
+                Xếp hạng theo doanh thu hiện tại
+              </p>
+            </div>
+
+            {displayTopProvinces.length > 0 ? (
+              <div className="space-y-3">
+                {displayTopProvinces.map((item, index) => {
+                  const revenue = Number(item.revenue || 0);
+                  const percent = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
+                  return (
+                    <div
+                      key={`${item.province_id}-${item.province_name}`}
+                      className="rounded-xl bg-[#FFF9F4] border border-orange-50 p-3"
+                    >
+                      <div className="mb-2 flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F58232] text-white text-[12px] font-bold">
+                            {index + 1}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-[13px] font-semibold text-[#13162D]">
+                              {item.province_name}
+                            </p>
+                            <p className="text-[12px] text-gray-500">
+                              {formatCurrency(revenue)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="h-2 rounded-full bg-orange-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-[#F6A96C] to-[#EA580C]"
+                          style={{ width: `${Math.max(percent, 8)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex h-[240px] items-center justify-center rounded-xl bg-[#FFF9F4] text-sm text-gray-400">
+                Chưa có dữ liệu xếp hạng tỉnh
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
-      {hasRevenueData && (
-        <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3">
-          <span className="text-[11px] text-gray-500">Thấp</span>
-          <div className="h-2 flex-1 rounded-full bg-gradient-to-r from-[#FDE4D2] to-[#EA580C]" />
-          <span className="text-[11px] text-gray-500">Cao</span>
-        </div>
-      )}
-
-      {!hasRevenueData && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-sm text-gray-400">
-            Chưa có dữ liệu doanh thu theo tỉnh
-          </p>
-        </div>
-      )}
     </div>
   );
 }
@@ -2078,6 +2222,7 @@ function DashboardView({ stats }) {
   const topCustomers = stats?.top_customers || [];
   const topProducts = stats?.top_products || [];
   const revenueByProvince = stats?.revenue_by_province || [];
+  const topProvinces = stats?.top_provinces || [];
   const customerFlow = stats?.customer_flow || [];
   const salesChannels = stats?.sales_channels || {
     direct: 0,
@@ -2308,7 +2453,10 @@ function DashboardView({ stats }) {
             <h3 className="text-sm font-semibold text-[#13162D] mb-3">
               Doanh thu theo tỉnh
             </h3>
-            <VietnamRevenueMap revenueByProvince={revenueByProvince} />
+            <VietnamRevenueMap
+              revenueByProvince={revenueByProvince}
+              topProvinces={topProvinces}
+            />
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
