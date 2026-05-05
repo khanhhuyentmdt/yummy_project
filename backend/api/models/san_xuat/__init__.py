@@ -1,5 +1,5 @@
 # ─── Nguyên vật liệu ──────────────────────────────────────────────────────────
-from .nguyen_vat_lieu import Material, MaterialGroup, Supplier, PurchaseOrder
+from .nguyen_vat_lieu import Material, MaterialGroup, Supplier, PurchaseOrder, PurchaseOrderItem
 
 # ─── Bếp trung tâm ────────────────────────────────────────────────────────────
 from .bep_trung_tam import (
@@ -29,6 +29,7 @@ __all__ = [
     'MaterialGroup',
     'Supplier',
     'PurchaseOrder',
+    'PurchaseOrderItem',
     
     # Bếp trung tâm
     'Product',

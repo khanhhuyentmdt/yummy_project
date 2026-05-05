@@ -10,6 +10,7 @@ from .san_xuat import (
     MaterialGroupSerializer, MaterialGroupWriteSerializer,
     SupplierSerializer,
     PurchaseOrderSerializer, PurchaseOrderWriteSerializer,
+    PurchaseOrderItemReadSerializer, PurchaseOrderItemWriteSerializer,
     # Bếp trung tâm
     ProductSerializer, ProductCreateSerializer,
     ProductGroupSerializer, ProductGroupCreateSerializer,
@@ -66,6 +67,8 @@ __all__ = [
     'SupplierSerializer',
     'PurchaseOrderSerializer',
     'PurchaseOrderWriteSerializer',
+    'PurchaseOrderItemReadSerializer',
+    'PurchaseOrderItemWriteSerializer',
 
     # Sản xuất - Bếp trung tâm
     'ProductSerializer',

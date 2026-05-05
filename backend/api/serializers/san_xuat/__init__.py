@@ -4,6 +4,7 @@ from .nguyen_vat_lieu import (
     MaterialGroupSerializer, MaterialGroupWriteSerializer,
     SupplierSerializer,
     PurchaseOrderSerializer, PurchaseOrderWriteSerializer,
+    PurchaseOrderItemReadSerializer, PurchaseOrderItemWriteSerializer,
 )
 
 # ─── Bếp trung tâm ────────────────────────────────────────────────────────────
@@ -37,6 +38,8 @@ __all__ = [
     'SupplierSerializer',
     'PurchaseOrderSerializer',
     'PurchaseOrderWriteSerializer',
+    'PurchaseOrderItemReadSerializer',
+    'PurchaseOrderItemWriteSerializer',
     
     # Bếp trung tâm
     'ProductSerializer',

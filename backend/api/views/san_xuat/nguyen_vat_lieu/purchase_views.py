@@ -109,13 +109,24 @@ def purchase_order_list(request):
     if request.method == 'GET':
         search = request.query_params.get('search', '').strip()
         status_filter = request.query_params.get('status', '').strip()
-        qs = PurchaseOrder.objects.select_related('supplier').all()
+        qs = PurchaseOrder.objects.select_related('supplier').prefetch_related('items__material').all()
         if search:
-            qs = qs.filter(code__icontains=search) | qs.filter(supplier__name__icontains=search)
+            qs = qs.filter(
+                Q(code__icontains=search)
+                | Q(supplier__name__icontains=search)
+                | Q(responsible_name__icontains=search)
+            )
         if status_filter:
             qs = qs.filter(status=status_filter)
         ordering = request.query_params.get('ordering', '').strip()
-        ALLOWED_DIRECT = {'code', '-code', 'created_at', '-created_at', 'total_value', '-total_value', 'status', '-status'}
+        ALLOWED_DIRECT = {
+            'code', '-code',
+            'created_at', '-created_at',
+            'order_date', '-order_date',
+            'expected_delivery_date', '-expected_delivery_date',
+            'total_value', '-total_value',
+            'status', '-status',
+        }
         SUPPLIER_MAP = {'supplier_name': 'supplier__name', '-supplier_name': '-supplier__name'}
         if ordering in ALLOWED_DIRECT:
             qs = qs.order_by(ordering)
@@ -139,7 +150,7 @@ def purchase_order_detail(request, pk):
         return Response({'detail': 'Khong co quyen truy cap.'}, status=status.HTTP_403_FORBIDDEN)
 
     try:
-        po = PurchaseOrder.objects.select_related('supplier').get(pk=pk)
+        po = PurchaseOrder.objects.select_related('supplier').prefetch_related('items__material').get(pk=pk)
     except PurchaseOrder.DoesNotExist:
         return Response({'detail': 'Khong tim thay phieu dat hang.'}, status=status.HTTP_404_NOT_FOUND)
 
